@@ -66,16 +66,16 @@ func (s *SlackSender) extractAddress(monitor *monitor.Model) string {
 func (s *SlackSender) buildActions(baseURL string, monitor *monitor.Model) []map[string]any {
 	actions := []map[string]any{}
 
-	// Add "Visit Pylno" button if base URL is available
+	// Add "Visit" button if base URL is available
 	if baseURL != "" && monitor != nil {
 		monitorURL := fmt.Sprintf("%s/monitors/%s", strings.TrimRight(baseURL, "/"), monitor.ID)
 		actions = append(actions, map[string]any{
 			"type": "button",
 			"text": map[string]any{
 				"type": "plain_text",
-				"text": "Visit Pylno",
+				"text": "Visit Peekaping",
 			},
-			"value": "Pylno",
+			"value": "Peekaping",
 			"url":   monitorURL,
 		})
 	}
@@ -225,7 +225,7 @@ func (s *SlackSender) Send(
 
 	// Handle rich message format
 	if cfg.RichMessage && heartbeat != nil {
-		title := "Pylno Alert"
+		title := "Peekaping Alert"
 
 		// Use blocks for modern Slack message format
 		blocks := s.buildBlocks(s.config.ClientURL, monitor, heartbeat, title, messageText)

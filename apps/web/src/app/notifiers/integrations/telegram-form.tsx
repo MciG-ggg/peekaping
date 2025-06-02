@@ -38,7 +38,7 @@ export const defaultValues: TelegramFormValues = {
   server_url: "https://api.telegram.org",
   use_template: false,
   template_parse_mode: "plain",
-  template: `Pylno Alert - {{ monitor.name }}\n\n{{ msg }}`,
+  template: `Peekaping Alert - {{ monitor.name }}\n\n{{ msg }}`,
   send_silently: false,
   protect_content: false,
 };
