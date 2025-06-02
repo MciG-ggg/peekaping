@@ -1,0 +1,96 @@
+package heartbeat
+
+import (
+	"context"
+	"time"
+)
+
+type Service interface {
+	Create(ctx context.Context, entity *CreateUpdateDto) (*Model, error)
+	FindByID(ctx context.Context, id string) (*Model, error)
+	FindAll(ctx context.Context, page int, limit int) ([]*Model, error)
+	// Update(ctx context.Context, entity *Model) error
+	Delete(ctx context.Context, id string) error
+
+	FindByMonitorIDAndTimeRange(ctx context.Context, monitorID string, startTime, endTime time.Time) ([]*ChartPoint, error)
+	FindUptimeStatsByMonitorID(ctx context.Context, monitorID string, periods map[string]time.Duration, now time.Time) (map[string]float64, error)
+	DeleteOlderThan(ctx context.Context, cutoff time.Time) (int64, error)
+	FindByMonitorIDPaginated(ctx context.Context, monitorID string, limit, page int, important *bool, reverse bool) ([]*Model, error)
+}
+
+type ServiceImpl struct {
+	repository Repository
+}
+
+func NewService(
+	repository Repository,
+) Service {
+	return &ServiceImpl{
+		repository,
+	}
+}
+
+func (mr *ServiceImpl) Create(ctx context.Context, entity *CreateUpdateDto) (*Model, error) {
+	createModel := &Model{
+		MonitorID: entity.MonitorID,
+		Status:    entity.Status,
+		Msg:       entity.Msg,
+		Ping:      entity.Ping,
+		Duration:  entity.Duration,
+		DownCount: entity.DownCount,
+		Retries:   entity.Retries,
+		Important: entity.Important,
+		Time:      entity.Time,
+		EndTime:   entity.EndTime,
+		Notified:  entity.Notified,
+	}
+
+	return mr.repository.Create(ctx, createModel)
+}
+
+func (mr *ServiceImpl) FindByID(ctx context.Context, id string) (*Model, error) {
+	return mr.repository.FindByID(ctx, id)
+}
+
+func (mr *ServiceImpl) FindAll(ctx context.Context, page int, limit int) ([]*Model, error) {
+	// Call the repository's FindAll method to retrieve paginated monitors
+	monitors, err := mr.repository.FindAll(ctx, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return monitors, nil
+}
+
+func (mr *ServiceImpl) FindActive(ctx context.Context) ([]*Model, error) {
+	return mr.repository.FindActive(ctx)
+}
+
+// func (mr *ServiceImpl) Update(ctx context.Context, entity *Model) (*Model, error) {
+// 	err := mr.repository.Update(ctx, entity)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return entity, nil
+// }
+
+func (mr *ServiceImpl) Delete(ctx context.Context, id string) error {
+	return mr.repository.Delete(ctx, id)
+}
+
+func (mr *ServiceImpl) FindByMonitorIDAndTimeRange(ctx context.Context, monitorID string, startTime, endTime time.Time) ([]*ChartPoint, error) {
+	return mr.repository.FindByMonitorIDAndTimeRange(ctx, monitorID, startTime, endTime)
+}
+
+func (mr *ServiceImpl) FindUptimeStatsByMonitorID(ctx context.Context, monitorID string, periods map[string]time.Duration, now time.Time) (map[string]float64, error) {
+	return mr.repository.FindUptimeStatsByMonitorID(ctx, monitorID, periods, now)
+}
+
+func (mr *ServiceImpl) DeleteOlderThan(ctx context.Context, cutoff time.Time) (int64, error) {
+	return mr.repository.DeleteOlderThan(ctx, cutoff)
+}
+
+func (mr *ServiceImpl) FindByMonitorIDPaginated(ctx context.Context, monitorID string, limit, page int, important *bool, reverse bool) ([]*Model, error) {
+	return mr.repository.FindByMonitorIDPaginated(ctx, monitorID, limit, page, important, reverse)
+}

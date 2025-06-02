@@ -1,0 +1,31 @@
+package notification
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+type Route struct {
+	controller *Controller
+}
+
+func NewRoute(
+	controller *Controller,
+) *Route {
+	return &Route{
+		controller,
+	}
+}
+
+func (uc *Route) ConnectRoute(
+	rg *gin.RouterGroup,
+	controller *Controller,
+) {
+	router := rg.Group("notifications")
+
+	router.GET("", uc.controller.FindAll)
+	router.POST("", uc.controller.Create)
+	router.GET("/:id", uc.controller.FindByID)
+	router.PUT("/:id", uc.controller.UpdateFull)
+	router.PATCH("/:id", uc.controller.UpdatePartial)
+	router.DELETE("/:id", uc.controller.Delete)
+}

@@ -1,0 +1,55 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: always
+    ports:
+      - '6001:27017'
+    cpus: 0.5
+    mem_limit: 1024m
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password321
+    volumes:
+      - ./.data/mongodb:/data/db
+
+  # server:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   cpus: 0.5
+  #   mem_limit: 512m
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - '8033:8033'
+  #   depends_on:
+  #     - mongodb
+
+  # fake-server:
+  #   image: node:22-alpine
+  #   restart: always
+  #   ports:
+  #     - '3025:3025'
+  #   volumes:
+  #     - ./fake-server:/app
+  #   working_dir: /app
+  #   command: npm start
+
+  # grafana:
+  #   image: grafana/grafana
+  #   ports:
+  #     - "3002:3000"
+  #   env_file: ".env"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./.data/grafana-data:/var/lib/grafana
+
+  # loki:
+  #   image: grafana/loki:latest
+  #   ports:
+  #     - "3101:3100"
+  #   volumes:
+  #     - ./loki-config.yml:/etc/loki/loki-config.yml
+  #     - ./.data/loki-data:/loki
+  #   command: -config.file=/etc/loki/loki-config.yml
+  #   restart: unless-stopped

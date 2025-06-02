@@ -1,0 +1,10 @@
+{
+  "name": "server",
+  "dependencies": {},
+  "scripts": {
+    "dev": "pnpm dev:watch",
+    "dev:watch": "nodemon --watch './**/*' -e go,html --signal SIGTERM --exec \"go run ./src\"",
+    "docs:watch": "nodemon --watch './**/*' --ignore docs -e go --exec \"swag init -d src\"",
+    "build": "go build -o dist/server ./src"
+  }
+}

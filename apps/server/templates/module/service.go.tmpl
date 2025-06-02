@@ -1,0 +1,48 @@
+package {{.ModuleName}}
+
+import "context"
+
+type Service interface {
+	Create(ctx context.Context, entity *CreateUpdateDto) (*Model, error)
+	FindByID(ctx context.Context, id string) (*Model, error)
+	FindAll(ctx context.Context, page int, limit int, q string) ([]*Model, error)
+	UpdateFull(ctx context.Context, id string, entity *CreateUpdateDto) (*Model, error)
+	UpdatePartial(ctx context.Context, id string, entity *PartialUpdateDto) (*Model, error)
+	Delete(ctx context.Context, id string) error
+}
+
+type ServiceImpl struct {
+	repository Repository
+}
+
+func NewService(
+	repository Repository,
+) Service {
+	return &ServiceImpl{
+		repository,
+	}
+}
+
+func (mr *ServiceImpl) Create(ctx context.Context, entity *CreateUpdateDto) (*Model, error) {
+	return mr.repository.Create(ctx, entity)
+}
+
+func (mr *ServiceImpl) FindByID(ctx context.Context, id string) (*Model, error) {
+	return mr.repository.FindByID(ctx, id)
+}
+
+func (mr *ServiceImpl) FindAll(ctx context.Context, page int, limit int, q string) ([]*Model, error) {
+	return mr.repository.FindAll(ctx, page, limit, q)
+}
+
+func (mr *ServiceImpl) UpdateFull(ctx context.Context, id string, entity *CreateUpdateDto) (*Model, error) {
+	return mr.repository.UpdateFull(ctx, id, entity)
+}
+
+func (mr *ServiceImpl) UpdatePartial(ctx context.Context, id string, entity *PartialUpdateDto) (*Model, error) {
+	return mr.repository.UpdatePartial(ctx, id, entity)
+}
+
+func (mr *ServiceImpl) Delete(ctx context.Context, id string) error {
+	return mr.repository.Delete(ctx, id)
+}

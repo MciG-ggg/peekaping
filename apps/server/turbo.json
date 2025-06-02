@@ -1,0 +1,17 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["PORT"],
+      "outputs": ["dist/**"]
+    },
+    "dev:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "docs:watch": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

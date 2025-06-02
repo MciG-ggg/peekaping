@@ -1,0 +1,14 @@
+package {{.ModuleName}}
+
+import (
+	"time"
+)
+
+type Model struct {
+	ID             string    `json:"id"`
+	Name           string    `json:"name"`
+	Active         bool      `json:"active"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	// Add other fields as needed
+}

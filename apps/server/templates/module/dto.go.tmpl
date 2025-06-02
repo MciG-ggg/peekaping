@@ -1,0 +1,22 @@
+package {{.ModuleName}}
+
+type CreateDto struct {
+
+}
+
+type UpdateDto struct {
+
+}
+
+type CreateUpdateDto struct {
+	// Add your fields here, e.g.:
+	Name     string `json:"name" validate:"required"`
+	Active   bool   `json:"active"`
+	// ...
+}
+
+type PartialUpdateDto struct {
+	Name   *string `json:"name,omitempty"`
+	Active *bool   `json:"active,omitempty"`
+	// ...
+}

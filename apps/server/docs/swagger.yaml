@@ -1,0 +1,1557 @@
+basePath: /api/v1
+definitions:
+  auth.LoginDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      token:
+        type: string
+    type: object
+  auth.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+      user:
+        $ref: '#/definitions/auth.Model'
+    type: object
+  auth.Model:
+    properties:
+      active:
+        type: boolean
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      twofa_last_token:
+        type: string
+      twofa_secret:
+        type: string
+      twofa_status:
+        type: boolean
+      updatedAt:
+        type: string
+    type: object
+  auth.RefreshTokenDto:
+    properties:
+      refreshToken:
+        type: string
+    type: object
+  auth.RegisterDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.TwoFADisableRequestDto:
+    description: TwoFADisableRequestDto is used to request 2FA disable
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.TwoFASetupRequestDto:
+    description: TwoFASetupRequestDto is used to request 2FA setup
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.TwoFASetupResponseDto:
+    description: TwoFASetupResponseDto is used to respond with 2FA setup info
+    properties:
+      provisioningUri:
+        type: string
+      secret:
+        type: string
+    type: object
+  auth.TwoFAVerifyRequestDto:
+    description: TwoFAVerifyRequestDto is used to verify a TOTP code
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    type: object
+  auth.TwoFAVerifyResponseDto:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  auth.UpdatePasswordDto:
+    description: UpdatePasswordDto is used for updating user password
+    properties:
+      currentPassword:
+        type: string
+      newPassword:
+        type: string
+    type: object
+  heartbeat.ChartPoint:
+    properties:
+      avgPing:
+        type: number
+      down:
+        type: integer
+      maxPing:
+        type: integer
+      minPing:
+        type: integer
+      timestamp:
+        type: integer
+      up:
+        type: integer
+    type: object
+  heartbeat.Model:
+    properties:
+      down_count:
+        type: integer
+      duration:
+        type: integer
+      end_time:
+        type: string
+      id:
+        type: string
+      important:
+        type: boolean
+      monitor_id:
+        type: string
+      msg:
+        type: string
+      notified:
+        type: boolean
+      ping:
+        type: integer
+      retries:
+        type: integer
+      status:
+        $ref: '#/definitions/heartbeat.MonitorStatus'
+      time:
+        type: string
+    type: object
+  heartbeat.MonitorStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - MonitorStatusDown
+    - MonitorStatusUp
+    - MonitorStatusPending
+    - MonitorStatusMaintenance
+  monitor.CreateUpdateDto:
+    properties:
+      active:
+        example: true
+        type: boolean
+      config:
+        type: string
+      interval:
+        example: 60
+        minimum: 20
+        type: integer
+      max_retries:
+        example: 3
+        minimum: 0
+        type: integer
+      name:
+        example: My Monitor
+        minLength: 3
+        type: string
+      notification_ids:
+        example:
+        - 6830ad485361f19c598d6d90
+        items:
+          type: string
+        type: array
+      proxy_id:
+        example: 6830ad485361f19c598d6d90
+        type: string
+      resend_interval:
+        example: 10
+        minimum: 0
+        type: integer
+      retry_interval:
+        example: 60
+        minimum: 20
+        type: integer
+      timeout:
+        example: 16
+        minimum: 16
+        type: integer
+      type:
+        example: http
+        type: string
+    required:
+    - name
+    - notification_ids
+    - type
+    type: object
+  monitor.Model:
+    properties:
+      active:
+        type: boolean
+      config:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      interval:
+        description: monitor interval in seconds to do request to url
+        example: 60
+        type: integer
+      max_retries:
+        description: Maximum retries before the service is marked as down and a notification
+          is sent
+        example: 3
+        type: integer
+      name:
+        description: monitor name
+        example: Monitor
+        type: string
+      proxy_id:
+        type: string
+      resend_interval:
+        description: Resend Notification if Down X times consecutively
+        example: 10
+        type: integer
+      retry_interval:
+        description: Retry interval in seconds to do request to url
+        example: 60
+        type: integer
+      status:
+        $ref: '#/definitions/heartbeat.MonitorStatus'
+      timeout:
+        description: monitor timeout in seconds to do request otherwise stop request
+        example: 16
+        type: integer
+      type:
+        description: 'connection type: http, etc'
+        enum:
+        - http
+        example: http
+        type: string
+      updated_at:
+        type: string
+    required:
+    - type
+    type: object
+  monitor.MonitorResponseDto:
+    properties:
+      active:
+        example: true
+        type: boolean
+      config:
+        type: string
+      created_at:
+        example: "2024-06-01T12:00:00Z"
+        type: string
+      id:
+        example: 60c72b2f9b1e8b6f1f8e4b1a
+        type: string
+      interval:
+        example: 60
+        type: integer
+      max_retries:
+        example: 3
+        type: integer
+      name:
+        example: My Monitor
+        type: string
+      notification_ids:
+        example:
+        - 6830ad485361f19c598d6d90
+        items:
+          type: string
+        type: array
+      proxy_id:
+        example: 6830ad485361f19c598d6d90
+        type: string
+      resend_interval:
+        example: 3
+        type: integer
+      retry_interval:
+        example: 10
+        type: integer
+      status:
+        example: 1
+        type: integer
+      timeout:
+        example: 10
+        type: integer
+      type:
+        example: http
+        type: string
+      updated_at:
+        example: "2024-06-01T12:00:00Z"
+        type: string
+    type: object
+  monitor.PartialUpdateDto:
+    properties:
+      active:
+        example: true
+        type: boolean
+      config:
+        type: string
+      interval:
+        example: 60
+        type: integer
+      max_retries:
+        example: 3
+        type: integer
+      name:
+        example: My Monitor
+        type: string
+      notification_ids:
+        example:
+        - 6830ad485361f19c598d6d90
+        items:
+          type: string
+        type: array
+      proxy_id:
+        example: 6830ad485361f19c598d6d90
+        type: string
+      resend_interval:
+        example: 10
+        type: integer
+      retry_interval:
+        example: 60
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/heartbeat.MonitorStatus'
+        example: 1
+      timeout:
+        example: 16
+        type: integer
+      type:
+        example: http
+        type: string
+    type: object
+  monitor.UptimeStatsDto:
+    properties:
+      7d:
+        type: number
+      24h:
+        type: number
+      30d:
+        type: number
+      365d:
+        type: number
+    type: object
+  notification.CreateUpdateDto:
+    properties:
+      active:
+        type: boolean
+      config:
+        type: string
+      is_default:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  notification.Model:
+    properties:
+      active:
+        type: boolean
+      config:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  notification.PartialUpdateDto:
+    properties:
+      active:
+        type: boolean
+      config:
+        type: string
+      is_default:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  proxy.CreateUpdateDto:
+    properties:
+      auth:
+        type: boolean
+      host:
+        type: string
+      password:
+        type: string
+      port:
+        maximum: 65535
+        minimum: 1
+        type: integer
+      protocol:
+        enum:
+        - http
+        - https
+        - socks
+        - socks4
+        - socks5
+        - socks5h
+        type: string
+      username:
+        type: string
+    required:
+    - host
+    - port
+    - protocol
+    type: object
+  proxy.Model:
+    properties:
+      auth:
+        type: boolean
+      createdDate:
+        type: string
+      host:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  proxy.PartialUpdateDto:
+    properties:
+      auth:
+        type: boolean
+      host:
+        type: string
+      password:
+        type: string
+      port:
+        maximum: 65535
+        minimum: 1
+        type: integer
+      protocol:
+        enum:
+        - http
+        - https
+        - socks
+        - socks4
+        - socks5
+        - socks5h
+        type: string
+      username:
+        type: string
+    type: object
+  utils.APIError:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  utils.ApiResponse-any:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-array_heartbeat_ChartPoint:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/heartbeat.ChartPoint'
+        type: array
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-array_heartbeat_Model:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/heartbeat.Model'
+        type: array
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-array_monitor_Model:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/monitor.Model'
+        type: array
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-array_notification_Model:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/notification.Model'
+        type: array
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-array_proxy_Model:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/proxy.Model'
+        type: array
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-auth_LoginResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.LoginResponse'
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-monitor_Model:
+    properties:
+      data:
+        $ref: '#/definitions/monitor.Model'
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-monitor_MonitorResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/monitor.MonitorResponseDto'
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-monitor_UptimeStatsDto:
+    properties:
+      data:
+        $ref: '#/definitions/monitor.UptimeStatsDto'
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-notification_Model:
+    properties:
+      data:
+        $ref: '#/definitions/notification.Model'
+      message:
+        type: string
+    type: object
+  utils.ApiResponse-proxy_Model:
+    properties:
+      data:
+        $ref: '#/definitions/proxy.Model'
+      message:
+        type: string
+    type: object
+host: localhost:8033
+info:
+  contact: {}
+  title: Peekaping API
+  version: "1.0"
+paths:
+  /auth/2fa/disable:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 2FA disable request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.TwoFADisableRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Disable 2FA (TOTP) for user
+      tags:
+      - Auth
+  /auth/2fa/setup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 2FA setup request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.TwoFASetupRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.TwoFASetupResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Enable 2FA (TOTP) for user
+      tags:
+      - Auth
+  /auth/2fa/verify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 2FA verify request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.TwoFAVerifyRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.TwoFAVerifyResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/auth.TwoFAVerifyResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Verify 2FA (TOTP) code for user
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-auth_LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Login admin
+      tags:
+      - Auth
+  /auth/password:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Password update data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.UpdatePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Update user password
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh token data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshTokenDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-auth_LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Refresh access token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-auth_LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Register new admin
+      tags:
+      - Auth
+  /monitors:
+    get:
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Active status
+        in: query
+        name: active
+        type: boolean
+      - description: Status
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-array_monitor_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get monitors
+      tags:
+      - Monitors
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Monitor object
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/monitor.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-monitor_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Create monitor
+      tags:
+      - Monitors
+  /monitors/{id}:
+    delete:
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Delete monitor
+      tags:
+      - Monitors
+    get:
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-monitor_MonitorResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get monitor by ID
+      tags:
+      - Monitors
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Monitor object
+        in: body
+        name: monitor
+        required: true
+        schema:
+          $ref: '#/definitions/monitor.PartialUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-monitor_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Update monitor
+      tags:
+      - Monitors
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Monitor object
+        in: body
+        name: monitor
+        required: true
+        schema:
+          $ref: '#/definitions/monitor.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-monitor_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Update monitor
+      tags:
+      - Monitors
+  /monitors/{id}/chartpoints:
+    get:
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Time period (30m, 3h, 6h, 24h, 1week)
+        enum:
+        - 30m
+        - 3h
+        - 6h
+        - 24h
+        - 1week
+        in: query
+        name: period
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-array_heartbeat_ChartPoint'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get monitor chart points
+      tags:
+      - Monitors
+  /monitors/{id}/heartbeats:
+    get:
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Number of heartbeats per page (default 50)
+        in: query
+        name: limit
+        type: integer
+      - description: Page number (default 0)
+        in: query
+        name: page
+        type: integer
+      - description: Filter by important heartbeats only
+        in: query
+        name: important
+        type: boolean
+      - description: Reverse the order of heartbeats
+        in: query
+        name: reverse
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-array_heartbeat_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated heartbeats for a monitor
+      tags:
+      - Monitors
+  /monitors/{id}/uptime:
+    get:
+      parameters:
+      - description: Monitor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-monitor_UptimeStatsDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get monitor uptime stats (24h, 7d, 30d, 365d)
+      tags:
+      - Monitors
+  /notifications:
+    get:
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-array_notification_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get notifications
+      tags:
+      - Notifications
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Notification object
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/notification.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-notification_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Create notification
+      tags:
+      - Notifications
+  /notifications/{id}:
+    delete:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Delete notification
+      tags:
+      - Notifications
+    get:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-notification_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get notification by ID
+      tags:
+      - Notifications
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Notification object
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/notification.PartialUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-notification_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Update notification
+      tags:
+      - Notifications
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Notification object
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/notification.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-notification_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Update notification
+      tags:
+      - Notifications
+  /proxies:
+    get:
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-array_proxy_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get proxies
+      tags:
+      - Proxies
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Proxy object
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/proxy.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-proxy_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Create proxy
+      tags:
+      - Proxies
+  /proxies/{id}:
+    delete:
+      parameters:
+      - description: Proxy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Delete proxy
+      tags:
+      - Proxies
+    get:
+      parameters:
+      - description: Proxy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-proxy_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get proxy by ID
+      tags:
+      - Proxies
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Proxy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Proxy object
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/proxy.PartialUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-proxy_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Update proxy
+      tags:
+      - Proxies
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Proxy ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Proxy object
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/proxy.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-proxy_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Update proxy
+      tags:
+      - Proxies
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
