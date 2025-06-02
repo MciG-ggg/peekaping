@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (e.g. v1.2.3)'
+        description: 'Version (e.g. 1.2.3)'
         required: true
         type: string
       changelog:
@@ -43,19 +43,20 @@ jobs:
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push UI image
         uses: docker/build-push-action@v5
         with:
           context: ./apps/web
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vipi-ui:${{ github.event.inputs.version }}
+          tags: ${{ env.REGISTRY }}/peekaping-ui:${{ github.event.inputs.version }}
 
       - name: Build and push Server image
         uses: docker/build-push-action@v5
         with:
           context: ./apps/server
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vipi-server:${{ github.event.inputs.version }}
+          tags: ${{ env.REGISTRY }}/peekaping-server:${{ github.event.inputs.version }}
