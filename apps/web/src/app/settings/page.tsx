@@ -69,7 +69,7 @@ const KeepDataPeriodSetting = () => {
   function onSubmit(values: { value: number }) {
     mutation.mutate({
       path: { key: KEEP_DATA_KEY },
-      body: { key: KEEP_DATA_KEY, type: "int", value: String(values.value) },
+      body: { type: "int", value: String(values.value) },
     });
   }
   return (
