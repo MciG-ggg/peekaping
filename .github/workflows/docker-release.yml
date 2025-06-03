@@ -35,8 +35,8 @@ jobs:
         with:
           context: ./apps/web
           push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/peekaping-ui:${{ github.event.inputs.version }}
+          # platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/web:${{ github.event.inputs.version }}
 
       - name: Build and push Server image
         id: build_server
@@ -44,8 +44,8 @@ jobs:
         with:
           context: ./apps/server
           push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/peekaping-server:${{ github.event.inputs.version }}
+          # platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/server:${{ github.event.inputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -56,7 +56,7 @@ jobs:
 
             ## Docker Images
 
-            - UI: `ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/peekaping-ui:${{ github.event.inputs.version }}`
-            - Server: `ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/peekaping-server:${{ github.event.inputs.version }}`
+            - UI: `ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/web:${{ github.event.inputs.version }}`
+            - Server: `ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/server:${{ github.event.inputs.version }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
