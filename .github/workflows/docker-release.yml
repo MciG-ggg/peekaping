@@ -41,9 +41,9 @@ jobs:
 
       - name: Update version in main.go (server)
         run: |
-          sed -i.bak -E 's/(Version\s*=\s*")[^"]+(")/\1${{ github.event.inputs.version }}\2/' main.go
-          rm main.go.bak
-        working-directory: ./apps/server
+          sed -i.bak -E 's/(Version\s*=\s*")[^"]+(")/\1${{ github.event.inputs.version }}\2/' version.go
+          rm version.go.bak
+        working-directory: ./apps/server/src
 
       - name: Write version.ts for web
         run: |
@@ -53,7 +53,7 @@ jobs:
 
       - name: Commit and tag version bump
         run: |
-          git add apps/web/package.json apps/web/src/version.ts apps/server/main.go
+          git add apps/web/package.json apps/web/src/version.ts apps/server/src/version.go
           git commit -m "chore: bump version to ${{ github.event.inputs.version }}"
           git tag v${{ github.event.inputs.version }}
           git push origin HEAD:${{ github.ref_name }}

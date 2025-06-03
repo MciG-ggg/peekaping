@@ -23,8 +23,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var Version = "0.0.0"
-
 // @title			Peekaping API
 // @BasePath	/api/v1
 // @securityDefinitions.apikey BearerAuth
