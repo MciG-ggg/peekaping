@@ -5,6 +5,6 @@ export const getConfig = () => {
   return {
     API_URL: isProd
       ? config.API_URL // don't fallback to default in prod
-      : config.API_URL || "http://localhost:8034",
+      : "http://localhost:8034",
   };
 };

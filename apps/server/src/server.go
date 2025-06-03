@@ -7,6 +7,7 @@ import (
 	"peekaping/src/modules/monitor"
 	"peekaping/src/modules/notification"
 	"peekaping/src/modules/proxy"
+	"peekaping/src/modules/setting"
 	"peekaping/src/modules/websocket"
 
 	_ "peekaping/docs"
@@ -36,6 +37,8 @@ func ProvideServer(
 	notificationController *notification.Controller,
 	proxyRoute *proxy.Route,
 	proxyController *proxy.Controller,
+	settingRoute *setting.Route,
+	settingController *setting.Controller,
 ) *Server {
 	server := gin.Default()
 	// server := gin.New()
@@ -63,6 +66,7 @@ func ProvideServer(
 	authRoute.ConnectRoute(router, authController)
 	notificationRoute.ConnectRoute(router, notificationController)
 	proxyRoute.ConnectRoute(router, proxyController)
+	settingRoute.ConnectRoute(router, settingController)
 
 	// Swagger routes
 	url := ginSwagger.URL("/swagger/doc.json")

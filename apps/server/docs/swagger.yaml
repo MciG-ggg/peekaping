@@ -465,6 +465,35 @@ definitions:
       username:
         type: string
     type: object
+  setting.CreateUpdateDto:
+    properties:
+      type:
+        enum:
+        - string
+        - int
+        - bool
+        - json
+        type: string
+      value:
+        type: string
+    required:
+    - type
+    type: object
+  setting.Model:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      key:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+      value:
+        type: string
+    type: object
   utils.APIError:
     properties:
       message:
@@ -565,7 +594,14 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8033
+  utils.ApiResponse-setting_Model:
+    properties:
+      data:
+        $ref: '#/definitions/setting.Model'
+      message:
+        type: string
+    type: object
+host: localhost:8034
 info:
   contact: {}
   title: Peekaping API
@@ -1549,6 +1585,96 @@ paths:
       summary: Update proxy
       tags:
       - Proxies
+  /settings/key/{key}:
+    delete:
+      parameters:
+      - description: Setting Key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Delete setting by key
+      tags:
+      - Settings
+    get:
+      parameters:
+      - description: Setting Key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-setting_Model'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Get setting by key
+      tags:
+      - Settings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Setting Key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: Setting object
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/setting.CreateUpdateDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ApiResponse-setting_Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      security:
+      - BearerAuth: []
+      summary: Set setting by key
+      tags:
+      - Settings
 securityDefinitions:
   BearerAuth:
     in: header

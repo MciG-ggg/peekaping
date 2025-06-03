@@ -90,6 +90,15 @@ import type {
   PutProxiesByIdData,
   PutProxiesByIdResponse,
   PutProxiesByIdError,
+  DeleteSettingsKeyByKeyData,
+  DeleteSettingsKeyByKeyResponse,
+  DeleteSettingsKeyByKeyError,
+  GetSettingsKeyByKeyData,
+  GetSettingsKeyByKeyResponse,
+  GetSettingsKeyByKeyError,
+  PutSettingsKeyByKeyData,
+  PutSettingsKeyByKeyResponse,
+  PutSettingsKeyByKeyError,
 } from "./types.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -742,6 +751,76 @@ export const putProxiesById = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/proxies/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+};
+
+/**
+ * Delete setting by key
+ */
+export const deleteSettingsKeyByKey = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteSettingsKeyByKeyData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).delete<
+    DeleteSettingsKeyByKeyResponse,
+    DeleteSettingsKeyByKeyError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "Authorization",
+        type: "apiKey",
+      },
+    ],
+    url: "/settings/key/{key}",
+    ...options,
+  });
+};
+
+/**
+ * Get setting by key
+ */
+export const getSettingsKeyByKey = <ThrowOnError extends boolean = false>(
+  options: Options<GetSettingsKeyByKeyData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetSettingsKeyByKeyResponse,
+    GetSettingsKeyByKeyError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "Authorization",
+        type: "apiKey",
+      },
+    ],
+    url: "/settings/key/{key}",
+    ...options,
+  });
+};
+
+/**
+ * Set setting by key
+ */
+export const putSettingsKeyByKey = <ThrowOnError extends boolean = false>(
+  options: Options<PutSettingsKeyByKeyData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    PutSettingsKeyByKeyResponse,
+    PutSettingsKeyByKeyError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "Authorization",
+        type: "apiKey",
+      },
+    ],
+    url: "/settings/key/{key}",
     ...options,
     headers: {
       "Content-Type": "application/json",

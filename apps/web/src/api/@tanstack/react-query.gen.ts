@@ -30,6 +30,9 @@ import {
   getProxiesById,
   patchProxiesById,
   putProxiesById,
+  deleteSettingsKeyByKey,
+  getSettingsKeyByKey,
+  putSettingsKeyByKey,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -112,6 +115,13 @@ import type {
   PutProxiesByIdData,
   PutProxiesByIdError,
   PutProxiesByIdResponse,
+  DeleteSettingsKeyByKeyData,
+  DeleteSettingsKeyByKeyError,
+  DeleteSettingsKeyByKeyResponse,
+  GetSettingsKeyByKeyData,
+  PutSettingsKeyByKeyData,
+  PutSettingsKeyByKeyError,
+  PutSettingsKeyByKeyResponse,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -154,6 +164,9 @@ export const postAuth2FaDisableQueryKey = (
   options: Options<PostAuth2FaDisableData>,
 ) => createQueryKey("postAuth2FaDisable", options);
 
+/**
+ * Disable 2FA (TOTP) for user
+ */
 export const postAuth2FaDisableOptions = (
   options: Options<PostAuth2FaDisableData>,
 ) => {
@@ -171,6 +184,9 @@ export const postAuth2FaDisableOptions = (
   });
 };
 
+/**
+ * Disable 2FA (TOTP) for user
+ */
 export const postAuth2FaDisableMutation = (
   options?: Partial<Options<PostAuth2FaDisableData>>,
 ): UseMutationOptions<
@@ -199,6 +215,9 @@ export const postAuth2FaSetupQueryKey = (
   options: Options<PostAuth2FaSetupData>,
 ) => createQueryKey("postAuth2FaSetup", options);
 
+/**
+ * Enable 2FA (TOTP) for user
+ */
 export const postAuth2FaSetupOptions = (
   options: Options<PostAuth2FaSetupData>,
 ) => {
@@ -216,6 +235,9 @@ export const postAuth2FaSetupOptions = (
   });
 };
 
+/**
+ * Enable 2FA (TOTP) for user
+ */
 export const postAuth2FaSetupMutation = (
   options?: Partial<Options<PostAuth2FaSetupData>>,
 ): UseMutationOptions<
@@ -244,6 +266,9 @@ export const postAuth2FaVerifyQueryKey = (
   options: Options<PostAuth2FaVerifyData>,
 ) => createQueryKey("postAuth2FaVerify", options);
 
+/**
+ * Verify 2FA (TOTP) code for user
+ */
 export const postAuth2FaVerifyOptions = (
   options: Options<PostAuth2FaVerifyData>,
 ) => {
@@ -261,6 +286,9 @@ export const postAuth2FaVerifyOptions = (
   });
 };
 
+/**
+ * Verify 2FA (TOTP) code for user
+ */
 export const postAuth2FaVerifyMutation = (
   options?: Partial<Options<PostAuth2FaVerifyData>>,
 ): UseMutationOptions<
@@ -288,6 +316,9 @@ export const postAuth2FaVerifyMutation = (
 export const postAuthLoginQueryKey = (options: Options<PostAuthLoginData>) =>
   createQueryKey("postAuthLogin", options);
 
+/**
+ * Login admin
+ */
 export const postAuthLoginOptions = (options: Options<PostAuthLoginData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -303,6 +334,9 @@ export const postAuthLoginOptions = (options: Options<PostAuthLoginData>) => {
   });
 };
 
+/**
+ * Login admin
+ */
 export const postAuthLoginMutation = (
   options?: Partial<Options<PostAuthLoginData>>,
 ): UseMutationOptions<
@@ -327,6 +361,9 @@ export const postAuthLoginMutation = (
   return mutationOptions;
 };
 
+/**
+ * Update user password
+ */
 export const putAuthPasswordMutation = (
   options?: Partial<Options<PutAuthPasswordData>>,
 ): UseMutationOptions<
@@ -355,6 +392,9 @@ export const postAuthRefreshQueryKey = (
   options: Options<PostAuthRefreshData>,
 ) => createQueryKey("postAuthRefresh", options);
 
+/**
+ * Refresh access token
+ */
 export const postAuthRefreshOptions = (
   options: Options<PostAuthRefreshData>,
 ) => {
@@ -372,6 +412,9 @@ export const postAuthRefreshOptions = (
   });
 };
 
+/**
+ * Refresh access token
+ */
 export const postAuthRefreshMutation = (
   options?: Partial<Options<PostAuthRefreshData>>,
 ): UseMutationOptions<
@@ -400,6 +443,9 @@ export const postAuthRegisterQueryKey = (
   options: Options<PostAuthRegisterData>,
 ) => createQueryKey("postAuthRegister", options);
 
+/**
+ * Register new admin
+ */
 export const postAuthRegisterOptions = (
   options: Options<PostAuthRegisterData>,
 ) => {
@@ -417,6 +463,9 @@ export const postAuthRegisterOptions = (
   });
 };
 
+/**
+ * Register new admin
+ */
 export const postAuthRegisterMutation = (
   options?: Partial<Options<PostAuthRegisterData>>,
 ): UseMutationOptions<
@@ -444,6 +493,9 @@ export const postAuthRegisterMutation = (
 export const getMonitorsQueryKey = (options?: Options<GetMonitorsData>) =>
   createQueryKey("getMonitors", options);
 
+/**
+ * Get monitors
+ */
 export const getMonitorsOptions = (options?: Options<GetMonitorsData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -498,6 +550,9 @@ export const getMonitorsInfiniteQueryKey = (
 ): QueryKey<Options<GetMonitorsData>> =>
   createQueryKey("getMonitors", options, true);
 
+/**
+ * Get monitors
+ */
 export const getMonitorsInfiniteOptions = (
   options?: Options<GetMonitorsData>,
 ) => {
@@ -544,6 +599,9 @@ export const getMonitorsInfiniteOptions = (
 export const postMonitorsQueryKey = (options: Options<PostMonitorsData>) =>
   createQueryKey("postMonitors", options);
 
+/**
+ * Create monitor
+ */
 export const postMonitorsOptions = (options: Options<PostMonitorsData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -559,6 +617,9 @@ export const postMonitorsOptions = (options: Options<PostMonitorsData>) => {
   });
 };
 
+/**
+ * Create monitor
+ */
 export const postMonitorsMutation = (
   options?: Partial<Options<PostMonitorsData>>,
 ): UseMutationOptions<
@@ -583,6 +644,9 @@ export const postMonitorsMutation = (
   return mutationOptions;
 };
 
+/**
+ * Delete monitor
+ */
 export const deleteMonitorsByIdMutation = (
   options?: Partial<Options<DeleteMonitorsByIdData>>,
 ): UseMutationOptions<
@@ -611,6 +675,9 @@ export const getMonitorsByIdQueryKey = (
   options: Options<GetMonitorsByIdData>,
 ) => createQueryKey("getMonitorsById", options);
 
+/**
+ * Get monitor by ID
+ */
 export const getMonitorsByIdOptions = (
   options: Options<GetMonitorsByIdData>,
 ) => {
@@ -628,6 +695,9 @@ export const getMonitorsByIdOptions = (
   });
 };
 
+/**
+ * Update monitor
+ */
 export const patchMonitorsByIdMutation = (
   options?: Partial<Options<PatchMonitorsByIdData>>,
 ): UseMutationOptions<
@@ -652,6 +722,9 @@ export const patchMonitorsByIdMutation = (
   return mutationOptions;
 };
 
+/**
+ * Update monitor
+ */
 export const putMonitorsByIdMutation = (
   options?: Partial<Options<PutMonitorsByIdData>>,
 ): UseMutationOptions<
@@ -680,6 +753,9 @@ export const getMonitorsByIdChartpointsQueryKey = (
   options: Options<GetMonitorsByIdChartpointsData>,
 ) => createQueryKey("getMonitorsByIdChartpoints", options);
 
+/**
+ * Get monitor chart points
+ */
 export const getMonitorsByIdChartpointsOptions = (
   options: Options<GetMonitorsByIdChartpointsData>,
 ) => {
@@ -701,6 +777,9 @@ export const getMonitorsByIdHeartbeatsQueryKey = (
   options: Options<GetMonitorsByIdHeartbeatsData>,
 ) => createQueryKey("getMonitorsByIdHeartbeats", options);
 
+/**
+ * Get paginated heartbeats for a monitor
+ */
 export const getMonitorsByIdHeartbeatsOptions = (
   options: Options<GetMonitorsByIdHeartbeatsData>,
 ) => {
@@ -723,6 +802,9 @@ export const getMonitorsByIdHeartbeatsInfiniteQueryKey = (
 ): QueryKey<Options<GetMonitorsByIdHeartbeatsData>> =>
   createQueryKey("getMonitorsByIdHeartbeats", options, true);
 
+/**
+ * Get paginated heartbeats for a monitor
+ */
 export const getMonitorsByIdHeartbeatsInfiniteOptions = (
   options: Options<GetMonitorsByIdHeartbeatsData>,
 ) => {
@@ -770,6 +852,9 @@ export const getMonitorsByIdUptimeQueryKey = (
   options: Options<GetMonitorsByIdUptimeData>,
 ) => createQueryKey("getMonitorsByIdUptime", options);
 
+/**
+ * Get monitor uptime stats (24h, 7d, 30d, 365d)
+ */
 export const getMonitorsByIdUptimeOptions = (
   options: Options<GetMonitorsByIdUptimeData>,
 ) => {
@@ -791,6 +876,9 @@ export const getNotificationsQueryKey = (
   options?: Options<GetNotificationsData>,
 ) => createQueryKey("getNotifications", options);
 
+/**
+ * Get notifications
+ */
 export const getNotificationsOptions = (
   options?: Options<GetNotificationsData>,
 ) => {
@@ -813,6 +901,9 @@ export const getNotificationsInfiniteQueryKey = (
 ): QueryKey<Options<GetNotificationsData>> =>
   createQueryKey("getNotifications", options, true);
 
+/**
+ * Get notifications
+ */
 export const getNotificationsInfiniteOptions = (
   options?: Options<GetNotificationsData>,
 ) => {
@@ -860,6 +951,9 @@ export const postNotificationsQueryKey = (
   options: Options<PostNotificationsData>,
 ) => createQueryKey("postNotifications", options);
 
+/**
+ * Create notification
+ */
 export const postNotificationsOptions = (
   options: Options<PostNotificationsData>,
 ) => {
@@ -877,6 +971,9 @@ export const postNotificationsOptions = (
   });
 };
 
+/**
+ * Create notification
+ */
 export const postNotificationsMutation = (
   options?: Partial<Options<PostNotificationsData>>,
 ): UseMutationOptions<
@@ -901,6 +998,9 @@ export const postNotificationsMutation = (
   return mutationOptions;
 };
 
+/**
+ * Delete notification
+ */
 export const deleteNotificationsByIdMutation = (
   options?: Partial<Options<DeleteNotificationsByIdData>>,
 ): UseMutationOptions<
@@ -929,6 +1029,9 @@ export const getNotificationsByIdQueryKey = (
   options: Options<GetNotificationsByIdData>,
 ) => createQueryKey("getNotificationsById", options);
 
+/**
+ * Get notification by ID
+ */
 export const getNotificationsByIdOptions = (
   options: Options<GetNotificationsByIdData>,
 ) => {
@@ -946,6 +1049,9 @@ export const getNotificationsByIdOptions = (
   });
 };
 
+/**
+ * Update notification
+ */
 export const patchNotificationsByIdMutation = (
   options?: Partial<Options<PatchNotificationsByIdData>>,
 ): UseMutationOptions<
@@ -970,6 +1076,9 @@ export const patchNotificationsByIdMutation = (
   return mutationOptions;
 };
 
+/**
+ * Update notification
+ */
 export const putNotificationsByIdMutation = (
   options?: Partial<Options<PutNotificationsByIdData>>,
 ): UseMutationOptions<
@@ -997,6 +1106,9 @@ export const putNotificationsByIdMutation = (
 export const getProxiesQueryKey = (options?: Options<GetProxiesData>) =>
   createQueryKey("getProxies", options);
 
+/**
+ * Get proxies
+ */
 export const getProxiesOptions = (options?: Options<GetProxiesData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -1017,6 +1129,9 @@ export const getProxiesInfiniteQueryKey = (
 ): QueryKey<Options<GetProxiesData>> =>
   createQueryKey("getProxies", options, true);
 
+/**
+ * Get proxies
+ */
 export const getProxiesInfiniteOptions = (
   options?: Options<GetProxiesData>,
 ) => {
@@ -1063,6 +1178,9 @@ export const getProxiesInfiniteOptions = (
 export const postProxiesQueryKey = (options: Options<PostProxiesData>) =>
   createQueryKey("postProxies", options);
 
+/**
+ * Create proxy
+ */
 export const postProxiesOptions = (options: Options<PostProxiesData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -1078,6 +1196,9 @@ export const postProxiesOptions = (options: Options<PostProxiesData>) => {
   });
 };
 
+/**
+ * Create proxy
+ */
 export const postProxiesMutation = (
   options?: Partial<Options<PostProxiesData>>,
 ): UseMutationOptions<
@@ -1102,6 +1223,9 @@ export const postProxiesMutation = (
   return mutationOptions;
 };
 
+/**
+ * Delete proxy
+ */
 export const deleteProxiesByIdMutation = (
   options?: Partial<Options<DeleteProxiesByIdData>>,
 ): UseMutationOptions<
@@ -1129,6 +1253,9 @@ export const deleteProxiesByIdMutation = (
 export const getProxiesByIdQueryKey = (options: Options<GetProxiesByIdData>) =>
   createQueryKey("getProxiesById", options);
 
+/**
+ * Get proxy by ID
+ */
 export const getProxiesByIdOptions = (options: Options<GetProxiesByIdData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -1144,6 +1271,9 @@ export const getProxiesByIdOptions = (options: Options<GetProxiesByIdData>) => {
   });
 };
 
+/**
+ * Update proxy
+ */
 export const patchProxiesByIdMutation = (
   options?: Partial<Options<PatchProxiesByIdData>>,
 ): UseMutationOptions<
@@ -1168,6 +1298,9 @@ export const patchProxiesByIdMutation = (
   return mutationOptions;
 };
 
+/**
+ * Update proxy
+ */
 export const putProxiesByIdMutation = (
   options?: Partial<Options<PutProxiesByIdData>>,
 ): UseMutationOptions<
@@ -1182,6 +1315,84 @@ export const putProxiesByIdMutation = (
   > = {
     mutationFn: async (localOptions) => {
       const { data } = await putProxiesById({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Delete setting by key
+ */
+export const deleteSettingsKeyByKeyMutation = (
+  options?: Partial<Options<DeleteSettingsKeyByKeyData>>,
+): UseMutationOptions<
+  DeleteSettingsKeyByKeyResponse,
+  AxiosError<DeleteSettingsKeyByKeyError>,
+  Options<DeleteSettingsKeyByKeyData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteSettingsKeyByKeyResponse,
+    AxiosError<DeleteSettingsKeyByKeyError>,
+    Options<DeleteSettingsKeyByKeyData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await deleteSettingsKeyByKey({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getSettingsKeyByKeyQueryKey = (
+  options: Options<GetSettingsKeyByKeyData>,
+) => createQueryKey("getSettingsKeyByKey", options);
+
+/**
+ * Get setting by key
+ */
+export const getSettingsKeyByKeyOptions = (
+  options: Options<GetSettingsKeyByKeyData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getSettingsKeyByKey({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getSettingsKeyByKeyQueryKey(options),
+  });
+};
+
+/**
+ * Set setting by key
+ */
+export const putSettingsKeyByKeyMutation = (
+  options?: Partial<Options<PutSettingsKeyByKeyData>>,
+): UseMutationOptions<
+  PutSettingsKeyByKeyResponse,
+  AxiosError<PutSettingsKeyByKeyError>,
+  Options<PutSettingsKeyByKeyData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    PutSettingsKeyByKeyResponse,
+    AxiosError<PutSettingsKeyByKeyError>,
+    Options<PutSettingsKeyByKeyData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await putSettingsKeyByKey({
         ...options,
         ...localOptions,
         throwOnError: true,

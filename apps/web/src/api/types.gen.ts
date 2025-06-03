@@ -250,6 +250,21 @@ export type ProxyPartialUpdateDto = {
   username?: string;
 };
 
+export type SettingCreateUpdateDto = {
+  key: string;
+  type: "string" | "int" | "bool" | "json";
+  value?: string;
+};
+
+export type SettingModel = {
+  created_at?: string;
+  id?: string;
+  key?: string;
+  type?: string;
+  updated_at?: string;
+  value?: string;
+};
+
 export type UtilsApiError = {
   message?: string;
   status?: string;
@@ -312,6 +327,11 @@ export type UtilsApiResponseNotificationModel = {
 
 export type UtilsApiResponseProxyModel = {
   data?: ProxyModel;
+  message?: string;
+};
+
+export type UtilsApiResponseSettingModel = {
+  data?: SettingModel;
   message?: string;
 };
 
@@ -1449,6 +1469,117 @@ export type PutProxiesByIdResponses = {
 export type PutProxiesByIdResponse =
   PutProxiesByIdResponses[keyof PutProxiesByIdResponses];
 
+export type DeleteSettingsKeyByKeyData = {
+  body?: never;
+  path: {
+    /**
+     * Setting Key
+     */
+    key: string;
+  };
+  query?: never;
+  url: "/settings/key/{key}";
+};
+
+export type DeleteSettingsKeyByKeyErrors = {
+  /**
+   * Not Found
+   */
+  404: UtilsApiError;
+  /**
+   * Internal Server Error
+   */
+  500: UtilsApiError;
+};
+
+export type DeleteSettingsKeyByKeyError =
+  DeleteSettingsKeyByKeyErrors[keyof DeleteSettingsKeyByKeyErrors];
+
+export type DeleteSettingsKeyByKeyResponses = {
+  /**
+   * OK
+   */
+  200: UtilsApiResponseAny;
+};
+
+export type DeleteSettingsKeyByKeyResponse =
+  DeleteSettingsKeyByKeyResponses[keyof DeleteSettingsKeyByKeyResponses];
+
+export type GetSettingsKeyByKeyData = {
+  body?: never;
+  path: {
+    /**
+     * Setting Key
+     */
+    key: string;
+  };
+  query?: never;
+  url: "/settings/key/{key}";
+};
+
+export type GetSettingsKeyByKeyErrors = {
+  /**
+   * Not Found
+   */
+  404: UtilsApiError;
+  /**
+   * Internal Server Error
+   */
+  500: UtilsApiError;
+};
+
+export type GetSettingsKeyByKeyError =
+  GetSettingsKeyByKeyErrors[keyof GetSettingsKeyByKeyErrors];
+
+export type GetSettingsKeyByKeyResponses = {
+  /**
+   * OK
+   */
+  200: UtilsApiResponseSettingModel;
+};
+
+export type GetSettingsKeyByKeyResponse =
+  GetSettingsKeyByKeyResponses[keyof GetSettingsKeyByKeyResponses];
+
+export type PutSettingsKeyByKeyData = {
+  /**
+   * Setting object
+   */
+  body: SettingCreateUpdateDto;
+  path: {
+    /**
+     * Setting Key
+     */
+    key: string;
+  };
+  query?: never;
+  url: "/settings/key/{key}";
+};
+
+export type PutSettingsKeyByKeyErrors = {
+  /**
+   * Bad Request
+   */
+  400: UtilsApiError;
+  /**
+   * Internal Server Error
+   */
+  500: UtilsApiError;
+};
+
+export type PutSettingsKeyByKeyError =
+  PutSettingsKeyByKeyErrors[keyof PutSettingsKeyByKeyErrors];
+
+export type PutSettingsKeyByKeyResponses = {
+  /**
+   * OK
+   */
+  200: UtilsApiResponseSettingModel;
+};
+
+export type PutSettingsKeyByKeyResponse =
+  PutSettingsKeyByKeyResponses[keyof PutSettingsKeyByKeyResponses];
+
 export type ClientOptions = {
-  baseURL: "localhost:8033/api/v1" | (string & {});
+  baseURL: "localhost:8034/api/v1" | (string & {});
 };

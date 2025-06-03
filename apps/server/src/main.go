@@ -12,6 +12,7 @@ import (
 	"peekaping/src/modules/monitor_notification"
 	"peekaping/src/modules/notification"
 	"peekaping/src/modules/proxy"
+	"peekaping/src/modules/setting"
 	"peekaping/src/modules/websocket"
 
 	_ "peekaping/docs"
@@ -26,7 +27,7 @@ import (
 // @title			Peekaping API
 // @version		1.0
 //
-// @host		localhost:8033
+// @host		localhost:8034
 // @BasePath	/api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -50,6 +51,7 @@ func main() {
 	notification.RegisterDependencies(container)
 	monitor_notification.RegisterDependencies(container)
 	proxy.RegisterDependencies(container)
+	setting.RegisterDependencies(container)
 
 	// Register custom validators
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -66,8 +68,8 @@ func main() {
 	}
 
 	// Start cleanup cron job(s)
-	err = container.Invoke(func(heartbeatService heartbeat.Service, logger *zap.SugaredLogger) {
-		cleanup.StartCleanupCron(heartbeatService, logger)
+	err = container.Invoke(func(heartbeatService heartbeat.Service, settingService setting.Service, logger *zap.SugaredLogger) {
+		cleanup.StartCleanupCron(heartbeatService, settingService, logger)
 	})
 	if err != nil {
 		log.Fatal(err)
