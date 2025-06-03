@@ -22,8 +22,8 @@ import SecurityPage from "./app/security/page";
 import EditNotifier from "./app/notifiers/edit/page";
 import EditProxy from "./app/proxies/edit/page";
 import { TimezoneProvider } from './context/TimezoneContext';
+import { VersionMismatchAlert } from "./components/VersionMismatchAlert";
 import { getConfig } from "./lib/config";
-// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const configureClient = () => {
   const accessToken = useAuthStore.getState().accessToken;
@@ -72,6 +72,8 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="peekaping-ui-theme">
       <TimezoneProvider>
         <QueryClientProvider client={queryClient}>
+          <VersionMismatchAlert />
+
           <WebSocketProvider>
             <Routes>
               {!accessToken ? (

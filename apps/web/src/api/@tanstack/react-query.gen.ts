@@ -9,6 +9,7 @@ import {
   putAuthPassword,
   postAuthRefresh,
   postAuthRegister,
+  getHealth,
   getMonitors,
   postMonitors,
   deleteMonitorsById,
@@ -33,6 +34,7 @@ import {
   deleteSettingsKeyByKey,
   getSettingsKeyByKey,
   putSettingsKeyByKey,
+  getVersion,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -62,6 +64,7 @@ import type {
   PostAuthRegisterData,
   PostAuthRegisterError,
   PostAuthRegisterResponse,
+  GetHealthData,
   GetMonitorsData,
   GetMonitorsError,
   GetMonitorsResponse,
@@ -122,6 +125,7 @@ import type {
   PutSettingsKeyByKeyData,
   PutSettingsKeyByKeyError,
   PutSettingsKeyByKeyResponse,
+  GetVersionData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -488,6 +492,28 @@ export const postAuthRegisterMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const getHealthQueryKey = (options?: Options<GetHealthData>) =>
+  createQueryKey("getHealth", options);
+
+/**
+ * Get server health
+ * Returns the current server health
+ */
+export const getHealthOptions = (options?: Options<GetHealthData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getHealth({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getHealthQueryKey(options),
+  });
 };
 
 export const getMonitorsQueryKey = (options?: Options<GetMonitorsData>) =>
@@ -1401,4 +1427,26 @@ export const putSettingsKeyByKeyMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const getVersionQueryKey = (options?: Options<GetVersionData>) =>
+  createQueryKey("getVersion", options);
+
+/**
+ * Get server version
+ * Returns the current server version
+ */
+export const getVersionOptions = (options?: Options<GetVersionData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getVersion({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getVersionQueryKey(options),
+  });
 };

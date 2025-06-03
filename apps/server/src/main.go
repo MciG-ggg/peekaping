@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"peekaping/docs"
 	"peekaping/src/modules/auth"
 	"peekaping/src/modules/cleanup"
 	"peekaping/src/modules/events"
@@ -15,8 +16,6 @@ import (
 	"peekaping/src/modules/setting"
 	"peekaping/src/modules/websocket"
 
-	_ "peekaping/docs"
-
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 
@@ -24,15 +23,16 @@ import (
 	"go.uber.org/zap"
 )
 
+var Version = "0.0.0"
+
 // @title			Peekaping API
-// @version		1.0
-//
-// @host		localhost:8034
 // @BasePath	/api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
 func main() {
+	docs.SwaggerInfo.Version = Version
+
 	container := dig.New()
 
 	// Provide dependencies
@@ -94,6 +94,8 @@ func main() {
 
 	// Start the server
 	err = container.Invoke(func(server *Server) {
+		docs.SwaggerInfo.Host = "localhost:" + server.cfg.Port
+
 		port := server.cfg.Port
 		if port == "" {
 			port = "8080"

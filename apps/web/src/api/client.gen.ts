@@ -23,6 +23,6 @@ export type CreateClientConfig<T extends DefaultClientOptions = ClientOptions> =
 
 export const client = createClient(
   createConfig<ClientOptions>({
-    baseURL: "localhost:8034/api/v1",
+    baseURL: "/api/v1",
   }),
 );

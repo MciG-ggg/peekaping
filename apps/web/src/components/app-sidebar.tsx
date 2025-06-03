@@ -21,6 +21,7 @@ import { NavUser } from "./nav-user";
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
 import { useAuthStore } from "@/store/auth";
+import { VERSION } from "../version";
 
 const data = {
   user: {
@@ -87,7 +88,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <div className="text-xs text-muted-foreground w-full mb-2 select-none px-4">
+          v{VERSION}
+        </div>
       </SidebarContent>
+
 
       <SidebarFooter>
         {user && (

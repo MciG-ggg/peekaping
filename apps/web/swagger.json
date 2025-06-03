@@ -2,10 +2,8 @@
     "swagger": "2.0",
     "info": {
         "title": "Peekaping API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "localhost:8034",
     "basePath": "/api/v1",
     "paths": {
         "/auth/2fa/disable": {
@@ -330,6 +328,29 @@
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns the current server health",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Get server health",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": \"success\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -1682,6 +1703,29 @@
                     }
                 }
             }
+        },
+        "/version": {
+            "get": {
+                "description": "Returns the current server version",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Get server version",
+                "responses": {
+                    "200": {
+                        "description": "{\"version\": \"1.2.3\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2358,15 +2402,9 @@
         "setting.CreateUpdateDto": {
             "type": "object",
             "required": [
-                "key",
                 "type"
             ],
             "properties": {
-                "key": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 1
-                },
                 "type": {
                     "type": "string",
                     "enum": [

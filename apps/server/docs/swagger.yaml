@@ -601,11 +601,9 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8034
 info:
   contact: {}
   title: Peekaping API
-  version: "1.0"
 paths:
   /auth/2fa/disable:
     post:
@@ -818,6 +816,21 @@ paths:
       summary: Register new admin
       tags:
       - Auth
+  /health:
+    get:
+      description: Returns the current server health
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status": "success"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get server health
+      tags:
+      - System
   /monitors:
     get:
       parameters:
@@ -1675,6 +1688,21 @@ paths:
       summary: Set setting by key
       tags:
       - Settings
+  /version:
+    get:
+      description: Returns the current server version
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"version": "1.2.3"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get server version
+      tags:
+      - System
 securityDefinitions:
   BearerAuth:
     in: header

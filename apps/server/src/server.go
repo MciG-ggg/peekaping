@@ -20,6 +20,26 @@ import (
 	"go.uber.org/zap"
 )
 
+// @Summary      Get server version
+// @Description  Returns the current server version
+// @Tags         System
+// @Produce      json
+// @Success      200  {object}  map[string]string  "{"version": "1.2.3"}"
+// @Router       /version [get]
+func versionHandler(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{"version": Version})
+}
+
+// @Summary      Get server health
+// @Description  Returns the current server health
+// @Tags         System
+// @Produce      json
+// @Success      200  {object}  map[string]string  "{"status": "success"}"
+// @Router       /health [get]
+func healthHandler(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
 type Server struct {
 	router *gin.Engine
 	cfg    *config.Config
@@ -57,9 +77,8 @@ func ProvideServer(
 	// server.Use(LogMiddleware(logger))
 
 	router := server.Group("/api/v1")
-	router.GET("/healthchecker", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success"})
-	})
+	router.GET("/health", healthHandler)
+	router.GET("/version", versionHandler)
 
 	// Connect routes
 	monitorRoute.ConnectRoute(router, monitorController)

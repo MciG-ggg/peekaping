@@ -27,6 +27,8 @@ import type {
   PostAuthRegisterData,
   PostAuthRegisterResponse,
   PostAuthRegisterError,
+  GetHealthData,
+  GetHealthResponse,
   GetMonitorsData,
   GetMonitorsResponse,
   GetMonitorsError,
@@ -99,6 +101,8 @@ import type {
   PutSettingsKeyByKeyData,
   PutSettingsKeyByKeyResponse,
   PutSettingsKeyByKeyError,
+  GetVersionData,
+  GetVersionResponse,
 } from "./types.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -256,6 +260,23 @@ export const postAuthRegister = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options?.headers,
     },
+  });
+};
+
+/**
+ * Get server health
+ * Returns the current server health
+ */
+export const getHealth = <ThrowOnError extends boolean = false>(
+  options?: Options<GetHealthData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetHealthResponse,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/health",
+    ...options,
   });
 };
 
@@ -826,5 +847,22 @@ export const putSettingsKeyByKey = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options?.headers,
     },
+  });
+};
+
+/**
+ * Get server version
+ * Returns the current server version
+ */
+export const getVersion = <ThrowOnError extends boolean = false>(
+  options?: Options<GetVersionData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetVersionResponse,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/version",
+    ...options,
   });
 };

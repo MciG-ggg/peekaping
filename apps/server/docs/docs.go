@@ -342,6 +342,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/health": {
+            "get": {
+                "description": "Returns the current server health",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Get server health",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": \"success\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/monitors": {
             "get": {
                 "security": [
@@ -1689,6 +1712,29 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/version": {
+            "get": {
+                "description": "Returns the current server version",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Get server version",
+                "responses": {
+                    "200": {
+                        "description": "{\"version\": \"1.2.3\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2584,8 +2630,8 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8034",
+	Version:          "",
+	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Peekaping API",

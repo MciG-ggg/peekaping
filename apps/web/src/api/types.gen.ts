@@ -251,7 +251,6 @@ export type ProxyPartialUpdateDto = {
 };
 
 export type SettingCreateUpdateDto = {
-  key: string;
   type: "string" | "int" | "bool" | "json";
   value?: string;
 };
@@ -579,6 +578,24 @@ export type PostAuthRegisterResponses = {
 
 export type PostAuthRegisterResponse =
   PostAuthRegisterResponses[keyof PostAuthRegisterResponses];
+
+export type GetHealthData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/health";
+};
+
+export type GetHealthResponses = {
+  /**
+   * {"status": "success"}
+   */
+  200: {
+    [key: string]: string;
+  };
+};
+
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
 
 export type GetMonitorsData = {
   body?: never;
@@ -1580,6 +1597,24 @@ export type PutSettingsKeyByKeyResponses = {
 export type PutSettingsKeyByKeyResponse =
   PutSettingsKeyByKeyResponses[keyof PutSettingsKeyByKeyResponses];
 
+export type GetVersionData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/version";
+};
+
+export type GetVersionResponses = {
+  /**
+   * {"version": "1.2.3"}
+   */
+  200: {
+    [key: string]: string;
+  };
+};
+
+export type GetVersionResponse = GetVersionResponses[keyof GetVersionResponses];
+
 export type ClientOptions = {
-  baseURL: "localhost:8034/api/v1" | (string & {});
+  baseURL: `${string}://${string}/api/v1` | (string & {});
 };
