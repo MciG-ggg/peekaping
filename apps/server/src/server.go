@@ -37,14 +37,14 @@ func ProvideServer(
 	proxyRoute *proxy.Route,
 	proxyController *proxy.Controller,
 ) *Server {
-	// server := gin.Default()
-	server := gin.New()
+	server := gin.Default()
+	// server := gin.New()
 
 	server.RedirectTrailingSlash = false
 
 	// CORS configuration
 	server.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Authorization"},

@@ -22,6 +22,9 @@
       "dependsOn": ["^docs:watch"],
       "cache": false,
       "persistent": true
+    },
+    "build:docker": {
+      "dependsOn": ["^build:docker"]
     }
   }
 }

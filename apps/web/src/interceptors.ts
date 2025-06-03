@@ -6,6 +6,7 @@ import type {
 } from "axios";
 import { client } from "./api/client.gen";
 import axios from "axios";
+import { getConfig } from "./lib/config";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -69,7 +70,7 @@ export const setupInterceptors = () => {
 
         try {
           const { data } = await axios.post(
-            `${import.meta.env.VITE_API_URL}/api/v1/auth/refresh`,
+            `${getConfig().API_URL}/api/v1/auth/refresh`,
             { refreshToken },
             {
               headers: {

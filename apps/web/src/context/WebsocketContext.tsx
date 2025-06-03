@@ -1,3 +1,4 @@
+import { getConfig } from '@/lib/config';
 import { useAuthStore } from '@/store/auth';
 import axios from 'axios';
 import React from 'react';
@@ -22,7 +23,7 @@ const WebSocketContext = createContext<WebSocketContextType>({
 	status: WebSocketStatus.CONNECTING,
 });
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = getConfig().API_URL
 
 
 const noop = () => {};
@@ -83,7 +84,7 @@ export const WebSocketProvider = ({
 					}
 
           const { data } = await axios.post(
-            `${import.meta.env.VITE_API_URL}/api/v1/auth/refresh`,
+            `${getConfig().API_URL}/api/v1/auth/refresh`,
             { refreshToken },
             {
               headers: {

@@ -22,13 +22,14 @@ import SecurityPage from "./app/security/page";
 import EditNotifier from "./app/notifiers/edit/page";
 import EditProxy from "./app/proxies/edit/page";
 import { TimezoneProvider } from './context/TimezoneContext';
+import { getConfig } from "./lib/config";
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const configureClient = () => {
   const accessToken = useAuthStore.getState().accessToken;
 
   client.setConfig({
-    baseURL: import.meta.env.VITE_API_URL + "/api/v1",
+    baseURL: getConfig().API_URL + "/api/v1",
     headers: accessToken
       ? {
           Authorization: `Bearer ${accessToken}`,
@@ -42,7 +43,7 @@ setupInterceptors();
 
 useAuthStore.subscribe((state) => {
   client.setConfig({
-    baseURL: import.meta.env.VITE_API_URL + "/api/v1",
+    baseURL: getConfig().API_URL + "/api/v1",
     headers: state.accessToken
       ? {
           Authorization: `Bearer ${state.accessToken}`,
