@@ -2,16 +2,12 @@ package monitor_notification
 
 import (
 	"peekaping/src/config"
+	"peekaping/src/utils"
 
 	"go.uber.org/dig"
 )
 
 func RegisterDependencies(container *dig.Container, cfg *config.Config) {
-	switch cfg.DBType {
-	case "postgres", "postgresql", "mysql", "sqlite":
-		container.Provide(NewSQLRepository)
-	case "mongo":
-		container.Provide(NewMongoRepository)
-	}
+	utils.RegisterRepositoryByDBType(container, cfg, NewSQLRepository, NewMongoRepository)
 	container.Provide(NewService)
 }
