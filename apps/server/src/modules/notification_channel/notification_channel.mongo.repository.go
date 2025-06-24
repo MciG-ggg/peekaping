@@ -37,7 +37,7 @@ type RepositoryImpl struct {
 	collection *mongo.Collection
 }
 
-func NewRepository(db *mongo.Client, cfg *config.Config) Repository {
+func NewMongoRepository(db *mongo.Client, cfg *config.Config) Repository {
 	collection := db.Database(cfg.DBName).Collection("notification_channel")
 	return &RepositoryImpl{db, collection}
 }

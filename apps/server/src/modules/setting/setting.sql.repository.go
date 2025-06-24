@@ -1,0 +1,83 @@
+package setting
+
+import (
+	"context"
+	"time"
+
+	"github.com/uptrace/bun"
+)
+
+type sqlModel struct {
+	bun.BaseModel `bun:"table:settings,alias:s"`
+
+	Key       string    `bun:"key,pk"`
+	Value     string    `bun:"value,notnull"`
+	Type      string    `bun:"type,notnull"`
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
+}
+
+func toDomainModelFromSQL(sm *sqlModel) *Model {
+	return &Model{
+		Key:   sm.Key,
+		Value: sm.Value,
+		Type:  sm.Type,
+	}
+}
+
+func toSQLModel(m *Model) *sqlModel {
+	return &sqlModel{
+		Key:   m.Key,
+		Value: m.Value,
+		Type:  m.Type,
+	}
+}
+
+type SQLRepositoryImpl struct {
+	db *bun.DB
+}
+
+func NewSQLRepository(db *bun.DB) Repository {
+	return &SQLRepositoryImpl{db: db}
+}
+
+func (r *SQLRepositoryImpl) GetByKey(ctx context.Context, key string) (*Model, error) {
+	sm := new(sqlModel)
+	err := r.db.NewSelect().Model(sm).Where("key = ?", key).Scan(ctx)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toDomainModelFromSQL(sm), nil
+}
+
+func (r *SQLRepositoryImpl) SetByKey(ctx context.Context, key string, entity *CreateUpdateDto) (*Model, error) {
+	sm := &sqlModel{
+		Key:       key,
+		Value:     entity.Value,
+		Type:      entity.Type,
+		UpdatedAt: time.Now(),
+	}
+
+	// Use Bun's built-in upsert capabilities
+	_, err := r.db.NewInsert().
+		Model(sm).
+		On("CONFLICT (key) DO UPDATE").
+		Set("value = EXCLUDED.value").
+		Set("type = EXCLUDED.type").
+		Set("updated_at = EXCLUDED.updated_at").
+		Returning("*").
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDomainModelFromSQL(sm), nil
+}
+
+func (r *SQLRepositoryImpl) DeleteByKey(ctx context.Context, key string) error {
+	_, err := r.db.NewDelete().Model((*sqlModel)(nil)).Where("key = ?", key).Exec(ctx)
+	return err
+}

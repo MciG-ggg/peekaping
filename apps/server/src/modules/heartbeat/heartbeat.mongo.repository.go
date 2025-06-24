@@ -51,7 +51,7 @@ func toDomainModel(mm *mongoModel) *Model {
 	}
 }
 
-func NewRepository(client *mongo.Client, cfg *config.Config) Repository {
+func NewMongoRepository(client *mongo.Client, cfg *config.Config) Repository {
 	db := client.Database(cfg.DBName)
 	collection := db.Collection("heartbeat")
 

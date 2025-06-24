@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.uber.org/zap"
 )
 
 type mongoModel struct {
@@ -30,10 +29,9 @@ type RepositoryImpl struct {
 	client     *mongo.Client
 	db         *mongo.Database
 	collection *mongo.Collection
-	logger     *zap.SugaredLogger
 }
 
-func NewRepository(client *mongo.Client, cfg *config.Config, logger *zap.SugaredLogger) Repository {
+func NewMongoRepository(client *mongo.Client, cfg *config.Config) Repository {
 	db := client.Database(cfg.DBName)
 	collection := db.Collection("monitor_maintenance")
 
@@ -50,7 +48,7 @@ func NewRepository(client *mongo.Client, cfg *config.Config, logger *zap.Sugared
 		panic("Failed to create index for monitor_maintenance: " + err.Error())
 	}
 
-	return &RepositoryImpl{client, db, collection, logger}
+	return &RepositoryImpl{client, db, collection}
 }
 
 func (r *RepositoryImpl) Create(ctx context.Context, model *Model) (*Model, error) {
@@ -63,7 +61,6 @@ func (r *RepositoryImpl) Create(ctx context.Context, model *Model) (*Model, erro
 	if err != nil {
 		return nil, err
 	}
-	r.logger.Debugf("Creating monitor_maintenance record for monitor: %s and maintenance: %s", model.MonitorID, model.MaintenanceID)
 
 	mm := &mongoModel{
 		ID:            primitive.NewObjectID(),

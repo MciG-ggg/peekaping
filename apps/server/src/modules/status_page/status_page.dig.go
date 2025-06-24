@@ -1,18 +1,19 @@
 package status_page
 
 import (
-	"peekaping/src/modules/heartbeat"
-	"peekaping/src/modules/monitor"
+	"peekaping/src/config"
 
 	"go.uber.org/dig"
-	"go.uber.org/zap"
 )
 
-func RegisterDependencies(container *dig.Container) {
-	container.Provide(NewStatusPageRepository)
+func RegisterDependencies(container *dig.Container, cfg *config.Config) {
+	switch cfg.DBType {
+	case "postgres", "postgresql", "mysql", "sqlite":
+		container.Provide(NewSQLRepository)
+	case "mongo":
+		container.Provide(NewMongoRepository)
+	}
 	container.Provide(NewService)
-	container.Provide(func(service Service, monitorService monitor.Service, heartbeatService heartbeat.Service, logger *zap.SugaredLogger) *Controller {
-		return NewController(service, monitorService, heartbeatService, logger)
-	})
+	container.Provide(NewController)
 	container.Provide(NewRoute)
 }

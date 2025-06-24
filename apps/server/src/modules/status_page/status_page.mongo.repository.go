@@ -51,7 +51,7 @@ type MongoRepository struct {
 	collection *mongo.Collection
 }
 
-func NewStatusPageRepository(client *mongo.Client, cfg *config.Config) Repository {
+func NewMongoRepository(client *mongo.Client, cfg *config.Config) Repository {
 	db := client.Database(cfg.DBName)
 	collection := db.Collection("status_pages")
 

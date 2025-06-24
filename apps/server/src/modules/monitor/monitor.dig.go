@@ -1,11 +1,18 @@
 package monitor
 
 import (
+	"peekaping/src/config"
+
 	"go.uber.org/dig"
 )
 
-func RegisterDependencies(container *dig.Container) {
-	container.Provide(NewMonitorRepository)
+func RegisterDependencies(container *dig.Container, cfg *config.Config) {
+	switch cfg.DBType {
+	case "postgres", "postgresql", "mysql", "sqlite":
+		container.Provide(NewSQLRepository)
+	case "mongo":
+		container.Provide(NewMongoRepository)
+	}
 	container.Provide(NewMonitorService)
 	container.Provide(NewMonitorController)
 	container.Provide(NewMonitorRoute)

@@ -80,7 +80,7 @@ type MonitorRepositoryImpl struct {
 	collection *mongo.Collection
 }
 
-func NewMonitorRepository(client *mongo.Client, cfg *config.Config) MonitorRepository {
+func NewMongoRepository(client *mongo.Client, cfg *config.Config) MonitorRepository {
 	db := client.Database(cfg.DBName)
 	collection := db.Collection("monitor")
 	ctx := context.Background()
