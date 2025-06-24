@@ -7,6 +7,7 @@ import (
 
 	"peekaping/src/modules/shared"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
 
@@ -71,6 +72,7 @@ func NewSQLRepository(db *bun.DB) Repository {
 
 func (r *SQLRepositoryImpl) Create(ctx context.Context, heartbeat *Model) (*Model, error) {
 	sm := toSQLModel(heartbeat)
+	sm.ID = uuid.New().String()
 	sm.Time = time.Now()
 
 	_, err := r.db.NewInsert().Model(sm).Returning("*").Exec(ctx)

@@ -377,7 +377,7 @@ func (mr *ServiceImpl) generateCronExpression(dto *CreateUpdateDto) (*string, er
 
 // GetMaintenancesByMonitorID returns all active maintenances for a given monitor_id
 func (mr *ServiceImpl) GetMaintenancesByMonitorID(ctx context.Context, monitorID string) ([]*Model, error) {
-	models, err := mr.repository.(*MongoRepositoryImpl).GetMaintenancesByMonitorID(ctx, monitorID)
+	models, err := mr.repository.GetMaintenancesByMonitorID(ctx, monitorID)
 	if err != nil {
 		return nil, err
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type sqlModel struct {
@@ -25,20 +25,9 @@ type sqlModel struct {
 }
 
 func toDomainModelFromSQL(sm *sqlModel) *Stat {
-	// Convert string IDs to ObjectIDs for compatibility with existing domain model
-	objID, _ := primitive.ObjectIDFromHex(sm.ID)
-	if objID.IsZero() {
-		objID = primitive.NewObjectID()
-	}
-
-	monitorObjID, _ := primitive.ObjectIDFromHex(sm.MonitorID)
-	if monitorObjID.IsZero() {
-		monitorObjID = primitive.NewObjectID()
-	}
-
 	return &Stat{
-		ID:          objID,
-		MonitorID:   monitorObjID,
+		ID:          sm.ID,
+		MonitorID:   sm.MonitorID,
 		Timestamp:   sm.Timestamp,
 		Ping:        sm.Ping,
 		PingMin:     sm.PingMin,
@@ -51,8 +40,8 @@ func toDomainModelFromSQL(sm *sqlModel) *Stat {
 
 func toSQLModel(s *Stat) *sqlModel {
 	return &sqlModel{
-		ID:          s.ID.Hex(),
-		MonitorID:   s.MonitorID.Hex(),
+		ID:          s.ID,
+		MonitorID:   s.MonitorID,
 		Timestamp:   s.Timestamp,
 		Ping:        s.Ping,
 		PingMin:     s.PingMin,
@@ -71,19 +60,20 @@ func NewSQLRepository(db *bun.DB) Repository {
 	return &SQLRepositoryImpl{db: db}
 }
 
-func (r *SQLRepositoryImpl) GetOrCreateStat(ctx context.Context, monitorID primitive.ObjectID, timestamp time.Time, period StatPeriod) (*Stat, error) {
+func (r *SQLRepositoryImpl) GetOrCreateStat(ctx context.Context, monitorID string, timestamp time.Time, period StatPeriod) (*Stat, error) {
 	sm := new(sqlModel)
 
 	// Try to find existing stat
 	err := r.db.NewSelect().
 		Model(sm).
-		Where("monitor_id = ? AND timestamp = ?", monitorID.Hex(), timestamp).
+		Where("monitor_id = ? AND timestamp = ?", monitorID, timestamp).
 		Scan(ctx)
 
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		// Create new stat if not found
 		sm = &sqlModel{
-			MonitorID:   monitorID.Hex(),
+			ID:          uuid.New().String(),
+			MonitorID:   monitorID,
 			Timestamp:   timestamp,
 			Ping:        0,
 			PingMin:     0,
@@ -126,11 +116,11 @@ func (r *SQLRepositoryImpl) UpsertStat(ctx context.Context, stat *Stat, period S
 	return err
 }
 
-func (r *SQLRepositoryImpl) FindStatsByMonitorIDAndTimeRange(ctx context.Context, monitorID primitive.ObjectID, since, until time.Time, period StatPeriod) ([]*Stat, error) {
+func (r *SQLRepositoryImpl) FindStatsByMonitorIDAndTimeRange(ctx context.Context, monitorID string, since, until time.Time, period StatPeriod) ([]*Stat, error) {
 	var sms []*sqlModel
 	err := r.db.NewSelect().
 		Model(&sms).
-		Where("monitor_id = ? AND timestamp BETWEEN ? AND ?", monitorID.Hex(), since, until).
+		Where("monitor_id = ? AND timestamp BETWEEN ? AND ?", monitorID, since, until).
 		Order("timestamp ASC").
 		Scan(ctx)
 	if err != nil {

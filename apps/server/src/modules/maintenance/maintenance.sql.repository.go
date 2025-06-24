@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
 
@@ -97,6 +98,7 @@ func NewSQLRepository(db *bun.DB) Repository {
 
 func (r *SQLRepositoryImpl) Create(ctx context.Context, entity *CreateUpdateDto) (*Model, error) {
 	sm := &sqlModel{
+		ID:            uuid.New().String(),
 		Title:         entity.Title,
 		Description:   entity.Description,
 		UserID:        entity.UserID,
@@ -291,4 +293,28 @@ func (r *SQLRepositoryImpl) SetActive(ctx context.Context, id string, active boo
 	}
 
 	return r.FindByID(ctx, id)
+}
+
+// GetMaintenancesByMonitorID returns all active maintenances for a given monitor_id
+func (r *SQLRepositoryImpl) GetMaintenancesByMonitorID(ctx context.Context, monitorID string) ([]*Model, error) {
+	var sms []*sqlModel
+
+	// Use JOIN to get maintenances that are associated with the monitor and are active
+	err := r.db.NewSelect().
+		Model(&sms).
+		Join("JOIN monitor_maintenances mm ON mm.maintenance_id = m.id").
+		Where("mm.monitor_id = ? AND m.active = ?", monitorID, true).
+		Order("m.updated_at DESC").
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var models []*Model
+	for _, sm := range sms {
+		models = append(models, toDomainModelFromSQL(sm))
+	}
+
+	return models, nil
 }

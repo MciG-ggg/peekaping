@@ -2,6 +2,7 @@ package stats
 
 import (
 	"context"
+	"fmt"
 	"peekaping/src/config"
 	"time"
 
@@ -48,8 +49,8 @@ type mongoModel struct {
 
 func toDomainModel(mm *mongoModel) *Stat {
 	return &Stat{
-		ID:          mm.ID,
-		MonitorID:   mm.MonitorID,
+		ID:          mm.ID.Hex(),
+		MonitorID:   mm.MonitorID.Hex(),
 		Timestamp:   mm.Timestamp,
 		Ping:        mm.Ping,
 		PingMin:     mm.PingMin,
@@ -60,10 +61,19 @@ func toDomainModel(mm *mongoModel) *Stat {
 	}
 }
 
-func toMongoModel(s *Stat) *mongoModel {
+func toMongoModel(s *Stat) (*mongoModel, error) {
+	objectID, err := primitive.ObjectIDFromHex(s.ID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid statID: %w", err)
+	}
+	monitorID, err := primitive.ObjectIDFromHex(s.MonitorID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid monitorID: %w", err)
+	}
+
 	return &mongoModel{
-		ID:          s.ID,
-		MonitorID:   s.MonitorID,
+		ID:          objectID,
+		MonitorID:   monitorID,
 		Timestamp:   s.Timestamp,
 		Ping:        s.Ping,
 		PingMin:     s.PingMin,
@@ -71,23 +81,28 @@ func toMongoModel(s *Stat) *mongoModel {
 		Up:          s.Up,
 		Down:        s.Down,
 		Maintenance: s.Maintenance,
-	}
+	}, nil
 }
 
 func (r *MongoRepository) GetOrCreateStat(
 	ctx context.Context,
-	monitorID primitive.ObjectID,
+	monitorID string,
 	timestamp time.Time,
 	period StatPeriod,
 ) (*Stat, error) {
+	objectID, err := primitive.ObjectIDFromHex(monitorID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid monitorID: %w", err)
+	}
 	coll := r.getStatCollection(period)
-	filter := bson.M{"monitor_id": monitorID, "timestamp": timestamp}
+	filter := bson.M{"monitor_id": objectID, "timestamp": timestamp}
 	var mm mongoModel
-	err := coll.FindOne(ctx, filter).Decode(&mm)
+	err = coll.FindOne(ctx, filter).Decode(&mm)
+
 	if err == mongo.ErrNoDocuments {
 		mm = mongoModel{
 			ID:        primitive.NewObjectID(),
-			MonitorID: monitorID,
+			MonitorID: objectID,
 			Timestamp: timestamp,
 			Ping:      0,
 			PingMin:   0,
@@ -104,7 +119,11 @@ func (r *MongoRepository) GetOrCreateStat(
 
 func (r *MongoRepository) UpsertStat(ctx context.Context, stat *Stat, period StatPeriod) error {
 	coll := r.getStatCollection(period)
-	mm := toMongoModel(stat)
+	mm, err := toMongoModel(stat)
+	if err != nil {
+		return err
+	}
+
 	filter := bson.M{"monitor_id": mm.MonitorID, "timestamp": mm.Timestamp}
 	update :=
 		bson.M{
@@ -117,20 +136,24 @@ func (r *MongoRepository) UpsertStat(ctx context.Context, stat *Stat, period Sta
 				"maintenance": mm.Maintenance,
 			},
 		}
-	_, err := coll.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
+	_, err = coll.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
 	return err
 }
 
 func (r *MongoRepository) FindStatsByMonitorIDAndTimeRange(
 	ctx context.Context,
-	monitorID primitive.ObjectID,
+	monitorID string,
 	since,
 	until time.Time,
 	period StatPeriod,
 ) ([]*Stat, error) {
+	objectID, err := primitive.ObjectIDFromHex(monitorID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid monitorID: %w", err)
+	}
 	coll := r.getStatCollection(period)
 	filter := bson.M{
-		"monitor_id": monitorID,
+		"monitor_id": objectID,
 		"timestamp":  bson.M{"$gte": since, "$lte": until},
 	}
 	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: 1}})

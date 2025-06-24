@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
 
@@ -43,6 +44,7 @@ func NewSQLRepository(db *bun.DB) Repository {
 
 func (r *SQLRepositoryImpl) Create(ctx context.Context, model *Model) (*Model, error) {
 	sm := toSQLModel(model)
+	sm.ID = uuid.New().String()
 	sm.CreatedAt = time.Now()
 	sm.UpdatedAt = time.Now()
 

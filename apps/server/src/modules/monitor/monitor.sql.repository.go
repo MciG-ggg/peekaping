@@ -6,6 +6,7 @@ import (
 
 	"peekaping/src/modules/shared"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
 
@@ -25,11 +26,17 @@ type sqlModel struct {
 	CreatedAt      time.Time            `bun:"created_at,nullzero,notnull,default:current_timestamp"`
 	UpdatedAt      time.Time            `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 	Config         string               `bun:"config"`
-	ProxyId        string               `bun:"proxy_id"`
+	ProxyId        *string              `bun:"proxy_id"`
 	PushToken      string               `bun:"push_token"`
 }
 
 func toDomainModelFromSQL(sm *sqlModel) *Model {
+	// Handle nil ProxyId by converting to empty string
+	var proxyId string
+	if sm.ProxyId != nil {
+		proxyId = *sm.ProxyId
+	}
+
 	return &Model{
 		ID:             sm.ID,
 		Type:           sm.Type,
@@ -44,12 +51,18 @@ func toDomainModelFromSQL(sm *sqlModel) *Model {
 		CreatedAt:      sm.CreatedAt,
 		UpdatedAt:      sm.UpdatedAt,
 		Config:         sm.Config,
-		ProxyId:        sm.ProxyId,
+		ProxyId:        proxyId,
 		PushToken:      sm.PushToken,
 	}
 }
 
 func toSQLModel(m *Model) *sqlModel {
+	// Handle empty ProxyId by converting to NULL for PostgreSQL UUID compatibility
+	var proxyId *string
+	if m.ProxyId != "" {
+		proxyId = &m.ProxyId
+	}
+
 	return &sqlModel{
 		ID:             m.ID,
 		Type:           m.Type,
@@ -64,7 +77,7 @@ func toSQLModel(m *Model) *sqlModel {
 		CreatedAt:      m.CreatedAt,
 		UpdatedAt:      m.UpdatedAt,
 		Config:         m.Config,
-		ProxyId:        m.ProxyId,
+		ProxyId:        proxyId,
 		PushToken:      m.PushToken,
 	}
 }
@@ -79,6 +92,7 @@ func NewSQLRepository(db *bun.DB) MonitorRepository {
 
 func (r *SQLRepositoryImpl) Create(ctx context.Context, monitor *Model) (*Model, error) {
 	sm := toSQLModel(monitor)
+	sm.ID = uuid.New().String()
 	sm.CreatedAt = time.Now()
 	sm.UpdatedAt = time.Now()
 
@@ -239,7 +253,12 @@ func (r *SQLRepositoryImpl) UpdatePartial(ctx context.Context, id string, monito
 		hasUpdates = true
 	}
 	if monitor.ProxyId != nil {
-		query = query.Set("proxy_id = ?", *monitor.ProxyId)
+		if *monitor.ProxyId == "" {
+			// Set to NULL when ProxyId is empty string
+			query = query.Set("proxy_id = ?", nil)
+		} else {
+			query = query.Set("proxy_id = ?", *monitor.ProxyId)
+		}
 		hasUpdates = true
 	}
 	if monitor.PushToken != nil {
@@ -266,7 +285,7 @@ func (r *SQLRepositoryImpl) Delete(ctx context.Context, id string) error {
 func (r *SQLRepositoryImpl) RemoveProxyReference(ctx context.Context, proxyId string) error {
 	_, err := r.db.NewUpdate().
 		Model((*sqlModel)(nil)).
-		Set("proxy_id = ?", "").
+		Set("proxy_id = ?", nil).
 		Where("proxy_id = ?", proxyId).
 		Exec(ctx)
 	return err
