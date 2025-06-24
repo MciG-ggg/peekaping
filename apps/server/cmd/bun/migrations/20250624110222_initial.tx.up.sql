@@ -2,10 +2,11 @@
 -- This migration creates all the necessary tables for the application
 -- Wrapped in a transaction for atomicity
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table for authentication
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Proxies table for proxy configurations
 CREATE TABLE IF NOT EXISTS proxies (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     protocol VARCHAR(10) NOT NULL,
     host VARCHAR(255) NOT NULL,
     port INTEGER NOT NULL,
@@ -31,11 +32,11 @@ CREATE TABLE IF NOT EXISTS proxies (
 
 -- Monitors table for monitoring configurations
 CREATE TABLE IF NOT EXISTS monitors (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     type VARCHAR(20) NOT NULL,
     name VARCHAR(150) NOT NULL,
     interval INTEGER NOT NULL,
-    timeout DOUBLE PRECISION NOT NULL,
+    timeout INTEGER NOT NULL,
     max_retries INTEGER NOT NULL,
     retry_interval INTEGER NOT NULL,
     resend_interval INTEGER NOT NULL,
@@ -51,7 +52,7 @@ CREATE TABLE IF NOT EXISTS monitors (
 
 -- Status pages table
 CREATE TABLE IF NOT EXISTS status_pages (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
@@ -66,7 +67,7 @@ CREATE TABLE IF NOT EXISTS status_pages (
 
 -- Notification channels table
 CREATE TABLE IF NOT EXISTS notification_channels (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
@@ -78,7 +79,7 @@ CREATE TABLE IF NOT EXISTS notification_channels (
 
 -- Maintenances table
 CREATE TABLE IF NOT EXISTS maintenances (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
     description TEXT,
     user_id UUID NOT NULL,
@@ -110,7 +111,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- Heartbeats table for monitoring results
 CREATE TABLE IF NOT EXISTS heartbeats (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     monitor_id UUID NOT NULL,
     status INTEGER NOT NULL, -- 0=Down, 1=Up, 2=Pending, 3=Maintenance
     msg TEXT,
@@ -127,7 +128,7 @@ CREATE TABLE IF NOT EXISTS heartbeats (
 
 -- Stats table for aggregated monitoring statistics
 CREATE TABLE IF NOT EXISTS stats (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     monitor_id UUID NOT NULL,
     timestamp TIMESTAMP NOT NULL,
     ping DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -146,7 +147,7 @@ CREATE TABLE IF NOT EXISTS stats (
 
 -- Monitor notifications junction table
 CREATE TABLE IF NOT EXISTS monitor_notifications (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     monitor_id UUID NOT NULL,
     notification_channel_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -158,7 +159,7 @@ CREATE TABLE IF NOT EXISTS monitor_notifications (
 
 -- Monitor maintenances junction table
 CREATE TABLE IF NOT EXISTS monitor_maintenances (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     monitor_id UUID NOT NULL,
     maintenance_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -170,7 +171,7 @@ CREATE TABLE IF NOT EXISTS monitor_maintenances (
 
 -- Monitor status pages junction table
 CREATE TABLE IF NOT EXISTS monitor_status_pages (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     monitor_id UUID NOT NULL,
     status_page_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
