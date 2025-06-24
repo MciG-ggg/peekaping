@@ -32,7 +32,6 @@ services:
 
   web:
     image: 0xfurai/peekaping-web:latest
-    expose: ["80"]
     depends_on:
       - server
     networks:
