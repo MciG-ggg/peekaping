@@ -48,23 +48,44 @@ func (r *SQLRepositoryImpl) GetByKey(ctx context.Context, key string) (*Model, e
 }
 
 func (r *SQLRepositoryImpl) SetByKey(ctx context.Context, key string, entity *CreateUpdateDto) (*Model, error) {
-	sm := &sqlModel{
-		Key:       key,
-		Value:     entity.Value,
-		Type:      entity.Type,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+	// Try to update existing record first
+	result, err := r.db.NewUpdate().
+		Model((*sqlModel)(nil)).
+		Where("key = ?", key).
+		Set("value = ?", entity.Value).
+		Set("type = ?", entity.Type).
+		Set("updated_at = ?", time.Now()).
+		Exec(ctx)
+
+	if err != nil {
+		return nil, err
 	}
 
-	// Use Bun's built-in upsert capabilities
-	_, err := r.db.NewInsert().
-		Model(sm).
-		On("CONFLICT (key) DO UPDATE").
-		Set("value = EXCLUDED.value").
-		Set("type = EXCLUDED.type").
-		Set("updated_at = EXCLUDED.updated_at").
-		Returning("*").
-		Exec(ctx)
+	// Check if any rows were affected by the update
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	// If no rows were updated, insert a new record
+	if rowsAffected == 0 {
+		sm := &sqlModel{
+			Key:       key,
+			Value:     entity.Value,
+			Type:      entity.Type,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+
+		_, err = r.db.NewInsert().Model(sm).Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Fetch and return the final record
+	sm := new(sqlModel)
+	err = r.db.NewSelect().Model(sm).Where("key = ?", key).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
