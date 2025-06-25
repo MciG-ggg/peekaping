@@ -19,17 +19,11 @@ type sqlModel struct {
 
 func toDomainModelFromSQL(sm *sqlModel) *Model {
 	return &Model{
-		Key:   sm.Key,
-		Value: sm.Value,
-		Type:  sm.Type,
-	}
-}
-
-func toSQLModel(m *Model) *sqlModel {
-	return &sqlModel{
-		Key:   m.Key,
-		Value: m.Value,
-		Type:  m.Type,
+		Key:       sm.Key,
+		Value:     sm.Value,
+		Type:      sm.Type,
+		CreatedAt: sm.CreatedAt,
+		UpdatedAt: sm.UpdatedAt,
 	}
 }
 
@@ -58,6 +52,7 @@ func (r *SQLRepositoryImpl) SetByKey(ctx context.Context, key string, entity *Cr
 		Key:       key,
 		Value:     entity.Value,
 		Type:      entity.Type,
+		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 

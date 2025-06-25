@@ -158,7 +158,7 @@ func (s *ServiceImpl) FindStatsByMonitorIDAndTimeRange(ctx context.Context, moni
 			result = append(result, stat)
 		} else {
 			result = append(result, &Stat{
-				ID:          "",
+				ID:          "", // TODO: check if this brake ui (react key)
 				MonitorID:   monitorID,
 				Timestamp:   t,
 				Ping:        0,

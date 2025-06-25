@@ -29,6 +29,8 @@ func toDomainModelFromSQL(sm *sqlModel) *Model {
 		Active:    sm.Active,
 		IsDefault: sm.IsDefault,
 		Config:    sm.Config,
+		CreatedAt: sm.CreatedAt,
+		UpdatedAt: sm.UpdatedAt,
 	}
 }
 
@@ -40,6 +42,8 @@ func toSQLModel(m *Model) *sqlModel {
 		Active:    m.Active,
 		IsDefault: m.IsDefault,
 		Config:    m.Config,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
 	}
 }
 

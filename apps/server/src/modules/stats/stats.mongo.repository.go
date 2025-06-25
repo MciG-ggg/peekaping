@@ -61,29 +61,6 @@ func toDomainModel(mm *mongoModel) *Stat {
 	}
 }
 
-func toMongoModel(s *Stat) (*mongoModel, error) {
-	objectID, err := primitive.ObjectIDFromHex(s.ID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid statID: %w", err)
-	}
-	monitorID, err := primitive.ObjectIDFromHex(s.MonitorID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid monitorID: %w", err)
-	}
-
-	return &mongoModel{
-		ID:          objectID,
-		MonitorID:   monitorID,
-		Timestamp:   s.Timestamp,
-		Ping:        s.Ping,
-		PingMin:     s.PingMin,
-		PingMax:     s.PingMax,
-		Up:          s.Up,
-		Down:        s.Down,
-		Maintenance: s.Maintenance,
-	}, nil
-}
-
 func (r *MongoRepository) GetOrCreateStat(
 	ctx context.Context,
 	monitorID string,
@@ -119,9 +96,26 @@ func (r *MongoRepository) GetOrCreateStat(
 
 func (r *MongoRepository) UpsertStat(ctx context.Context, stat *Stat, period StatPeriod) error {
 	coll := r.getStatCollection(period)
-	mm, err := toMongoModel(stat)
+
+	objectID, err := primitive.ObjectIDFromHex(stat.ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid statID: %w", err)
+	}
+	monitorID, err := primitive.ObjectIDFromHex(stat.MonitorID)
+	if err != nil {
+		return fmt.Errorf("invalid monitorID: %w", err)
+	}
+
+	mm := mongoModel{
+		ID:          objectID,
+		MonitorID:   monitorID,
+		Timestamp:   stat.Timestamp,
+		Ping:        stat.Ping,
+		PingMin:     stat.PingMin,
+		PingMax:     stat.PingMax,
+		Up:          stat.Up,
+		Down:        stat.Down,
+		Maintenance: stat.Maintenance,
 	}
 
 	filter := bson.M{"monitor_id": mm.MonitorID, "timestamp": mm.Timestamp}

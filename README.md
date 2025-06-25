@@ -137,6 +137,7 @@ DB_PASSWORD=your-secure-password
 DB_NAME=peekaping
 DB_HOST=localhost
 DB_PORT=6001
+DB_TYPE=mongo
 
 PORT=8034
 CLIENT_URL="http://localhost:5173"

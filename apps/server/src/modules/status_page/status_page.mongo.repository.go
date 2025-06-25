@@ -22,11 +22,12 @@ type mongoModel struct {
 	Published            bool               `bson:"published"`
 	SearchEngineIndex    bool               `bson:"search_engine_index"`
 	Password             string             `bson:"password,omitempty"`
-	CreatedAt            time.Time          `bson:"created_at"`
-	UpdatedAt            time.Time          `bson:"updated_at"`
 	FooterText           string             `bson:"footer_text"`
 	GoogleAnalyticsTagID string             `bson:"google_analytics_tag_id"`
 	AutoRefreshInterval  int                `bson:"auto_refresh_interval"`
+
+	CreatedAt time.Time `bson:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at"`
 }
 
 func toDomainModel(m *mongoModel) *Model {
@@ -38,10 +39,11 @@ func toDomainModel(m *mongoModel) *Model {
 		Icon:                m.Icon,
 		Theme:               m.Theme,
 		Published:           m.Published,
-		CreatedAt:           m.CreatedAt,
-		UpdatedAt:           m.UpdatedAt,
 		FooterText:          m.FooterText,
 		AutoRefreshInterval: m.AutoRefreshInterval,
+
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
 	}
 }
 

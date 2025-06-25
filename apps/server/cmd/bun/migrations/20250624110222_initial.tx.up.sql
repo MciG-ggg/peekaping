@@ -182,21 +182,30 @@ CREATE TABLE IF NOT EXISTS monitor_status_pages (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_monitors_active ON monitors(active);
-CREATE INDEX IF NOT EXISTS idx_monitors_status ON monitors(status);
+-- Core foreign key and unique indexes
 CREATE INDEX IF NOT EXISTS idx_monitors_proxy_id ON monitors(proxy_id);
-CREATE INDEX IF NOT EXISTS idx_heartbeats_monitor_id ON heartbeats(monitor_id);
-CREATE INDEX IF NOT EXISTS idx_heartbeats_time ON heartbeats(time);
-CREATE INDEX IF NOT EXISTS idx_heartbeats_status ON heartbeats(status);
-CREATE INDEX IF NOT EXISTS idx_stats_monitor_id ON stats(monitor_id);
-CREATE INDEX IF NOT EXISTS idx_stats_timestamp ON stats(timestamp);
 CREATE INDEX IF NOT EXISTS idx_maintenances_user_id ON maintenances(user_id);
-CREATE INDEX IF NOT EXISTS idx_maintenances_active ON maintenances(active);
 CREATE INDEX IF NOT EXISTS idx_status_pages_slug ON status_pages(slug);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- Composite indexes for time-series queries (CRITICAL for performance)
+CREATE INDEX IF NOT EXISTS idx_heartbeats_monitor_time ON heartbeats(monitor_id, time);
+CREATE INDEX IF NOT EXISTS idx_stats_monitor_timestamp ON stats(monitor_id, timestamp);
+
+-- Composite indexes for common filtering patterns
+CREATE INDEX IF NOT EXISTS idx_monitors_active_status ON monitors(active, status);
+CREATE INDEX IF NOT EXISTS idx_heartbeats_monitor_important ON heartbeats(monitor_id, important);
+
+-- Enhanced composite for complex heartbeat queries
+CREATE INDEX IF NOT EXISTS idx_heartbeats_monitor_time_important ON heartbeats(monitor_id, time, important);
+
+-- Single column indexes for specific filtering needs
+CREATE INDEX IF NOT EXISTS idx_heartbeats_status ON heartbeats(status);
+CREATE INDEX IF NOT EXISTS idx_heartbeats_important ON heartbeats(important);
+CREATE INDEX IF NOT EXISTS idx_maintenances_active ON maintenances(active);
 CREATE INDEX IF NOT EXISTS idx_status_pages_published ON status_pages(published);
 CREATE INDEX IF NOT EXISTS idx_notification_channels_type ON notification_channels(type);
 CREATE INDEX IF NOT EXISTS idx_notification_channels_active ON notification_channels(active);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_active ON users(active);
 CREATE INDEX IF NOT EXISTS idx_proxies_host_port ON proxies(host, port);
 

@@ -1394,57 +1394,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/monitors/{id}/stats/uptime-slow": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Monitors"
-                ],
-                "summary": "Get monitor uptime stats (24h, 7d, 30d, 365d)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Monitor ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ApiResponse-monitor_UptimeStatsDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            }
-        },
         "/notification-channels": {
             "get": {
                 "security": [
@@ -3497,23 +3446,6 @@ const docTemplate = `{
                 }
             }
         },
-        "monitor.UptimeStatsDto": {
-            "type": "object",
-            "properties": {
-                "24h": {
-                    "type": "number"
-                },
-                "30d": {
-                    "type": "number"
-                },
-                "365d": {
-                    "type": "number"
-                },
-                "7d": {
-                    "type": "number"
-                }
-            }
-        },
         "notification_channel.CreateUpdateDto": {
             "type": "object",
             "properties": {
@@ -3543,6 +3475,9 @@ const docTemplate = `{
                 "config": {
                     "type": "string"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -3553,6 +3488,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -4291,21 +4229,6 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/monitor.StatPointsSummaryDto"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "utils.ApiResponse-monitor_UptimeStatsDto": {
-            "type": "object",
-            "required": [
-                "data",
-                "message"
-            ],
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/monitor.UptimeStatsDto"
                 },
                 "message": {
                     "type": "string"

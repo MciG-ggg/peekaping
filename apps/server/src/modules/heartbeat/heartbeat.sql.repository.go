@@ -2,7 +2,6 @@ package heartbeat
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"peekaping/src/modules/shared"
@@ -137,62 +136,6 @@ func (r *SQLRepositoryImpl) Delete(ctx context.Context, id string) error {
 	return err
 }
 
-func (r *SQLRepositoryImpl) FindByMonitorIDAndTimeRange(
-	ctx context.Context,
-	monitorID string,
-	startTime,
-	endTime time.Time,
-) ([]*ChartPoint, error) {
-	var results []struct {
-		Up        int     `bun:"up"`
-		Down      int     `bun:"down"`
-		AvgPing   float64 `bun:"avg_ping"`
-		MinPing   int     `bun:"min_ping"`
-		MaxPing   int     `bun:"max_ping"`
-		Timestamp int64   `bun:"timestamp"`
-	}
-
-	// Use database-agnostic time truncation (hour intervals)
-	// Use basic time grouping that works across databases
-	timeGroupBy := "strftime('%Y-%m-%d %H:00:00', time)" // SQLite format as baseline
-	timestampSelect := "CAST(strftime('%s', time) AS INTEGER)"
-
-	// For production, you might want to detect database type and adjust accordingly
-	// This simplified version works best with SQLite but is reasonably cross-compatible
-
-	err := r.db.NewSelect().
-		Model((*sqlModel)(nil)).
-		Column(
-			"COUNT(CASE WHEN status = ? THEN 1 END) as up",
-			"COUNT(CASE WHEN status = ? THEN 1 END) as down",
-			"AVG(ping) as avg_ping",
-			"MIN(ping) as min_ping",
-			"MAX(ping) as max_ping",
-			fmt.Sprintf("%s as timestamp", timestampSelect),
-		).
-		Where("monitor_id = ? AND time BETWEEN ? AND ?", monitorID, startTime, endTime).
-		Group(timeGroupBy).
-		Order("timestamp ASC").
-		Scan(ctx, &results)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var chartPoints []*ChartPoint
-	for _, r := range results {
-		chartPoints = append(chartPoints, &ChartPoint{
-			Up:        r.Up,
-			Down:      r.Down,
-			AvgPing:   r.AvgPing,
-			MinPing:   r.MinPing,
-			MaxPing:   r.MaxPing,
-			Timestamp: r.Timestamp,
-		})
-	}
-	return chartPoints, nil
-}
-
 func (r *SQLRepositoryImpl) FindByMonitorIDPaginated(
 	ctx context.Context,
 	monitorID string,
@@ -211,11 +154,7 @@ func (r *SQLRepositoryImpl) FindByMonitorIDPaginated(
 		query = query.Where("important = ?", *important)
 	}
 
-	if reverse {
-		query = query.Order("time ASC")
-	} else {
-		query = query.Order("time DESC")
-	}
+	query = query.Order("time DESC")
 
 	var sms []*sqlModel
 	err := query.Scan(ctx, &sms)
@@ -227,6 +166,13 @@ func (r *SQLRepositoryImpl) FindByMonitorIDPaginated(
 	for _, sm := range sms {
 		models = append(models, toDomainModelFromSQL(sm))
 	}
+
+	if reverse && len(models) > 1 {
+		for i, j := 0, len(models)-1; i < j; i, j = i+1, j-1 {
+			models[i], models[j] = models[j], models[i]
+		}
+	}
+
 	return models, nil
 }
 

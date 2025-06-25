@@ -53,38 +53,8 @@ func toDomainModelFromSQL(sm *sqlModel) *Model {
 		Cron:          sm.Cron,
 		Timezone:      sm.Timezone,
 		Duration:      sm.Duration,
-		CreatedAt:     sm.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:     sm.UpdatedAt.Format(time.RFC3339),
-	}
-}
-
-func toSQLModel(m *Model) *sqlModel {
-	createdAt, _ := time.Parse(time.RFC3339, m.CreatedAt)
-	updatedAt, _ := time.Parse(time.RFC3339, m.UpdatedAt)
-
-	// Convert arrays to JSON strings (simplified - in production use proper JSON marshaling)
-	weekdaysStr := "[]"
-	daysOfMonthStr := "[]"
-
-	return &sqlModel{
-		ID:            m.ID,
-		Title:         m.Title,
-		Description:   m.Description,
-		UserID:        m.UserID,
-		Active:        m.Active,
-		Strategy:      m.Strategy,
-		StartDateTime: m.StartDateTime,
-		EndDateTime:   m.EndDateTime,
-		StartTime:     m.StartTime,
-		EndTime:       m.EndTime,
-		Weekdays:      weekdaysStr,
-		DaysOfMonth:   daysOfMonthStr,
-		IntervalDay:   m.IntervalDay,
-		Cron:          m.Cron,
-		Timezone:      m.Timezone,
-		Duration:      m.Duration,
-		CreatedAt:     createdAt,
-		UpdatedAt:     updatedAt,
+		CreatedAt:     sm.CreatedAt,
+		UpdatedAt:     sm.UpdatedAt,
 	}
 }
 

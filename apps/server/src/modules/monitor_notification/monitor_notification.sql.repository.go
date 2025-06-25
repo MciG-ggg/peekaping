@@ -23,6 +23,8 @@ func toDomainModelFromSQL(sm *sqlModel) *Model {
 		ID:             sm.ID,
 		MonitorID:      sm.MonitorID,
 		NotificationID: sm.NotificationChannelID,
+		CreatedAt:      sm.CreatedAt,
+		UpdatedAt:      sm.UpdatedAt,
 	}
 }
 
@@ -31,6 +33,8 @@ func toSQLModel(m *Model) *sqlModel {
 		ID:                    m.ID,
 		MonitorID:             m.MonitorID,
 		NotificationChannelID: m.NotificationID,
+		CreatedAt:             m.CreatedAt,
+		UpdatedAt:             m.UpdatedAt,
 	}
 }
 

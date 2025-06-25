@@ -290,13 +290,6 @@ export type MonitorStatPointsSummaryDto = {
   uptime?: number;
 };
 
-export type MonitorUptimeStatsDto = {
-  "24h"?: number;
-  "30d"?: number;
-  "365d"?: number;
-  "7d"?: number;
-};
-
 export type NotificationChannelCreateUpdateDto = {
   active?: boolean;
   config?: string;
@@ -308,10 +301,12 @@ export type NotificationChannelCreateUpdateDto = {
 export type NotificationChannelModel = {
   active?: boolean;
   config?: string;
+  created_at?: string;
   id?: string;
   is_default?: boolean;
   name?: string;
   type?: string;
+  updated_at?: string;
 };
 
 export type NotificationChannelPartialUpdateDto = {
@@ -560,11 +555,6 @@ export type UtilsApiResponseMonitorMonitorResponseDto = {
 
 export type UtilsApiResponseMonitorStatPointsSummaryDto = {
   data: MonitorStatPointsSummaryDto;
-  message: string;
-};
-
-export type UtilsApiResponseMonitorUptimeStatsDto = {
-  data: MonitorUptimeStatsDto;
   message: string;
 };
 
@@ -1627,46 +1617,6 @@ export type GetMonitorsByIdStatsUptimeResponses = {
 
 export type GetMonitorsByIdStatsUptimeResponse =
   GetMonitorsByIdStatsUptimeResponses[keyof GetMonitorsByIdStatsUptimeResponses];
-
-export type GetMonitorsByIdStatsUptimeSlowData = {
-  body?: never;
-  path: {
-    /**
-     * Monitor ID
-     */
-    id: string;
-  };
-  query?: never;
-  url: "/monitors/{id}/stats/uptime-slow";
-};
-
-export type GetMonitorsByIdStatsUptimeSlowErrors = {
-  /**
-   * Bad Request
-   */
-  400: UtilsApiError;
-  /**
-   * Not Found
-   */
-  404: UtilsApiError;
-  /**
-   * Internal Server Error
-   */
-  500: UtilsApiError;
-};
-
-export type GetMonitorsByIdStatsUptimeSlowError =
-  GetMonitorsByIdStatsUptimeSlowErrors[keyof GetMonitorsByIdStatsUptimeSlowErrors];
-
-export type GetMonitorsByIdStatsUptimeSlowResponses = {
-  /**
-   * OK
-   */
-  200: UtilsApiResponseMonitorUptimeStatsDto;
-};
-
-export type GetMonitorsByIdStatsUptimeSlowResponse =
-  GetMonitorsByIdStatsUptimeSlowResponses[keyof GetMonitorsByIdStatsUptimeSlowResponses];
 
 export type GetNotificationChannelsData = {
   body?: never;

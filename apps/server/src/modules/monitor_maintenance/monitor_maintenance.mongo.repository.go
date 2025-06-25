@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"peekaping/src/config"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,6 +16,8 @@ type mongoModel struct {
 	ID            primitive.ObjectID `bson:"_id"`
 	MonitorID     primitive.ObjectID `bson:"monitor_id"`
 	MaintenanceID primitive.ObjectID `bson:"maintenance_id"`
+	CreatedAt     time.Time          `bson:"created_at"`
+	UpdatedAt     time.Time          `bson:"updated_at"`
 }
 
 func toDomainModel(mm *mongoModel) *Model {
@@ -22,6 +25,8 @@ func toDomainModel(mm *mongoModel) *Model {
 		ID:            mm.ID.Hex(),
 		MonitorID:     mm.MonitorID.Hex(),
 		MaintenanceID: mm.MaintenanceID.Hex(),
+		CreatedAt:     mm.CreatedAt,
+		UpdatedAt:     mm.UpdatedAt,
 	}
 }
 

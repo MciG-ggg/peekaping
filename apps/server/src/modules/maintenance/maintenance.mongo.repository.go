@@ -29,8 +29,8 @@ type mongoModel struct {
 	Cron          *string            `bson:"cron,omitempty"`
 	Timezone      *string            `bson:"timezone,omitempty"`
 	Duration      *int               `bson:"duration,omitempty"`
-	CreatedAt     string             `bson:"created_at"`
-	UpdatedAt     string             `bson:"updated_at"`
+	CreatedAt     time.Time          `bson:"created_at"`
+	UpdatedAt     time.Time          `bson:"updated_at"`
 }
 
 type mongoUpdateModel struct {
@@ -103,8 +103,8 @@ func (r *MongoRepositoryImpl) Create(ctx context.Context, entity *CreateUpdateDt
 		Cron:          entity.Cron,
 		Timezone:      entity.Timezone,
 		Duration:      entity.Duration,
-		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 
 	_, err := r.collection.InsertOne(ctx, mm)
@@ -203,7 +203,7 @@ func (r *MongoRepositoryImpl) UpdateFull(ctx context.Context, id string, entity 
 		Cron:          entity.Cron,
 		Timezone:      entity.Timezone,
 		Duration:      entity.Duration,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:     time.Now(),
 	}
 
 	filter := bson.M{"_id": objectID}

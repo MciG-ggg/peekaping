@@ -41,11 +41,11 @@ type mongoUpdateModel struct {
 	ResendInterval *int                     `bson:"resend_interval,omitempty"`
 	Active         *bool                    `bson:"active,omitempty"`
 	Status         *heartbeat.MonitorStatus `bson:"status,omitempty"`
-	CreatedAt      *time.Time               `bson:"created_at,omitempty"`
-	UpdatedAt      *time.Time               `bson:"updated_at,omitempty"`
 	Config         *string                  `bson:"config,omitempty"`
 	ProxyId        *primitive.ObjectID      `bson:"proxy_id,omitempty"`
 	PushToken      *string                  `bson:"push_token,omitempty"`
+	CreatedAt      *time.Time               `bson:"created_at,omitempty"`
+	UpdatedAt      *time.Time               `bson:"updated_at,omitempty"`
 }
 
 func toDomainModel(mm *mongoModel) *Model {
@@ -66,11 +66,11 @@ func toDomainModel(mm *mongoModel) *Model {
 		ResendInterval: mm.ResendInterval,
 		Active:         mm.Active,
 		Status:         mm.Status,
-		CreatedAt:      mm.CreatedAt,
-		UpdatedAt:      mm.UpdatedAt,
 		Config:         mm.Config,
 		ProxyId:        proxyId,
 		PushToken:      mm.PushToken,
+		CreatedAt:      mm.CreatedAt,
+		UpdatedAt:      mm.UpdatedAt,
 	}
 }
 
