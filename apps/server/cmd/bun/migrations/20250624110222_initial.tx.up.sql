@@ -80,7 +80,6 @@ CREATE TABLE IF NOT EXISTS maintenances (
     id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    user_id UUID NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
     strategy VARCHAR(50) NOT NULL,
     start_date_time VARCHAR(50),
@@ -95,7 +94,6 @@ CREATE TABLE IF NOT EXISTS maintenances (
     duration INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Settings table
