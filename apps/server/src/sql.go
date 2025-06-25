@@ -11,6 +11,7 @@ import (
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/driver/sqliteshim"
+	"github.com/uptrace/bun/extra/bundebug"
 	"go.uber.org/zap"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -73,6 +74,10 @@ func ProvideSQLDB(
 	if err = db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
+
+	db.AddQueryHook(bundebug.NewQueryHook(
+		bundebug.FromEnv(),
+	))
 
 	logger.Info("Successfully connected to SQL database")
 	return db, nil

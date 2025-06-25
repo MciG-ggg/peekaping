@@ -6,7 +6,6 @@ type Model struct {
 	ID            string    `json:"id"`
 	Title         string    `json:"title"`
 	Description   string    `json:"description"`
-	UserID        string    `json:"user_id"`
 	Active        bool      `json:"active"`
 	Strategy      string    `json:"strategy"`
 	StartDateTime *string   `json:"start_date_time,omitempty"`

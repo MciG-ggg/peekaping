@@ -13,6 +13,7 @@ import (
 	"peekaping/src/modules/heartbeat"
 	"peekaping/src/modules/maintenance"
 	"peekaping/src/modules/monitor"
+	"peekaping/src/modules/monitor_maintenance"
 	"peekaping/src/modules/monitor_notification"
 	"peekaping/src/modules/monitor_status_page"
 	"peekaping/src/modules/notification_channel"
@@ -72,6 +73,7 @@ func main() {
 	proxy.RegisterDependencies(container, &cfg)
 	setting.RegisterDependencies(container, &cfg)
 	stats.RegisterDependencies(container, &cfg)
+	monitor_maintenance.RegisterDependencies(container, &cfg)
 	maintenance.RegisterDependencies(container, &cfg)
 	status_page.RegisterDependencies(container, &cfg)
 	monitor_status_page.RegisterDependencies(container, &cfg)

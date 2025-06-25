@@ -5,7 +5,6 @@ import "time"
 type CreateUpdateDto struct {
 	Title         string   `json:"title" validate:"required"`
 	Description   string   `json:"description"`
-	UserID        string   `json:"user_id"`
 	Active        bool     `json:"active"`
 	Strategy      string   `json:"strategy" validate:"required"`
 	StartDateTime *string  `json:"start_date_time,omitempty" validate:"omitempty,datetime=2006-01-02T15:04"`
@@ -24,7 +23,6 @@ type CreateUpdateDto struct {
 type PartialUpdateDto struct {
 	Title         *string  `json:"title,omitempty"`
 	Description   *string  `json:"description,omitempty"`
-	UserID        *string  `json:"user_id,omitempty"`
 	Active        *bool    `json:"active,omitempty"`
 	Strategy      *string  `json:"strategy,omitempty"`
 	StartDateTime *string  `json:"start_date_time,omitempty" validate:"omitempty,datetime=2006-01-02T15:04"`
@@ -44,7 +42,6 @@ type MaintenanceResponseDto struct {
 	ID            string    `json:"id"`
 	Title         string    `json:"title"`
 	Description   string    `json:"description"`
-	UserID        string    `json:"user_id"`
 	Active        bool      `json:"active"`
 	Strategy      string    `json:"strategy"`
 	StartDateTime *string   `json:"start_date_time,omitempty" validate:"omitempty,datetime=2006-01-02T15:04"`

@@ -157,3 +157,36 @@ func (r *RepositoryImpl) DeleteByMaintenanceID(ctx context.Context, maintenanceI
 	_, err = r.collection.DeleteMany(ctx, filter)
 	return err
 }
+
+func (r *RepositoryImpl) FindByMaintenanceID(ctx context.Context, maintenanceID string) ([]*Model, error) {
+	maintenanceObjectID, err := primitive.ObjectIDFromHex(maintenanceID)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"maintenance_id": maintenanceObjectID}
+	cursor, err := r.collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []*mongoModel
+	for cursor.Next(ctx) {
+		var entity mongoModel
+		if err := cursor.Decode(&entity); err != nil {
+			return nil, err
+		}
+		results = append(results, &entity)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	domainEntities := make([]*Model, len(results))
+	for i, entity := range results {
+		domainEntities[i] = toDomainModel(entity)
+	}
+
+	return domainEntities, nil
+}

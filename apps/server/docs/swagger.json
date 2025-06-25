@@ -2886,9 +2886,6 @@
                 "title": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                },
                 "weekdays": {
                     "type": "array",
                     "items": {
@@ -2957,9 +2954,6 @@
                 "updated_at": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                },
                 "weekdays": {
                     "type": "array",
                     "items": {
@@ -3022,9 +3016,6 @@
                 "updated_at": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                },
                 "weekdays": {
                     "type": "array",
                     "items": {
@@ -3083,9 +3074,6 @@
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 },
                 "weekdays": {

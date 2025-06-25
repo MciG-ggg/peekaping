@@ -2895,9 +2895,6 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                },
                 "weekdays": {
                     "type": "array",
                     "items": {
@@ -2966,9 +2963,6 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                },
                 "weekdays": {
                     "type": "array",
                     "items": {
@@ -3031,9 +3025,6 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                },
                 "weekdays": {
                     "type": "array",
                     "items": {
@@ -3092,9 +3083,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 },
                 "weekdays": {

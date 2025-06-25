@@ -186,8 +186,6 @@ definitions:
         type: string
       title:
         type: string
-      user_id:
-        type: string
       weekdays:
         items:
           type: integer
@@ -236,8 +234,6 @@ definitions:
         type: string
       updated_at:
         type: string
-      user_id:
-        type: string
       weekdays:
         items:
           type: integer
@@ -279,8 +275,6 @@ definitions:
         type: string
       updated_at:
         type: string
-      user_id:
-        type: string
       weekdays:
         items:
           type: integer
@@ -320,8 +314,6 @@ definitions:
       timezone:
         type: string
       title:
-        type: string
-      user_id:
         type: string
       weekdays:
         items:

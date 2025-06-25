@@ -14,7 +14,6 @@ type sqlModel struct {
 	ID            string    `bun:"id,pk"`
 	Title         string    `bun:"title,notnull"`
 	Description   string    `bun:"description"`
-	UserID        string    `bun:"user_id,notnull"`
 	Active        bool      `bun:"active,notnull,default:true"`
 	Strategy      string    `bun:"strategy,notnull"`
 	StartDateTime *string   `bun:"start_date_time"`
@@ -40,7 +39,6 @@ func toDomainModelFromSQL(sm *sqlModel) *Model {
 		ID:            sm.ID,
 		Title:         sm.Title,
 		Description:   sm.Description,
-		UserID:        sm.UserID,
 		Active:        sm.Active,
 		Strategy:      sm.Strategy,
 		StartDateTime: sm.StartDateTime,
@@ -71,7 +69,6 @@ func (r *SQLRepositoryImpl) Create(ctx context.Context, entity *CreateUpdateDto)
 		ID:            uuid.New().String(),
 		Title:         entity.Title,
 		Description:   entity.Description,
-		UserID:        entity.UserID,
 		Active:        entity.Active,
 		Strategy:      entity.Strategy,
 		StartDateTime: entity.StartDateTime,
@@ -141,7 +138,6 @@ func (r *SQLRepositoryImpl) UpdateFull(ctx context.Context, id string, entity *C
 		ID:            id,
 		Title:         entity.Title,
 		Description:   entity.Description,
-		UserID:        entity.UserID,
 		Active:        entity.Active,
 		Strategy:      entity.Strategy,
 		StartDateTime: entity.StartDateTime,

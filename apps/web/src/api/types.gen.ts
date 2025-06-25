@@ -107,7 +107,6 @@ export type MaintenanceCreateUpdateDto = {
   strategy: string;
   timezone?: string;
   title: string;
-  user_id?: string;
   weekdays?: Array<number>;
 };
 
@@ -129,7 +128,6 @@ export type MaintenanceMaintenanceResponseDto = {
   timezone?: string;
   title?: string;
   updated_at?: string;
-  user_id?: string;
   weekdays?: Array<number>;
 };
 
@@ -150,7 +148,6 @@ export type MaintenanceModel = {
   timezone?: string;
   title?: string;
   updated_at?: string;
-  user_id?: string;
   weekdays?: Array<number>;
 };
 
@@ -169,7 +166,6 @@ export type MaintenancePartialUpdateDto = {
   strategy?: string;
   timezone?: string;
   title?: string;
-  user_id?: string;
   weekdays?: Array<number>;
 };
 

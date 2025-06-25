@@ -90,6 +90,24 @@ func (r *SQLRepositoryImpl) FindByMonitorID(ctx context.Context, monitorID strin
 	return models, nil
 }
 
+func (r *SQLRepositoryImpl) FindByMaintenanceID(ctx context.Context, maintenanceID string) ([]*Model, error) {
+	var sms []*sqlModel
+	err := r.db.NewSelect().
+		Model(&sms).
+		Where("maintenance_id = ?", maintenanceID).
+		Order("created_at DESC").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var models []*Model
+	for _, sm := range sms {
+		models = append(models, toDomainModelFromSQL(sm))
+	}
+	return models, nil
+}
+
 func (r *SQLRepositoryImpl) Delete(ctx context.Context, id string) error {
 	_, err := r.db.NewDelete().Model((*sqlModel)(nil)).Where("id = ?", id).Exec(ctx)
 	return err
