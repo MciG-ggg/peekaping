@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS maintenances (
     timezone VARCHAR(100),
     duration INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Settings table
@@ -180,7 +180,6 @@ CREATE TABLE IF NOT EXISTS monitor_status_pages (
 -- Create indexes for better performance
 -- Core foreign key and unique indexes
 CREATE INDEX IF NOT EXISTS idx_monitors_proxy_id ON monitors(proxy_id);
-CREATE INDEX IF NOT EXISTS idx_maintenances_user_id ON maintenances(user_id);
 CREATE INDEX IF NOT EXISTS idx_status_pages_slug ON status_pages(slug);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
