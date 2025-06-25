@@ -1,0 +1,8 @@
+{
+  "label": "Self Hosting",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "How to self host Peekaping"
+  }
+}
