@@ -2,6 +2,7 @@ package maintenance
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,9 +32,16 @@ type sqlModel struct {
 }
 
 func toDomainModelFromSQL(sm *sqlModel) *Model {
-	// Parse JSON strings back to arrays (simplified - in production use proper JSON unmarshaling)
+	// Parse JSON strings back to arrays
 	var weekdays []int
 	var daysOfMonth []int
+
+	if sm.Weekdays != "" {
+		json.Unmarshal([]byte(sm.Weekdays), &weekdays)
+	}
+	if sm.DaysOfMonth != "" {
+		json.Unmarshal([]byte(sm.DaysOfMonth), &daysOfMonth)
+	}
 
 	return &Model{
 		ID:            sm.ID,
@@ -65,6 +73,10 @@ func NewSQLRepository(db *bun.DB) Repository {
 }
 
 func (r *SQLRepositoryImpl) Create(ctx context.Context, entity *CreateUpdateDto) (*Model, error) {
+	// Marshal arrays to JSON strings
+	weekdaysJSON, _ := json.Marshal(entity.Weekdays)
+	daysOfMonthJSON, _ := json.Marshal(entity.DaysOfMonth)
+
 	sm := &sqlModel{
 		ID:            uuid.New().String(),
 		Title:         entity.Title,
@@ -75,8 +87,8 @@ func (r *SQLRepositoryImpl) Create(ctx context.Context, entity *CreateUpdateDto)
 		EndDateTime:   entity.EndDateTime,
 		StartTime:     entity.StartTime,
 		EndTime:       entity.EndTime,
-		Weekdays:      "[]", // Convert to JSON string
-		DaysOfMonth:   "[]", // Convert to JSON string
+		Weekdays:      string(weekdaysJSON),
+		DaysOfMonth:   string(daysOfMonthJSON),
 		IntervalDay:   entity.IntervalDay,
 		Cron:          entity.Cron,
 		Timezone:      entity.Timezone,
@@ -134,6 +146,10 @@ func (r *SQLRepositoryImpl) FindAll(ctx context.Context, page int, limit int, q 
 }
 
 func (r *SQLRepositoryImpl) UpdateFull(ctx context.Context, id string, entity *CreateUpdateDto) (*Model, error) {
+	// Marshal arrays to JSON strings
+	weekdaysJSON, _ := json.Marshal(entity.Weekdays)
+	daysOfMonthJSON, _ := json.Marshal(entity.DaysOfMonth)
+
 	sm := &sqlModel{
 		ID:            id,
 		Title:         entity.Title,
@@ -144,8 +160,8 @@ func (r *SQLRepositoryImpl) UpdateFull(ctx context.Context, id string, entity *C
 		EndDateTime:   entity.EndDateTime,
 		StartTime:     entity.StartTime,
 		EndTime:       entity.EndTime,
-		Weekdays:      "[]",
-		DaysOfMonth:   "[]",
+		Weekdays:      string(weekdaysJSON),
+		DaysOfMonth:   string(daysOfMonthJSON),
 		IntervalDay:   entity.IntervalDay,
 		Cron:          entity.Cron,
 		Timezone:      entity.Timezone,
@@ -203,11 +219,13 @@ func (r *SQLRepositoryImpl) UpdatePartial(ctx context.Context, id string, entity
 		hasUpdates = true
 	}
 	if entity.Weekdays != nil {
-		query = query.Set("weekdays = ?", "[]") // Convert to JSON
+		weekdaysJSON, _ := json.Marshal(entity.Weekdays)
+		query = query.Set("weekdays = ?", string(weekdaysJSON))
 		hasUpdates = true
 	}
 	if entity.DaysOfMonth != nil {
-		query = query.Set("days_of_month = ?", "[]") // Convert to JSON
+		daysOfMonthJSON, _ := json.Marshal(entity.DaysOfMonth)
+		query = query.Set("days_of_month = ?", string(daysOfMonthJSON))
 		hasUpdates = true
 	}
 	if entity.IntervalDay != nil {
