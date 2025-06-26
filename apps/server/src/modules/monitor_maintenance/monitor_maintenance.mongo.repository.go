@@ -71,6 +71,8 @@ func (r *RepositoryImpl) Create(ctx context.Context, model *Model) (*Model, erro
 		ID:            primitive.NewObjectID(),
 		MonitorID:     monitorObjectID,
 		MaintenanceID: maintenanceObjectID,
+		CreatedAt:     time.Now().UTC(),
+		UpdatedAt:     time.Now().UTC(),
 	}
 
 	_, err = r.collection.InsertOne(ctx, mm)
