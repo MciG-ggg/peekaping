@@ -43,7 +43,7 @@ jobs:
           fi
 
   build-and-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs: validate-version
     if: needs.validate-version.outputs.is_valid_rc == 'true'
     steps:
