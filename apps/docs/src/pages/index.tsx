@@ -11,7 +11,7 @@ import styles from "./index.module.css";
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
-    <header className={clsx("hero hero--primary", styles.heroBanner)}>
+    <header className={clsx("hero ", styles.heroBanner)}>
       <div className="container">
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
@@ -30,7 +30,7 @@ function HomepageHeader() {
           </Link>
           <Link
             className="button button--secondary button--lg"
-            to="/tutorial-basics/create-a-document"
+                          to="/tutorial-basics/create-monitor"
             style={{ marginLeft: "1rem" }}
           >
             Quick Setup
@@ -39,7 +39,7 @@ function HomepageHeader() {
         <div className={styles.betaNotice}>
           <p>
             ⚠️ <strong>Beta Status:</strong> Peekaping is currently in beta.
-            <Link to="/intro#beta-status"> Learn more</Link>
+            <Link to="/intro#️-beta-status"> Learn more</Link>
           </p>
         </div>
       </div>

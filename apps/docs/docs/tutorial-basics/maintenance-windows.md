@@ -396,9 +396,9 @@ Examples:
 
 With advanced features configured:
 
-1. [Review troubleshooting guide](/tutorial-basics/congratulations) for common issues
+1. [Review troubleshooting guide](/tutorial-basics/troubleshooting-guide) for common issues
 2. [Explore configuration options](/tutorial-extras/manage-docs-versions) for fine-tuning
-3. [Check API documentation](/tutorial-extras/translate-your-site) for integration possibilities
+3. [Check API documentation](/tutorial-extras/api-reference) for integration possibilities
 4. [Set up monitoring for Peekaping itself](/tutorial-extras/manage-docs-versions) (meta-monitoring)
 
 ## Getting Help

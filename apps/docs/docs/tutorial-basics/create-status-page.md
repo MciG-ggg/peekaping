@@ -376,10 +376,10 @@ curl -X POST https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK \
 
 Now that you have a status page set up:
 
-1. [Configure maintenance windows](/tutorial-basics/deploy-your-site) for planned downtime
+1. [Configure maintenance windows](/tutorial-basics/maintenance-windows) for planned downtime
 2. [Set up advanced monitoring](/tutorial-extras/manage-docs-versions) features
-3. [Review security settings](/tutorial-basics/congratulations) for your setup
-4. [Explore API integrations](/tutorial-extras/translate-your-site) for custom workflows
+3. [Review security settings](/tutorial-basics/troubleshooting-guide) for your setup
+4. [Explore API integrations](/tutorial-extras/api-reference) for custom workflows
 
 ## Examples and Inspiration
 

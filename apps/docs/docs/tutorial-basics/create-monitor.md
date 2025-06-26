@@ -9,7 +9,7 @@ This guide will walk you through setting up your first monitor in Peekaping. You
 ## Prerequisites
 
 Before starting, ensure you have:
-- Peekaping running (see [Docker Installation](/self-hosting/docker))
+- Peekaping running (see [Docker Installation](/self-hosting/docker-installation))
 - Access to the web interface
 - Admin account created during initial setup
 
@@ -86,7 +86,7 @@ In the **Notifications** tab:
 5. **Resend Interval**: How often to resend notifications while down
 
 :::warning Important
-You need to configure notification channels before you can receive alerts. See [Setting Up Notifications](/tutorial-basics/create-a-page) for details.
+You need to configure notification channels before you can receive alerts. See [Setting Up Notifications](/tutorial-basics/create-notification-channel) for details.
 :::
 
 ### 6. Advanced Settings (Optional)
@@ -250,15 +250,15 @@ curl -X POST https://your-peekaping-instance.com/api/push/your-unique-id \
 
 Now that you have your first monitor set up:
 
-1. [Configure notification channels](/tutorial-basics/create-a-page) to receive alerts
-2. [Create a status page](/tutorial-basics/create-a-blog-post) to share status with users
-3. [Set up maintenance windows](/tutorial-basics/deploy-your-site) for planned downtime
+1. [Configure notification channels](/tutorial-basics/create-notification-channel) to receive alerts
+2. [Create a status page](/tutorial-basics/create-status-page) to share status with users
+3. [Set up maintenance windows](/tutorial-basics/maintenance-windows) for planned downtime
 4. [Explore advanced monitoring features](/tutorial-extras/manage-docs-versions)
 
 ## Getting Help
 
 If you encounter issues:
-- Check the [Troubleshooting Guide](/tutorial-basics/congratulations)
+- Check the [Troubleshooting Guide](/tutorial-basics/troubleshooting-guide)
 - Review monitor logs in the dashboard
 - Join the community discussions
 - Report bugs on [GitHub](https://github.com/0xfurai/peekaping/issues)

@@ -315,7 +315,7 @@ docker image prune
 
 ## Next Steps
 
-- [Configure your first monitor](/tutorial-basics/create-a-document)
-- [Set up notification channels](/tutorial-basics/create-a-page)
-- [Create status pages](/tutorial-basics/create-a-blog-post)
-- [Enable security features](/tutorial-basics/deploy-your-site)
+- [Configure your first monitor](/tutorial-basics/create-monitor)
+- [Set up notification channels](/tutorial-basics/create-notification-channel)
+- [Create status pages](/tutorial-basics/create-status-page)
+- [Enable security features](/tutorial-basics/maintenance-windows)

@@ -627,4 +627,4 @@ sudo -u peekaping /opt/peekaping/server/peekaping-server --migrate
 curl http://localhost:8034/health
 ```
 
-This manual installation method provides full control over your Peekaping deployment while requiring more hands-on management. For easier maintenance, consider using the [Docker installation](/self-hosting/docker) method instead.
+This manual installation method provides full control over your Peekaping deployment while requiring more hands-on management. For easier maintenance, consider using the [Docker installation](/self-hosting/docker-installation) method instead.

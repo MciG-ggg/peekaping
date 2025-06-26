@@ -354,9 +354,9 @@ openssl s_client -connect smtp.gmail.com:587 -starttls smtp
 
 With notification channels configured:
 
-1. [Create status pages](/tutorial-basics/create-a-blog-post) for public communication
-2. [Set up maintenance windows](/tutorial-basics/deploy-your-site) for planned downtime
+1. [Create status pages](/tutorial-basics/create-status-page) for public communication
+2. [Set up maintenance windows](/tutorial-basics/maintenance-windows) for planned downtime
 3. [Configure advanced monitoring](/tutorial-extras/manage-docs-versions) features
-4. [Review security settings](/tutorial-basics/congratulations) for your setup
+4. [Review security settings](/tutorial-basics/troubleshooting-guide) for your setup
 
-Need help? Check the [troubleshooting guide](/tutorial-basics/congratulations) or join our community discussions!
+Need help? Check the [troubleshooting guide](/tutorial-basics/troubleshooting-guide) or join our community discussions!
