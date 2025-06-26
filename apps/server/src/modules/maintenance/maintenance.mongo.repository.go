@@ -285,9 +285,13 @@ func (r *MongoRepositoryImpl) SetActive(ctx context.Context, id string, active b
 
 // GetMaintenancesByMonitorID returns all active maintenances for a given monitor_id
 func (r *MongoRepositoryImpl) GetMaintenancesByMonitorID(ctx context.Context, monitorID string) ([]*Model, error) {
+	objectID, err := primitive.ObjectIDFromHex(monitorID)
+	if err != nil {
+		return nil, err
+	}
 	coll := r.db.Collection("monitor_maintenance")
 	// Find all maintenance_ids for this monitor
-	cursor, err := coll.Find(ctx, bson.M{"monitor_id": monitorID})
+	cursor, err := coll.Find(ctx, bson.M{"monitor_id": objectID})
 	if err != nil {
 		return nil, err
 	}
