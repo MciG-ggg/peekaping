@@ -96,7 +96,7 @@ func (mr *ServiceImpl) Create(ctx context.Context, entity *CreateUpdateDto) (*Mo
 	}
 
 	// Handle monitor IDs if provided
-	if len(entity.MonitorIds) > 0 {
+	if entity.MonitorIds != nil {
 		err = mr.monitorMaintenanceService.SetMonitors(ctx, created.ID, entity.MonitorIds)
 		if err != nil {
 			return nil, err
@@ -164,7 +164,7 @@ func (mr *ServiceImpl) UpdateFull(ctx context.Context, id string, entity *Create
 	}
 
 	// Handle monitor IDs if provided
-	if len(entity.MonitorIds) > 0 {
+	if entity.MonitorIds != nil {
 		err = mr.monitorMaintenanceService.SetMonitors(ctx, id, entity.MonitorIds)
 		if err != nil {
 			return nil, err
@@ -267,7 +267,7 @@ func (mr *ServiceImpl) UpdatePartial(ctx context.Context, id string, entity *Par
 	}
 
 	// Handle monitor IDs if provided
-	if len(entity.MonitorIds) > 0 {
+	if entity.MonitorIds != nil {
 		err = mr.monitorMaintenanceService.SetMonitors(ctx, id, entity.MonitorIds)
 		if err != nil {
 			return nil, err
