@@ -141,6 +141,7 @@ func (r *SQLRepositoryImpl) Delete(ctx context.Context, id string) error {
 
 func (r *SQLRepositoryImpl) AddMonitorToStatusPage(ctx context.Context, statusPageID, monitorID string, order int, active bool) (*Model, error) {
 	sm := &sqlModel{
+		ID:           uuid.New().String(),
 		MonitorID:    monitorID,
 		StatusPageID: statusPageID,
 		CreatedAt:    time.Now(),
