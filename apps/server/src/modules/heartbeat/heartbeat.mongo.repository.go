@@ -149,8 +149,13 @@ func (r *RepositoryImpl) FindAll(ctx context.Context, page int, limit int) ([]*M
 }
 
 func (r *RepositoryImpl) Delete(ctx context.Context, id string) error {
-	filter := bson.M{"_id": id}
-	_, err := r.collection.DeleteOne(ctx, filter)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": objectID}
+	_, err = r.collection.DeleteOne(ctx, filter)
 	return err
 }
 

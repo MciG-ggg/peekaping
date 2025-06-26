@@ -83,8 +83,13 @@ func (r *RepositoryImpl) Create(ctx context.Context, model *Model) (*Model, erro
 
 func (r *RepositoryImpl) FindByID(ctx context.Context, id string) (*Model, error) {
 	var entity mongoModel
-	filter := bson.M{"_id": id}
-	err := r.collection.FindOne(ctx, filter).Decode(&entity)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"_id": objectID}
+	err = r.collection.FindOne(ctx, filter).Decode(&entity)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, nil

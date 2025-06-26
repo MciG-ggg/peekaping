@@ -424,9 +424,14 @@ func (r *MonitorRepositoryImpl) FindActive(ctx context.Context) ([]*Model, error
 
 // RemoveProxyReference sets proxy_id to an empty string for all monitors with the given proxyId.
 func (r *MonitorRepositoryImpl) RemoveProxyReference(ctx context.Context, proxyId string) error {
-	filter := bson.M{"proxy_id": proxyId}
+	objectID, err := primitive.ObjectIDFromHex(proxyId)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"proxy_id": objectID}
 	update := bson.M{"$set": bson.M{"proxy_id": ""}}
-	_, err := r.collection.UpdateMany(ctx, filter, update)
+	_, err = r.collection.UpdateMany(ctx, filter, update)
 	return err
 }
 
