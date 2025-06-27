@@ -177,7 +177,7 @@ const Http = () => {
         notification_ids: monitor.data.notification_ids,
         proxy_id: monitor.data.proxy_id,
         accepted_statuscodes: parsedConfig.accepted_statuscodes,
-        max_redirects: parsedConfig.max_redirects || 10,
+        max_redirects: parsedConfig.max_redirects,
         httpOptions,
         authentication,
       });
