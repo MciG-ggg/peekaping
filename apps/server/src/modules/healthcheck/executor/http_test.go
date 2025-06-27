@@ -977,6 +977,41 @@ func TestHTTPExecutor_Execute_MaxRedirects(t *testing.T) {
 	result := executor.Execute(context.Background(), monitor, nil)
 	// Should fail because we exceed max redirects (2) but need 3 redirects to reach final page
 	assert.Equal(t, shared.MonitorStatusDown, result.Status)
+	assert.Contains(t, result.Message, "too many redirects")
+	assert.Contains(t, result.Message, "maximum allowed is 2")
+}
+
+func TestHTTPExecutor_Execute_DisabledRedirects(t *testing.T) {
+	// Setup
+	logger := zap.NewNop().Sugar()
+	executor := NewHTTPExecutor(logger)
+
+	// Create test server that redirects
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, r.URL.String()+"?redirected", http.StatusFound)
+	}))
+	defer server.Close()
+
+	monitor := &Monitor{
+		ID:       "monitor1",
+		Type:     "http",
+		Name:     "Test Monitor",
+		Interval: 30,
+		Timeout:  5,
+		Config: `{
+			"url": "` + server.URL + `",
+			"method": "GET",
+			"encoding": "json",
+			"accepted_statuscodes": ["2XX"],
+			"authMethod": "none",
+			"max_redirects": 0
+		}`,
+	}
+
+	result := executor.Execute(context.Background(), monitor, nil)
+	// Should fail because redirects are disabled
+	assert.Equal(t, shared.MonitorStatusDown, result.Status)
+	assert.Contains(t, result.Message, "redirects disabled")
 }
 
 func TestIsStatusAccepted(t *testing.T) {
