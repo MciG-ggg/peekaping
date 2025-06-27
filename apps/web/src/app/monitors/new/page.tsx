@@ -7,6 +7,9 @@ import {
 import CreateEditForm from "../components/create-edit-form";
 import CreateNotificationChannel from "@/app/notification-channels/components/create-notification-channel";
 import CreateProxy from "@/app/proxies/components/create-proxy";
+import { useLocation } from "react-router-dom";
+import type { MonitorMonitorResponseDto } from "@/api";
+import { cloneMonitor } from "../components/monitor-registry";
 
 const NewMonitorContent = () => {
   const {
@@ -60,10 +63,17 @@ const NewMonitorContent = () => {
   );
 };
 
-const NewMonitor = () => (
-  <MonitorFormProvider mode="create">
-    <NewMonitorContent />
-  </MonitorFormProvider>
-);
+const NewMonitor = () => {
+  const location = useLocation();
+  const cloneData = location.state?.cloneData as
+    | MonitorMonitorResponseDto
+    | undefined;
+
+  return (
+    <MonitorFormProvider mode="create" initialValues={cloneMonitor(cloneData)}>
+      <NewMonitorContent />
+    </MonitorFormProvider>
+  );
+};
 
 export default NewMonitor;

@@ -26,7 +26,7 @@ import Proxies, {
 import { useMonitorFormContext } from "../../context/monitor-form-context";
 import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import type { MonitorCreateUpdateDto } from "@/api";
+import type { MonitorCreateUpdateDto, MonitorMonitorResponseDto } from "@/api";
 
 export const pushSchema = z
   .object({
@@ -51,6 +51,41 @@ export const pushDefaultValues: PushForm = {
 export interface PushConfig {
   pushToken: string;
 }
+
+export const deserialize = (data: MonitorMonitorResponseDto): PushForm => {
+  return {
+    type: "push",
+    name: data.name || "Monitor Copy",
+    interval: data.interval || 60,
+    timeout: data.timeout || 16,
+    max_retries: data.max_retries || 3,
+    retry_interval: data.retry_interval || 60,
+    resend_interval: data.resend_interval || 10,
+    notification_ids: data.notification_ids || [],
+    proxy_id: data.proxy_id || "",
+    pushToken: "", // Generate new push token
+  };
+};
+
+export const serialize = (formData: PushForm): MonitorCreateUpdateDto => {
+  const config: PushConfig = {
+    pushToken: formData.pushToken,
+  };
+
+  return {
+    type: "push",
+    name: formData.name,
+    interval: formData.interval,
+    max_retries: formData.max_retries,
+    retry_interval: formData.retry_interval,
+    notification_ids: formData.notification_ids,
+    proxy_id: formData.proxy_id,
+    resend_interval: formData.resend_interval,
+    timeout: formData.timeout,
+    config: JSON.stringify(config),
+    push_token: formData.pushToken,
+  };
+};
 
 // Generate a random 24-character alphanumeric token
 const generateToken = () =>
@@ -128,23 +163,7 @@ const PushForm = ({
   };
 
   const onSubmit = (data: PushForm) => {
-    const config: PushConfig = {
-      pushToken: data.pushToken,
-    };
-
-    const payload: MonitorCreateUpdateDto = {
-      type: "push",
-      name: data.name,
-      interval: data.interval,
-      max_retries: data.max_retries,
-      retry_interval: data.retry_interval,
-      notification_ids: data.notification_ids,
-      proxy_id: data.proxy_id,
-      resend_interval: data.resend_interval,
-      timeout: data.timeout,
-      config: JSON.stringify(config),
-      push_token: data.pushToken,
-    };
+    const payload = serialize(data);
 
     if (mode === "create") {
       createMonitorMutation.mutate({

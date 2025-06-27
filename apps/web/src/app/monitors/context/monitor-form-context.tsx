@@ -27,7 +27,9 @@ import type {
   PutMonitorsByIdError,
   PutMonitorsByIdData,
 } from "@/api";
-import type { UtilsApiResponseMonitorMonitorResponseDto } from "@/api/types.gen";
+import type {
+  UtilsApiResponseMonitorMonitorResponseDto,
+} from "@/api/types.gen";
 import {
   httpDefaultValues,
   httpSchema,
@@ -89,12 +91,14 @@ interface MonitorFormProviderProps {
   children: React.ReactNode;
   mode: Mode;
   monitorId?: string;
+  initialValues?: MonitorForm;
 }
 
 export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
   children,
   mode,
   monitorId,
+  initialValues = formDefaultValues,
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -108,7 +112,7 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
   });
 
   const form = useForm<MonitorForm>({
-    defaultValues: formDefaultValues,
+    defaultValues: initialValues,
     resolver: zodResolver(formSchema),
   });
 
@@ -154,7 +158,6 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
       proxySheetOpen,
       setProxySheetOpen,
       monitor,
-      // onSubmit,
       mode,
       isPending:
         mode === "create"
@@ -171,7 +174,6 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
       notifierSheetOpen,
       proxySheetOpen,
       monitor,
-      // onSubmit,
       mode,
       monitorId,
     ]

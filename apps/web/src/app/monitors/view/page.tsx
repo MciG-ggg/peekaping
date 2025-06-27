@@ -30,6 +30,7 @@ import Layout from "@/layout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  Copy,
   Edit,
   Loader2,
   Pause,
@@ -362,6 +363,20 @@ const MonitorPage = () => {
             >
               <Edit />
               Edit
+            </Button>
+            <Button
+              variant="ghost"
+              className="rounded-none border-r"
+              onClick={() => {
+                navigate("/monitors/new", {
+                  state: {
+                    cloneData: monitor,
+                  },
+                });
+              }}
+            >
+              <Copy />
+              Clone
             </Button>
             <Button
               variant="destructive"
