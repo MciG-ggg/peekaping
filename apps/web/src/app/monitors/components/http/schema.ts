@@ -46,7 +46,60 @@ export const httpDefaultValues: HttpForm = {
 };
 
 export const deserialize = (data: MonitorMonitorResponseDto): HttpForm => {
-  const config = data.config ? JSON.parse(data.config) : {};
+  let config: Partial<HttpExecutorConfig> = {};
+  try {
+    config = data.config ? JSON.parse(data.config) : {};
+  } catch (error) {
+    console.error("Failed to parse HTTP monitor config:", error);
+    config = {};
+  }
+
+  // Build authentication object based on authMethod
+  const authMethod = config.authMethod || "none";
+  let authentication: HttpForm["authentication"];
+
+  switch (authMethod) {
+    case "basic":
+      authentication = {
+        authMethod: "basic",
+        basic_auth_user: config.basic_auth_user || "",
+        basic_auth_pass: config.basic_auth_pass || "",
+      };
+      break;
+    case "oauth2-cc":
+      authentication = {
+        authMethod: "oauth2-cc",
+        oauth_auth_method: (config.oauth_auth_method === "client_secret_post"
+          ? "client_secret_post"
+          : "client_secret_basic") as "client_secret_basic" | "client_secret_post",
+        oauth_token_url: config.oauth_token_url || "",
+        oauth_client_id: config.oauth_client_id || "",
+        oauth_client_secret: config.oauth_client_secret || "",
+        oauth_scopes: config.oauth_scopes || "",
+      };
+      break;
+    case "ntlm":
+      authentication = {
+        authMethod: "ntlm",
+        basic_auth_user: config.basic_auth_user || "",
+        basic_auth_pass: config.basic_auth_pass || "",
+        authDomain: config.authDomain || "",
+        authWorkstation: config.authWorkstation || "",
+      };
+      break;
+    case "mtls":
+      authentication = {
+        authMethod: "mtls",
+        tlsCert: config.tlsCert || "",
+        tlsKey: config.tlsKey || "",
+        tlsCa: config.tlsCa || "",
+      };
+      break;
+    default:
+      authentication = {
+        authMethod: "none",
+      };
+  }
 
   return {
     type: "http",
@@ -67,31 +120,7 @@ export const deserialize = (data: MonitorMonitorResponseDto): HttpForm => {
       headers: config.headers || '{ "Content-Type": "application/json" }',
       body: config.body || "",
     },
-    authentication: {
-      authMethod: config.authMethod || "none",
-      ...(config.authMethod === "basic" && {
-        basic_auth_user: config.basic_auth_user || "",
-        basic_auth_pass: config.basic_auth_pass || "",
-      }),
-      ...(config.authMethod === "oauth2-cc" && {
-        oauth_auth_method: config.oauth_auth_method || "client_secret_basic",
-        oauth_token_url: config.oauth_token_url || "",
-        oauth_client_id: config.oauth_client_id || "",
-        oauth_client_secret: config.oauth_client_secret || "",
-        oauth_scopes: config.oauth_scopes || "",
-      }),
-      ...(config.authMethod === "ntlm" && {
-        basic_auth_user: config.basic_auth_user || "",
-        basic_auth_pass: config.basic_auth_pass || "",
-        authDomain: config.authDomain || "",
-        authWorkstation: config.authWorkstation || "",
-      }),
-      ...(config.authMethod === "mtls" && {
-        tlsCert: config.tlsCert || "",
-        tlsKey: config.tlsKey || "",
-        tlsCa: config.tlsCa || "",
-      }),
-    },
+    authentication,
   };
 };
 

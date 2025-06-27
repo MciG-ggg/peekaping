@@ -66,7 +66,16 @@ const MonitorPage = () => {
   });
 
   const monitor = data?.data;
-  const config = JSON.parse(monitor?.config ?? "{}");
+
+  // Safe JSON parsing with error handling
+  const config = useMemo(() => {
+    try {
+      return JSON.parse(monitor?.config ?? "{}");
+    } catch (error) {
+      console.error("Failed to parse monitor config:", error);
+      return {};
+    }
+  }, [monitor?.config]);
 
   const deleteMutation = useMutation({
     ...deleteMonitorsByIdMutation({

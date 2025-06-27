@@ -53,6 +53,14 @@ export interface PushConfig {
 }
 
 export const deserialize = (data: MonitorMonitorResponseDto): PushForm => {
+  let config: Partial<PushConfig> = {};
+  try {
+    config = data.config ? JSON.parse(data.config) : {};
+  } catch (error) {
+    console.error("Failed to parse push monitor config:", error);
+    config = {};
+  }
+
   return {
     type: "push",
     name: data.name || "Monitor Copy",
@@ -63,7 +71,7 @@ export const deserialize = (data: MonitorMonitorResponseDto): PushForm => {
     resend_interval: data.resend_interval || 10,
     notification_ids: data.notification_ids || [],
     proxy_id: data.proxy_id || "",
-    pushToken: "", // Generate new push token
+    pushToken: data.push_token || config.pushToken || "", // Get from API or config
   };
 };
 
@@ -119,33 +127,6 @@ const PushForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset form with monitor data in edit mode (like HTTP)
-  useEffect(() => {
-    if (
-      mode === "edit" &&
-      monitorId &&
-      form &&
-      typeof form.reset === "function"
-    ) {
-      if (monitor?.data && monitor.data.type === "push") {
-        const { config, push_token } = monitor.data;
-        const parsedConfig: PushConfig = config ? JSON.parse(config) : {};
-
-        form.reset({
-          type: "push",
-          name: monitor.data.name,
-          interval: monitor.data.interval,
-          max_retries: monitor.data.max_retries,
-          retry_interval: monitor.data.retry_interval,
-          timeout: monitor.data.timeout,
-          resend_interval: monitor.data.resend_interval,
-          notification_ids: monitor.data.notification_ids || [],
-          proxy_id: monitor.data.proxy_id,
-          pushToken: push_token || parsedConfig.pushToken || "",
-        });
-      }
-    }
-  }, [mode, monitorId, form, monitor]);
 
   const [copied, setCopied] = useState(false);
   const pushUrl = `${baseUrl}/api/v1/push/${pushToken}?status=up&msg=OK&ping=`;
