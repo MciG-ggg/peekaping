@@ -154,14 +154,6 @@ const PingForm = () => {
     }
   };
 
-  // Reset form with monitor data in edit mode
-  useEffect(() => {
-    if (mode === "edit" && monitor?.data) {
-      const deserializedData = deserialize(monitor.data);
-      form.reset(deserializedData);
-    }
-  }, [form, monitor, mode]);
-
   return (
     <Form {...form}>
       <form
