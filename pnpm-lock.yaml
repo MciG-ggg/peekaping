@@ -4,10 +4,21 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@tanstack/query-devtools':
+    hash: flbxs7qkkjsuzt2gg42rcl6slu
+    path: patches/@tanstack__query-devtools.patch
+
 importers:
 
   .:
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.53.1
+        version: 1.53.1
+      '@types/node':
+        specifier: 22.15.17
+        version: 22.15.17
       turbo:
         specifier: ^2.5.4
         version: 2.5.4
