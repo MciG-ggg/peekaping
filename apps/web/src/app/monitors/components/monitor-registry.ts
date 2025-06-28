@@ -4,9 +4,9 @@ import { deserialize as httpDeserialize } from "./http/schema";
 import { deserialize as tcpDeserialize } from "./tcp";
 import { deserialize as pingDeserialize } from "./ping";
 import { deserialize as pushDeserialize } from "./push";
-import HttpForm from "./http";
 import TCPForm from "./tcp";
 import PingForm from "./ping";
+import HttpForm from "./http";
 import PushForm from "./push";
 import type { ComponentType } from "react";
 
