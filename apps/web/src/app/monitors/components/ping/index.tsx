@@ -70,7 +70,7 @@ export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
       const parsedConfig = JSON.parse(data.config);
       config = {
         host: parsedConfig.host || "example.com",
-        packet_size: parsedConfig.packet_size || 32,
+        packet_size: parsedConfig.packet_size ?? 32,
       };
     } catch (error) {
       console.error("Failed to parse ping monitor config:", error);
@@ -84,9 +84,9 @@ export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
     packet_size: config.packet_size,
     interval: data.interval || 60,
     timeout: data.timeout || 16,
-    max_retries: data.max_retries || 3,
+    max_retries: data.max_retries ?? 3,
     retry_interval: data.retry_interval || 60,
-    resend_interval: data.resend_interval || 10,
+    resend_interval: data.resend_interval ?? 10,
     notification_ids: data.notification_ids || [],
     proxy_id: data.proxy_id || "",
   };
@@ -95,7 +95,7 @@ export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
 export const serialize = (formData: PingForm): MonitorCreateUpdateDto => {
   const config: PingConfig = {
     host: formData.host,
-    packet_size: formData.packet_size || 32,
+    packet_size: formData.packet_size ?? 32,
   };
 
   return {
@@ -188,7 +188,7 @@ const PingForm = () => {
                       min="0"
                       max="65507"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 32)}
+                      onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
                     />
                   </FormControl>
                   <FormMessage />

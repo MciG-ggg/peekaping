@@ -70,7 +70,7 @@ export const deserialize = (data: MonitorMonitorResponseDto): TCPForm => {
       const parsedConfig = JSON.parse(data.config);
       config = {
         host: parsedConfig.host || "example.com",
-        port: parsedConfig.port || 80,
+        port: parsedConfig.port ?? 80,
       };
     } catch (error) {
       console.error("Failed to parse TCP monitor config:", error);
@@ -84,9 +84,9 @@ export const deserialize = (data: MonitorMonitorResponseDto): TCPForm => {
     port: config.port,
     interval: data.interval || 60,
     timeout: data.timeout || 16,
-    max_retries: data.max_retries || 3,
+    max_retries: data.max_retries ?? 3,
     retry_interval: data.retry_interval || 60,
-    resend_interval: data.resend_interval || 10,
+    resend_interval: data.resend_interval ?? 10,
     notification_ids: data.notification_ids || [],
     proxy_id: data.proxy_id || "",
   };
