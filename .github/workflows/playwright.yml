@@ -26,11 +26,18 @@ jobs:
     - name: Start services
       run: docker compose -f docker-compose.prod.postgres.yml up -d
 
+    - name: Show container logs
+      run: |
+        echo "=== Container Status ==="
+        docker compose -f docker-compose.prod.postgres.yml ps
+        echo "=== Container Logs ==="
+        docker compose -f docker-compose.prod.postgres.yml logs
+
     - name: Wait for services to be ready
       run: |
         echo "Waiting for services to be healthy..."
-        timeout 300 bash -c 'until curl -f http://localhost:8383/api/v1/health 2>/dev/null; do sleep 5; done' || true
-        sleep 10
+        timeout 60 bash -c 'until curl -f http://localhost:8383/api/v1/health 2>/dev/null; do sleep 1; done' || true
+        sleep 5
 
     - name: Run Playwright tests
       run: pnpm exec playwright test
