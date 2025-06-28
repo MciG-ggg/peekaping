@@ -8,7 +8,7 @@ type Monitor struct {
 	ID string `json:"id"`
 
 	// connection type: http, tcp, ping, etc
-	Type string `json:"type" example:"http"`
+	Type string `json:"type" validate:"required" example:"http"`
 
 	// monitor name
 	Name string `json:"name" example:"Monitor"`

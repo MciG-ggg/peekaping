@@ -428,6 +428,8 @@ definitions:
         type: string
       updated_at:
         type: string
+    required:
+    - type
     type: object
   monitor.MonitorResponseDto:
     properties:
@@ -838,6 +840,8 @@ definitions:
         type: string
       uptime_24h:
         type: number
+    required:
+    - type
     type: object
   status_page.StatusPageWithMonitorsResponseDTO:
     properties:

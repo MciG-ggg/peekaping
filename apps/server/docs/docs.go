@@ -3230,6 +3230,9 @@ const docTemplate = `{
         },
         "monitor.Model": {
             "type": "object",
+            "required": [
+                "type"
+            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3811,6 +3814,9 @@ const docTemplate = `{
         },
         "status_page.MonitorWithHeartbeatsAndUptimeDTO": {
             "type": "object",
+            "required": [
+                "type"
+            ],
             "properties": {
                 "active": {
                     "type": "boolean"

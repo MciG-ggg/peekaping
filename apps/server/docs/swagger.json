@@ -3221,6 +3221,9 @@
         },
         "monitor.Model": {
             "type": "object",
+            "required": [
+                "type"
+            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3802,6 +3805,9 @@
         },
         "status_page.MonitorWithHeartbeatsAndUptimeDTO": {
             "type": "object",
+            "required": [
+                "type"
+            ],
             "properties": {
                 "active": {
                     "type": "boolean"

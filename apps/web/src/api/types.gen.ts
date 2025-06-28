@@ -226,7 +226,7 @@ export type MonitorModel = {
   /**
    * connection type: http, tcp, ping, etc
    */
-  type?: string;
+  type: string;
   updated_at?: string;
 };
 
@@ -428,7 +428,7 @@ export type StatusPageMonitorWithHeartbeatsAndUptimeDto = {
   /**
    * connection type: http, tcp, ping, etc
    */
-  type?: string;
+  type: string;
   updated_at?: string;
   uptime_24h?: number;
 };
