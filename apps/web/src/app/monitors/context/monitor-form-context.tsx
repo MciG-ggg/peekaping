@@ -15,7 +15,7 @@ import {
   getMonitorsByIdQueryKey,
 } from "@/api/@tanstack/react-query.gen";
 import { toast } from "sonner";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { pushSchema, type PushForm } from "../components/push";
 import type {
