@@ -8,6 +8,11 @@ on:
         required: false
         type: number
         default: 300
+      container-tag:
+        description: 'Container tag to test (e.g., latest, 1.2.3-rc.1)'
+        required: false
+        type: string
+        default: 'latest'
 
 jobs:
   playwright-tests:
@@ -31,15 +36,28 @@ jobs:
     - name: Create .env file
       run: cp .env.prod.example .env
 
+    - name: Update docker-compose file with container tag
+      run: |
+        # Create a temporary docker-compose file with the specified container tag
+        cp docker-compose.prod.${{ matrix.database }}.yml docker-compose.test.${{ matrix.database }}.yml
+
+        # Replace container tags with the specified version
+        sed -i 's|0xfurai/peekaping-server:latest|0xfurai/peekaping-server:${{ inputs.container-tag }}|g' docker-compose.test.${{ matrix.database }}.yml
+        sed -i 's|0xfurai/peekaping-web:latest|0xfurai/peekaping-web:${{ inputs.container-tag }}|g' docker-compose.test.${{ matrix.database }}.yml
+        sed -i 's|0xfurai/peekaping-migrate:latest|0xfurai/peekaping-migrate:${{ inputs.container-tag }}|g' docker-compose.test.${{ matrix.database }}.yml
+
+        echo "=== Modified docker-compose file ==="
+        cat docker-compose.test.${{ matrix.database }}.yml
+
     - name: Start services
-      run: docker compose -f docker-compose.prod.${{ matrix.database }}.yml up -d
+      run: docker compose -f docker-compose.test.${{ matrix.database }}.yml up -d
 
     - name: Show container logs
       run: |
         echo "=== Container Status ==="
-        docker compose -f docker-compose.prod.${{ matrix.database }}.yml ps
+        docker compose -f docker-compose.test.${{ matrix.database }}.yml ps
         echo "=== Container Logs ==="
-        docker compose -f docker-compose.prod.${{ matrix.database }}.yml logs
+        docker compose -f docker-compose.test.${{ matrix.database }}.yml logs
 
     - name: Wait for services to be ready
       run: |
@@ -55,11 +73,11 @@ jobs:
             attempt=$((attempt + 1))
             sleep 5
             echo "=== Container Status ==="
-            docker compose -f docker-compose.prod.${{ matrix.database }}.yml ps
+            docker compose -f docker-compose.test.${{ matrix.database }}.yml ps
             echo "=== Server Logs ==="
-            docker compose -f docker-compose.prod.${{ matrix.database }}.yml logs server
+            docker compose -f docker-compose.test.${{ matrix.database }}.yml logs server
             echo "=== Gateway Logs ==="
-            docker compose -f docker-compose.prod.${{ matrix.database }}.yml logs gateway
+            docker compose -f docker-compose.test.${{ matrix.database }}.yml logs gateway
 
           done
         ' || echo "Health check timed out after 60 seconds"
@@ -71,11 +89,15 @@ jobs:
 
     - name: Stop services
       if: always()
-      run: docker compose -f docker-compose.prod.${{ matrix.database }}.yml down
+      run: docker compose -f docker-compose.test.${{ matrix.database }}.yml down
+
+    - name: Cleanup temporary docker-compose file
+      if: always()
+      run: rm -f docker-compose.test.${{ matrix.database }}.yml
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-report-${{ matrix.database }}
+        name: playwright-report-${{ matrix.database }}-${{ inputs.container-tag }}
         path: playwright-report/
         retention-days: 30
