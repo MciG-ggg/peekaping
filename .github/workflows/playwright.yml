@@ -9,6 +9,7 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
+    # prepare environment and dependencies
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
@@ -17,10 +18,28 @@ jobs:
       run: npm install -g pnpm && pnpm install
     - name: Install Playwright Browsers
       run: pnpm exec playwright install --with-deps
+
+    # prepare services
+    - name: Create .env file
+      run: cp .env.prod.example .env
+
     - name: Start services
       run: docker compose -f docker-compose.prod.postgres.yml up -d
+
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for services to be healthy..."
+        timeout 300 bash -c 'until curl -f http://localhost:8383/health 2>/dev/null; do sleep 5; done' || true
+        sleep 10
+
     - name: Run Playwright tests
       run: pnpm exec playwright test
+
+    - name: Stop services
+      if: always()
+      run: docker compose -f docker-compose.prod.postgres.yml down
+
+    # epilogue
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
