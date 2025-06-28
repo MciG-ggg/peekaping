@@ -8,6 +8,9 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        database: [postgres, mongo, sqlite]
     steps:
     # prepare environment and dependencies
     - uses: actions/checkout@v4
@@ -24,14 +27,14 @@ jobs:
       run: cp .env.prod.example .env
 
     - name: Start services
-      run: docker compose -f docker-compose.prod.postgres.yml up -d
+      run: docker compose -f docker-compose.prod.${{ matrix.database }}.yml up -d
 
     - name: Show container logs
       run: |
         echo "=== Container Status ==="
-        docker compose -f docker-compose.prod.postgres.yml ps
+        docker compose -f docker-compose.prod.${{ matrix.database }}.yml ps
         echo "=== Container Logs ==="
-        docker compose -f docker-compose.prod.postgres.yml logs
+        docker compose -f docker-compose.prod.${{ matrix.database }}.yml logs
 
     - name: Wait for services to be ready
       run: |
@@ -47,11 +50,11 @@ jobs:
             attempt=$((attempt + 1))
             sleep 5
             echo "=== Container Status ==="
-            docker compose -f docker-compose.prod.postgres.yml ps
+            docker compose -f docker-compose.prod.${{ matrix.database }}.yml ps
             echo "=== Server Logs ==="
-            docker compose -f docker-compose.prod.postgres.yml logs server
+            docker compose -f docker-compose.prod.${{ matrix.database }}.yml logs server
             echo "=== Gateway Logs ==="
-            docker compose -f docker-compose.prod.postgres.yml logs gateway
+            docker compose -f docker-compose.prod.${{ matrix.database }}.yml logs gateway
 
           done
         ' || echo "Health check timed out after 60 seconds"
@@ -63,12 +66,12 @@ jobs:
 
     - name: Stop services
       if: always()
-      run: docker compose -f docker-compose.prod.postgres.yml down
+      run: docker compose -f docker-compose.prod.${{ matrix.database }}.yml down
 
     # epilogue
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-report
+        name: playwright-report-${{ matrix.database }}
         path: playwright-report/
         retention-days: 30
