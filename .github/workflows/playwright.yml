@@ -49,7 +49,7 @@ jobs:
             echo "=== Container Status ==="
             docker compose -f docker-compose.prod.postgres.yml ps
             echo "=== Container Logs ==="
-            docker compose -f docker-compose.prod.postgres.yml logs peekaping-server-1
+            docker compose -f docker-compose.prod.postgres.yml logs server
           done
         ' || echo "Health check timed out after 60 seconds"
         echo "Health check succeeded! Waiting additional 5 seconds for stability..."
