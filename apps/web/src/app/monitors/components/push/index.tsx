@@ -63,7 +63,7 @@ export const deserialize = (data: MonitorMonitorResponseDto): PushForm => {
 
   return {
     type: "push",
-    name: data.name || "Monitor Copy",
+    name: data.name || "My Monitor",
     interval: data.interval || 60,
     timeout: data.timeout || 16,
     max_retries: data.max_retries || 3,
