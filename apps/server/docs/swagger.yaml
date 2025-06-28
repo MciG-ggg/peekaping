@@ -423,15 +423,11 @@ definitions:
         example: 16
         type: integer
       type:
-        description: 'connection type: http, etc'
-        enum:
-        - http
+        description: 'connection type: http, tcp, ping, etc'
         example: http
         type: string
       updated_at:
         type: string
-    required:
-    - type
     type: object
   monitor.MonitorResponseDto:
     properties:
@@ -835,17 +831,13 @@ definitions:
         example: 16
         type: integer
       type:
-        description: 'connection type: http, etc'
-        enum:
-        - http
+        description: 'connection type: http, tcp, ping, etc'
         example: http
         type: string
       updated_at:
         type: string
       uptime_24h:
         type: number
-    required:
-    - type
     type: object
   status_page.StatusPageWithMonitorsResponseDTO:
     properties:

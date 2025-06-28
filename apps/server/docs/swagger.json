@@ -3221,9 +3221,6 @@
         },
         "monitor.Model": {
             "type": "object",
-            "required": [
-                "type"
-            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3277,11 +3274,8 @@
                     "example": 16
                 },
                 "type": {
-                    "description": "connection type: http, etc",
+                    "description": "connection type: http, tcp, ping, etc",
                     "type": "string",
-                    "enum": [
-                        "http"
-                    ],
                     "example": "http"
                 },
                 "updated_at": {
@@ -3808,9 +3802,6 @@
         },
         "status_page.MonitorWithHeartbeatsAndUptimeDTO": {
             "type": "object",
-            "required": [
-                "type"
-            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3870,11 +3861,8 @@
                     "example": 16
                 },
                 "type": {
-                    "description": "connection type: http, etc",
+                    "description": "connection type: http, tcp, ping, etc",
                     "type": "string",
-                    "enum": [
-                        "http"
-                    ],
                     "example": "http"
                 },
                 "updated_at": {

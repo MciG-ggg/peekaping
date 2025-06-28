@@ -3230,9 +3230,6 @@ const docTemplate = `{
         },
         "monitor.Model": {
             "type": "object",
-            "required": [
-                "type"
-            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3286,11 +3283,8 @@ const docTemplate = `{
                     "example": 16
                 },
                 "type": {
-                    "description": "connection type: http, etc",
+                    "description": "connection type: http, tcp, ping, etc",
                     "type": "string",
-                    "enum": [
-                        "http"
-                    ],
                     "example": "http"
                 },
                 "updated_at": {
@@ -3817,9 +3811,6 @@ const docTemplate = `{
         },
         "status_page.MonitorWithHeartbeatsAndUptimeDTO": {
             "type": "object",
-            "required": [
-                "type"
-            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3879,11 +3870,8 @@ const docTemplate = `{
                     "example": 16
                 },
                 "type": {
-                    "description": "connection type: http, etc",
+                    "description": "connection type: http, tcp, ping, etc",
                     "type": "string",
-                    "enum": [
-                        "http"
-                    ],
                     "example": "http"
                 },
                 "updated_at": {
