@@ -48,8 +48,11 @@ jobs:
             sleep 5
             echo "=== Container Status ==="
             docker compose -f docker-compose.prod.postgres.yml ps
-            echo "=== Container Logs ==="
+            echo "=== Server Logs ==="
             docker compose -f docker-compose.prod.postgres.yml logs server
+            echo "=== Gateway Logs ==="
+            docker compose -f docker-compose.prod.postgres.yml logs gateway
+
           done
         ' || echo "Health check timed out after 60 seconds"
         echo "Health check succeeded! Waiting additional 5 seconds for stability..."
