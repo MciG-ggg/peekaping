@@ -32,16 +32,18 @@ jobs:
         DB_TYPE=${{ matrix.database }}
         DB_HOST=localhost
         DB_PORT=${{ matrix.database == 'postgres' && '5432' || matrix.database == 'mongo' && '27017' || '3306' }}
-        DB_NAME=peekaping
+        DB_NAME=${{ matrix.database == 'sqlite' && '/app/data/peekaping.db' || 'peekaping' }}
         DB_USER=${{ matrix.database == 'postgres' && 'postgres' || matrix.database == 'mongo' && 'root' || 'root' }}
         DB_PASS=password
 
         # Server Configuration
-        SERVER_PORT=8034
+        PORT=8034
         JWT_SECRET=test-secret-key-for-playwright-tests
-
-        # Other Configuration
-        NODE_ENV=test
+        ACCESS_TOKEN_EXPIRED_IN=1h
+        ACCESS_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
+        REFRESH_TOKEN_EXPIRED_IN=1d
+        REFRESH_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
+        BUNDEBUG=2
         EOF
 
     # Build and start services using docker-compose.dev
@@ -60,10 +62,10 @@ jobs:
         echo "Waiting for services to be healthy..."
         timeout 120 bash -c '
           attempt=1
-          until curl -f http://localhost:8383/api/v1/health; do
+          until curl -f http://localhost:8034/api/v1/health; do
             echo "Attempt $attempt: Health check failed, retrying in 5 seconds..."
-            response=$(curl -s http://localhost:8383/api/v1/health || echo "connection failed")
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8383/api/v1/health || echo "000")
+            response=$(curl -s http://localhost:8034/api/v1/health || echo "connection failed")
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8034/api/v1/health || echo "000")
             echo "  Status Code: $status_code"
             echo "  Response Body: $response"
             attempt=$((attempt + 1))
