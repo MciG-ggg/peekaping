@@ -13,8 +13,12 @@ on:
         type: string
 
 jobs:
+  playwright-tests:
+    uses: ./.github/workflows/playwright-reusable.yml
+
   build-and-release:
     runs-on: ${{ matrix.runner }}
+    needs: playwright-tests
     strategy:
       matrix:
         include:

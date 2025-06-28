@@ -42,9 +42,14 @@ jobs:
             exit 1
           fi
 
+  playwright-tests:
+    needs: validate-version
+    if: needs.validate-version.outputs.is_valid_rc == 'true'
+    uses: ./.github/workflows/playwright-reusable.yml
+
   build-and-release:
     runs-on: ${{ matrix.runner }}
-    needs: validate-version
+    needs: [validate-version, playwright-tests]
     if: needs.validate-version.outputs.is_valid_rc == 'true'
     strategy:
       matrix:
