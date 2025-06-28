@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { TypographyH4 } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Intervals, {
   intervalsDefaultValues,
