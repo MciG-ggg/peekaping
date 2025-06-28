@@ -7,7 +7,7 @@ on:
         description: 'Timeout in minutes for the test job'
         required: false
         type: number
-        default: 60 * 5
+        default: 300
 
 jobs:
   playwright-tests:
