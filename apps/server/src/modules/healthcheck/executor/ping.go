@@ -18,7 +18,6 @@ import (
 
 type PingConfig struct {
 	Host       string `json:"host" validate:"required" example:"example.com"`
-	Count      int    `json:"count" validate:"min=1,max=10" example:"1"`
 	PacketSize int    `json:"packet_size" validate:"min=0,max=65507" example:"32"`
 }
 
@@ -51,11 +50,6 @@ func (p *PingExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Prox
 	}
 	cfg := cfgAny.(*PingConfig)
 
-	// Set default count if not provided
-	if cfg.Count == 0 {
-		cfg.Count = 1
-	}
-
 	// Set default packet size if not provided
 	if cfg.PacketSize == 0 {
 		cfg.PacketSize = 32
@@ -66,12 +60,12 @@ func (p *PingExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Prox
 	startTime := time.Now().UTC()
 
 	// Try native ICMP first, fallback to system ping command
-	success, rtt, err := p.tryNativePing(ctx, cfg.Host, cfg.Count, cfg.PacketSize, time.Duration(m.Timeout)*time.Second)
+	success, rtt, err := p.tryNativePing(ctx, cfg.Host, cfg.PacketSize, time.Duration(m.Timeout)*time.Second)
 	if err != nil {
 		// Fallback to system ping command
 		p.logger.Debugf("Ping failed: %s, %s, %s", m.Name, err.Error(), "trying system ping")
 		startTime = time.Now().UTC() // reset start time
-		success, rtt, err = p.trySystemPing(ctx, cfg.Host, cfg.Count, cfg.PacketSize, time.Duration(m.Timeout)*time.Second)
+		success, rtt, err = p.trySystemPing(ctx, cfg.Host, cfg.PacketSize, time.Duration(m.Timeout)*time.Second)
 	}
 
 	endTime := time.Now().UTC()
@@ -106,7 +100,7 @@ func (p *PingExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Prox
 }
 
 // tryNativePing attempts to use native ICMP implementation
-func (p *PingExecutor) tryNativePing(ctx context.Context, host string, count int, packetSize int, timeout time.Duration) (bool, time.Duration, error) {
+func (p *PingExecutor) tryNativePing(ctx context.Context, host string, packetSize int, timeout time.Duration) (bool, time.Duration, error) {
 	// Resolve the host
 	dst, err := net.ResolveIPAddr("ip4", host)
 	if err != nil {
@@ -179,18 +173,18 @@ func (p *PingExecutor) tryNativePing(ctx context.Context, host string, count int
 }
 
 // trySystemPing falls back to using the system ping command
-func (p *PingExecutor) trySystemPing(ctx context.Context, host string, count int, packetSize int, timeout time.Duration) (bool, time.Duration, error) {
+func (p *PingExecutor) trySystemPing(ctx context.Context, host string, packetSize int, timeout time.Duration) (bool, time.Duration, error) {
 	var cmd *exec.Cmd
 
 	p.logger.Debugf("System ping: host=%s, dataSize=%d, totalPacketSize=%d", host, packetSize, packetSize+8)
 
 	switch runtime.GOOS {
 	case "windows":
-		cmd = exec.CommandContext(ctx, "ping", "-n", strconv.Itoa(count), "-l", strconv.Itoa(packetSize), "-w", strconv.Itoa(int(timeout.Milliseconds())), host)
+		cmd = exec.CommandContext(ctx, "ping", "-n", "1", "-l", strconv.Itoa(packetSize), "-w", strconv.Itoa(int(timeout.Milliseconds())), host)
 	case "darwin":
-		cmd = exec.CommandContext(ctx, "ping", "-c", strconv.Itoa(count), "-s", strconv.Itoa(packetSize), "-W", strconv.Itoa(int(timeout.Milliseconds())), host)
+		cmd = exec.CommandContext(ctx, "ping", "-c", "1", "-s", strconv.Itoa(packetSize), "-W", strconv.Itoa(int(timeout.Milliseconds())), host)
 	default: // linux and others
-		cmd = exec.CommandContext(ctx, "ping", "-c", strconv.Itoa(count), "-s", strconv.Itoa(packetSize), "-W", strconv.Itoa(int(timeout.Seconds())), host)
+		cmd = exec.CommandContext(ctx, "ping", "-c", "1", "-s", strconv.Itoa(packetSize), "-W", strconv.Itoa(int(timeout.Seconds())), host)
 	}
 
 	start := time.Now()

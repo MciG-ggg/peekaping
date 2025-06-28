@@ -33,7 +33,6 @@ import type { MonitorCreateUpdateDto, MonitorMonitorResponseDto } from "@/api";
 
 interface PingConfig {
   host: string;
-  count: number;
   packet_size: number;
 }
 
@@ -41,7 +40,6 @@ export const pingSchema = z
   .object({
     type: z.literal("ping"),
     host: z.string().min(1, "Host is required"),
-    count: z.number().min(1, "Count must be at least 1").max(10, "Count must be at most 10").optional(),
     packet_size: z.number().min(0, "Data size must be at least 0 bytes").max(65507, "Data size must be at most 65507 bytes").optional(),
   })
   .merge(generalSchema)
@@ -54,7 +52,6 @@ export type PingForm = z.infer<typeof pingSchema>;
 export const pingDefaultValues: PingForm = {
   type: "ping",
   host: "example.com",
-  count: 1,
   packet_size: 32,
   ...generalDefaultValues,
   ...intervalsDefaultValues,
@@ -65,7 +62,6 @@ export const pingDefaultValues: PingForm = {
 export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
   let config: PingConfig = {
     host: "example.com",
-    count: 1,
     packet_size: 32,
   };
 
@@ -74,7 +70,6 @@ export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
       const parsedConfig = JSON.parse(data.config);
       config = {
         host: parsedConfig.host || "example.com",
-        count: parsedConfig.count || 1,
         packet_size: parsedConfig.packet_size || 32,
       };
     } catch (error) {
@@ -86,7 +81,6 @@ export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
     type: "ping",
     name: data.name || "My Ping Monitor",
     host: config.host,
-    count: config.count,
     packet_size: config.packet_size,
     interval: data.interval || 60,
     timeout: data.timeout || 16,
@@ -101,7 +95,6 @@ export const deserialize = (data: MonitorMonitorResponseDto): PingForm => {
 export const serialize = (formData: PingForm): MonitorCreateUpdateDto => {
   const config: PingConfig = {
     host: formData.host,
-    count: formData.count || 1,
     packet_size: formData.packet_size || 32,
   };
 
@@ -176,27 +169,6 @@ const PingForm = () => {
                   <FormLabel>Host</FormLabel>
                   <FormControl>
                     <Input placeholder="example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="count"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ping Count</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="1"
-                      min="1"
-                      max="10"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
