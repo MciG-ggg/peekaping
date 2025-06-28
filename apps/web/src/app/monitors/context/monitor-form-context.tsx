@@ -37,7 +37,7 @@ import {
 } from "../components/http/schema";
 import { z } from "zod";
 import { commonMutationErrorHandler } from "@/lib/utils";
-import { deserializeMonitor, cloneMonitor } from "../components/monitor-registry";
+import { deserializeMonitor } from "../components/monitor-registry";
 
 const formSchema = z.discriminatedUnion("type", [httpSchema, pushSchema]);
 
@@ -102,13 +102,10 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
   initialValues = formDefaultValues,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
   const [notifierSheetOpen, setNotifierSheetOpen] = useState(false);
   const [proxySheetOpen, setProxySheetOpen] = useState(false);
 
-  // Check if we have clone data from navigation state
-  const cloneData = location.state?.cloneData;
 
   // Only fetch monitor in edit mode
   const { data: monitor } = useQuery({
@@ -121,7 +118,7 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
     resolver: zodResolver(formSchema),
   });
 
-  // Handle form population for edit mode and clone mode
+  // Handle form population for edit mode only
   useEffect(() => {
     let formData: MonitorForm | undefined;
 
@@ -129,9 +126,6 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
       if (mode === "edit" && monitor?.data) {
         // Use registry deserialize function for edit mode
         formData = deserializeMonitor(monitor.data);
-      } else if (cloneData) {
-        // Use registry clone function for clone mode
-        formData = cloneMonitor(cloneData);
       }
 
       if (formData) {
@@ -141,7 +135,7 @@ export const MonitorFormProvider: React.FC<MonitorFormProviderProps> = ({
       console.error("Failed to deserialize monitor data:", error);
       toast.error("Failed to load monitor data");
     }
-  }, [mode, monitor, cloneData, form]);
+  }, [mode, monitor, form]);
 
   // Mutations
   const createMonitorMutation = useMutation({
