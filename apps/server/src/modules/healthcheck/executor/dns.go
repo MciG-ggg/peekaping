@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/miekg/dns"
 	"go.uber.org/zap"
 )
 
@@ -147,9 +148,49 @@ func (d *DNSExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Proxy
 			message = fmt.Sprintf("SRV records (cname: %s): %s", srvCname, strings.Join(srvStrings, ", "))
 		}
 	case "CAA":
-		err = fmt.Errorf("CAA record lookup not implemented in this version")
+		// Use miekg/dns for CAA record lookup
+		msg := new(dns.Msg)
+		msg.SetQuestion(dns.Fqdn(cfg.Host), dns.TypeCAA)
+
+		client := new(dns.Client)
+		client.Timeout = time.Duration(m.Timeout) * time.Second
+
+		var resp *dns.Msg
+		resp, _, err = client.Exchange(msg, fmt.Sprintf("%s:%d", cfg.ResolverServer, cfg.Port))
+
+		if err == nil && resp != nil && len(resp.Answer) > 0 {
+			var caaStrings []string
+			for _, ans := range resp.Answer {
+				if caa, ok := ans.(*dns.CAA); ok {
+					caaStrings = append(caaStrings, fmt.Sprintf("%d %s %q", caa.Flag, caa.Tag, caa.Value))
+				}
+			}
+			if len(caaStrings) > 0 {
+				recordsFound = true
+				message = fmt.Sprintf("CAA records: %s", strings.Join(caaStrings, "; "))
+			}
+		}
 	case "SOA":
-		err = fmt.Errorf("SOA record lookup not implemented in this version")
+		// Use miekg/dns for SOA record lookup
+		msg := new(dns.Msg)
+		msg.SetQuestion(dns.Fqdn(cfg.Host), dns.TypeSOA)
+
+		client := new(dns.Client)
+		client.Timeout = time.Duration(m.Timeout) * time.Second
+
+		var resp *dns.Msg
+		resp, _, err = client.Exchange(msg, fmt.Sprintf("%s:%d", cfg.ResolverServer, cfg.Port))
+
+		if err == nil && resp != nil && len(resp.Answer) > 0 {
+			for _, ans := range resp.Answer {
+				if soa, ok := ans.(*dns.SOA); ok {
+					recordsFound = true
+					message = fmt.Sprintf("SOA: Primary NS: %s, Admin: %s, Serial: %d, Refresh: %d, Retry: %d, Expire: %d, Min TTL: %d",
+						soa.Ns, soa.Mbox, soa.Serial, soa.Refresh, soa.Retry, soa.Expire, soa.Minttl)
+					break
+				}
+			}
+		}
 	default:
 		err = fmt.Errorf("unsupported record type: %s", cfg.ResolveType)
 	}

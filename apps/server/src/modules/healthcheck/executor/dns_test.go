@@ -283,7 +283,7 @@ func TestDNSExecutor_Execute(t *testing.T) {
 			expectMessage:  "CNAME:",
 		},
 		{
-			name: "unsupported record type CAA",
+			name: "successful CAA record lookup",
 			monitor: &Monitor{
 				ID:       "monitor6",
 				Type:     "dns",
@@ -291,17 +291,17 @@ func TestDNSExecutor_Execute(t *testing.T) {
 				Interval: 30,
 				Timeout:  5,
 				Config: `{
-					"host": "example.com",
+					"host": "cloudflare.com",
 					"resolver_server": "8.8.8.8",
 					"port": 53,
 					"resolve_type": "CAA"
 				}`,
 			},
-			expectedStatus: shared.MonitorStatusDown,
-			expectMessage:  "CAA record lookup not implemented",
+			expectedStatus: shared.MonitorStatusUp,
+			expectMessage:  "CAA records:",
 		},
 		{
-			name: "unsupported record type SOA",
+			name: "successful SOA record lookup",
 			monitor: &Monitor{
 				ID:       "monitor7",
 				Type:     "dns",
@@ -315,8 +315,8 @@ func TestDNSExecutor_Execute(t *testing.T) {
 					"resolve_type": "SOA"
 				}`,
 			},
-			expectedStatus: shared.MonitorStatusDown,
-			expectMessage:  "SOA record lookup not implemented",
+			expectedStatus: shared.MonitorStatusUp,
+			expectMessage:  "SOA:",
 		},
 	}
 
