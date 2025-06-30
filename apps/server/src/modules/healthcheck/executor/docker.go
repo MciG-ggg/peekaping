@@ -78,14 +78,23 @@ func (e *DockerExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Pr
 
 	if container.State != nil && container.State.Running {
 		if container.State.Health != nil && container.State.Health.Status != "healthy" {
-			return &Result{
-				Status:    shared.MonitorStatusPending,
-				Message:   container.State.Health.Status,
-				StartTime: start,
-				EndTime:   endTime,
+			// Handle different health statuses appropriately
+			switch container.State.Health.Status {
+			case "starting":
+				return &Result{
+					Status:    shared.MonitorStatusPending,
+					Message:   container.State.Health.Status,
+					StartTime: start,
+					EndTime:   endTime,
+				}
+			case "unhealthy":
+				return DownResult(fmt.Errorf("container is unhealthy: %s", container.State.Health.Status), start, endTime)
+			default:
+				// For any other non-healthy status, consider it down
+				return DownResult(fmt.Errorf("container health status: %s", container.State.Health.Status), start, endTime)
 			}
 		}
-		message := "running"
+		var message string
 		if container.State.Health != nil {
 			message = container.State.Health.Status
 		} else {
@@ -97,6 +106,10 @@ func (e *DockerExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Pr
 			StartTime: start,
 			EndTime:   endTime,
 		}
+	}
+
+	if container.State == nil {
+		return DownResult(fmt.Errorf("container state is nil"), start, endTime)
 	}
 
 	return DownResult(fmt.Errorf("container state is %s", container.State.Status), start, endTime)
