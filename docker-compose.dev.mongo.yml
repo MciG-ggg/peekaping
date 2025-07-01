@@ -28,9 +28,9 @@ services:
     env_file:
       - .env
     environment:
-      - DB_HOST=mongodb
-      - DB_PORT=27017
-      - DB_TYPE=mongo
+      DB_HOST: mongodb
+      DB_PORT: 27017
+      DB_TYPE: mongo
     depends_on:
       - mongodb
     networks:
@@ -46,6 +46,6 @@ services:
     depends_on:
       - server
     environment:
-      - API_URL=http://localhost:8034
+      API_URL: http://localhost:8034
     networks:
       - appnet
