@@ -23,8 +23,28 @@ const monitorTypes = [
     description: "HTTP(S) Monitor",
   },
   {
+    type: "tcp",
+    description: "TCP Port Monitor",
+  },
+  {
+    type: "ping",
+    description: "Ping Monitor (ICMP)",
+  },
+  {
+    type: "dns",
+    description: "DNS Monitor",
+  },
+  {
     type: "push",
     description: "Push Monitor (external service calls a generated URL)",
+  },
+  {
+    type: "docker",
+    description: "Docker Container",
+  },
+  {
+    type: "snmp",
+    description: "SNMP Monitor",
   },
 ];
 
