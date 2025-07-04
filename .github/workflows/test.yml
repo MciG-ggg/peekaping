@@ -3,8 +3,20 @@ name: Test and Lint
 on:
   pull_request:
     branches: [ main, master ]
+    paths-ignore:
+      - 'apps/docs/**'
+      - '*.md'
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
   push:
     branches: [ main, master ]
+    paths-ignore:
+      - 'apps/docs/**'
+      - '*.md'
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
     tags:
       - 'v*'
 
