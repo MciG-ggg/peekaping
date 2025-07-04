@@ -24,8 +24,12 @@ We encourage you to try Peekaping and provide feedback, but please use it at you
 ## ✨ Key Features
 
 ### 🔍 **Monitoring Types**
-- **HTTP/HTTPS Monitoring** - Monitor websites, APIs, and web services
-- **Push Monitoring** - Monitor services that push heartbeats to Peekaping
+- **HTTP/HTTPS Monitoring** - Monitor websites, APIs, and web services with comprehensive options
+- **TCP Port Monitoring** - Monitor TCP port connectivity and availability
+- **Ping Monitoring (ICMP)** - Traditional ping monitoring using ICMP packets
+- **DNS Monitoring** - Monitor DNS query responses and resolution times
+- **Push Monitoring** - Monitor services that push heartbeats to a generated URL endpoint
+- **Docker Container Monitoring** - Monitor Docker container status and health
 
 ### 📊 **Real-time Dashboard**
 - Live status updates with WebSocket connections
@@ -35,7 +39,7 @@ We encourage you to try Peekaping and provide feedback, but please use it at you
 - Visual heartbeat history
 
 ### 🔔 **Smart Notifications**
-- **Multiple Channels**: Email (SMTP), Slack, Telegram, Webhooks, Ntfy
+- **Multiple Channels**: Email (SMTP), Slack, Telegram, Webhooks, Ntfy, PagerDuty
 - **Intelligent Alerting**: Configurable retry logic before marking as down
 - **Notification Control**: Set resend intervals to avoid spam
 - **Important Events**: Only get notified when status actually changes
@@ -47,24 +51,8 @@ We encourage you to try Peekaping and provide feedback, but please use it at you
 ### 🛠 **Advanced Features**
 - **Maintenance Windows** - Schedule maintenance to prevent false alerts
 - **Proxy Support** - Route monitoring through HTTP proxies
-- **Multi-user Authentication** - Secure login with 2FA support
-- **Real-time Collaboration** - Multiple users can monitor simultaneously
+- **2FA User Authentication** - Secure login with 2FA support
 - **Data Retention** - Automatic cleanup of old heartbeat data
-
-## 🚀 Quick Start
-
-The fastest way to get started with Peekaping is using Docker:
-
-```bash
-# Download configuration files
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/.env.example -o .env
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/docker-compose.prod.yml -o docker-compose.yml
-
-# Start Peekaping
-docker compose up -d
-
-# Visit http://localhost:8383
-```
 
 ## 🏗 Architecture
 
@@ -72,7 +60,7 @@ Peekaping is built with modern technologies:
 
 - **Backend**: Go with strong typing and dependency injection
 - **Frontend**: React with TypeScript
-- **Database**: MongoDB for data persistence
+- **Database**: MongoDB/Postgres/SQLite for data persistence
 - **Real-time**: WebSocket connections for live updates
 - **API**: RESTful API with Swagger documentation
 

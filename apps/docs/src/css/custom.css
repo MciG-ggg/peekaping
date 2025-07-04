@@ -1,143 +1,129 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+@import "tailwindcss";
 
-/* Custom color palette based on OKLCH theme */
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
 :root {
-  /* Primary color - Purple/Violet theme */
-  --ifm-color-primary: #8b5cf6;
-  --ifm-color-primary-dark: #7c3aed;
-  --ifm-color-primary-darker: #6d28d9;
-  --ifm-color-primary-darkest: #5b21b6;
-  --ifm-color-primary-light: #a78bfa;
-  --ifm-color-primary-lighter: #c4b5fd;
-  --ifm-color-primary-lightest: #ddd6fe;
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
 
-  /* Background and text colors */
-  --ifm-background-color: #ffffff;
-  --ifm-font-color-base: #252525;
-  --ifm-color-content: #252525;
-  --ifm-color-content-secondary: #6b7280;
+  /* --primary: oklch(0.205 0 0); */
+  --primary: oklch(0.6405 0.1889 297.89);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
 
-  /* Surface colors */
-  --ifm-background-surface-color: #ffffff;
-  --ifm-card-background-color: #ffffff;
-  --ifm-navbar-background-color: #fafafa;
-  --ifm-footer-background-color: #f9fafb;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
 
-  /* Border and accent colors */
-  --ifm-color-emphasis-100: #f3f4f6;
-  --ifm-color-emphasis-200: #e5e7eb;
-  --ifm-color-emphasis-300: #d1d5db;
-  --ifm-color-emphasis-400: #9ca3af;
-  --ifm-color-emphasis-500: #6b7280;
-  --ifm-color-emphasis-600: #4b5563;
-  --ifm-color-emphasis-700: #374151;
-  --ifm-color-emphasis-800: #1f2937;
-  --ifm-color-emphasis-900: #111827;
-
-  /* Code and syntax highlighting */
-  --ifm-code-font-size: 95%;
-  --ifm-code-background: #f8fafc;
-  --ifm-code-border-color: #e2e8f0;
-  --docusaurus-highlighted-code-line-bg: rgba(139, 92, 246, 0.1);
-
-  /* Success, warning, danger colors */
-  --ifm-color-success: #10b981;
-  --ifm-color-info: #3b82f6;
-  --ifm-color-warning: #f59e0b;
-  --ifm-color-danger: #ef4444;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Dark theme colors */
-[data-theme='dark'] {
-  /* Primary color - same purple but adjusted for dark theme */
-  --ifm-color-primary: #8b5cf6;
-  --ifm-color-primary-dark: #7c3aed;
-  --ifm-color-primary-darker: #6d28d9;
-  --ifm-color-primary-darkest: #5b21b6;
-  --ifm-color-primary-light: #a78bfa;
-  --ifm-color-primary-lighter: #c4b5fd;
-  --ifm-color-primary-lightest: #ddd6fe;
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
 
-  /* Background and text colors for dark theme */
-  --ifm-background-color: #252525;
-  --ifm-font-color-base: #fafafa;
-  --ifm-color-content: #fafafa;
-  --ifm-color-content-secondary: #9ca3af;
+  /* --primary: oklch(0.922 0 0); */
+  --primary: oklch(0.6405 0.1889 297.89);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
 
-  /* Surface colors for dark theme */
-  --ifm-background-surface-color: #343434;
-  --ifm-card-background-color: #343434;
-  --ifm-navbar-background-color: #1f2937;
-  --ifm-footer-background-color: #111827;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
 
-  /* Border and accent colors for dark theme */
-  --ifm-color-emphasis-100: #374151;
-  --ifm-color-emphasis-200: #4b5563;
-  --ifm-color-emphasis-300: #6b7280;
-  --ifm-color-emphasis-400: #9ca3af;
-  --ifm-color-emphasis-500: #d1d5db;
-  --ifm-color-emphasis-600: #e5e7eb;
-  --ifm-color-emphasis-700: #f3f4f6;
-  --ifm-color-emphasis-800: #f9fafb;
-  --ifm-color-emphasis-900: #ffffff;
-
-  /* Code and syntax highlighting for dark theme */
-  --ifm-code-background: #1e293b;
-  --ifm-code-border-color: #475569;
-  --docusaurus-highlighted-code-line-bg: rgba(139, 92, 246, 0.2);
-
-  /* Success, warning, danger colors for dark theme */
-  --ifm-color-success: #10b981;
-  --ifm-color-info: #60a5fa;
-  --ifm-color-warning: #fbbf24;
-  --ifm-color-danger: #f87171;
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Additional custom styles */
-.navbar {
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
-}
 
-[data-theme='dark'] .navbar {
-  border-bottom: 1px solid var(--ifm-color-emphasis-300);
-}
 
-/* Custom button styles to match the theme */
-.button--primary {
-  background: linear-gradient(135deg, var(--ifm-color-primary) 0%, var(--ifm-color-primary-dark) 100%);
-  border: none;
-  box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.25);
-  transition: all 0.3s ease;
-}
 
-.button--primary:hover {
-  background: linear-gradient(135deg, var(--ifm-color-primary-dark) 0%, var(--ifm-color-primary-darker) 100%);
-  box-shadow: 0 6px 20px 0 rgba(139, 92, 246, 0.35);
-  transform: translateY(-1px);
-}
-
-/* Custom card styling */
-.card {
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  border-color: var(--ifm-color-primary-light);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
-  transform: translateY(-2px);
-}
-
-[data-theme='dark'] .card {
-  border-color: var(--ifm-color-emphasis-300);
-}
-
-[data-theme='dark'] .card:hover {
-  border-color: var(--ifm-color-primary);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+.navbar__item, .footer__link-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
