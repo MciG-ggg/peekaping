@@ -64,7 +64,7 @@ function KeyFeatures() {
                 <code>
                   {`# Download configuration files
 curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/.env.example -o .env
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/docker-compose.prod.yml -o docker-compose.yml
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/docker-compose.prod.sqlite.yml -o docker-compose.yml
 
 # Start Peekaping
 docker compose up -d
