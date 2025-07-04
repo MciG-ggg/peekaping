@@ -28,13 +28,21 @@ export function HomepageHeader() {
               className="button button--primary button--lg bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
               to="/intro"
             >
-              Get Started 🚀
+              Docs 📚
             </Link>
-            <Link
+            {/* <Link
               className="button button--secondary button--lg bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 px-8 py-3 rounded-lg font-semibold text-lg border-2 border-blue-600 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200"
               to="/tutorial-basics/create-monitor"
             >
               Quick Setup
+            </Link> */}
+            <Link
+              className="button button--outline button--lg bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              href="https://demo.peekaping.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Live Demo ✨
             </Link>
           </div>
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 inline-block">
