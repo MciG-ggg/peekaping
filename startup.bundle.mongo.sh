@@ -64,24 +64,26 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
     echo "Waiting for MongoDB to be ready..."
     sleep 5
 
-    # Create admin user and database using mongosh (MongoDB Shell)
+    # Create admin user in admin database using mongosh (MongoDB Shell)
     mongosh admin --eval "
         db.createUser({
             user: 'admin',
             pwd: '$DB_PASS',
             roles: ['root']
         });
-        db.auth('admin', '$DB_PASS');
     "
 
-    # Create database user using mongosh
-    mongosh "$DB_NAME" --eval "
+    # Create application user with database access using mongosh
+    mongosh admin --eval "
         db.createUser({
             user: '$DB_USER',
             pwd: '$DB_PASS',
-            roles: ['readWrite', 'dbAdmin']
+            roles: [
+                { role: 'readWrite', db: '$DB_NAME' },
+                { role: 'dbAdmin', db: '$DB_NAME' }
+            ]
         });
-    " --authenticationDatabase admin -u admin -p "$DB_PASS"
+    " -u admin -p "$DB_PASS"
 
     # Stop MongoDB
     mongod --dbpath /data/db --shutdown
