@@ -25,7 +25,13 @@ mkdir -p /var/lib/postgresql/data
 if [ ! -f /var/lib/postgresql/data/.postgres_initialized ]; then
     echo "Initializing PostgreSQL..."
 
-        # Initialize PostgreSQL cluster
+    # Clear data directory if it exists but is not initialized
+    if [ -d /var/lib/postgresql/data ]; then
+        rm -rf /var/lib/postgresql/data/*
+        rm -rf /var/lib/postgresql/data/.[^.]*
+    fi
+
+    # Initialize PostgreSQL cluster
     su-exec postgres initdb -D /var/lib/postgresql/data
 
     # Configure PostgreSQL

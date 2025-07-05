@@ -104,8 +104,8 @@ If you enjoy this project, come say hi &amp; follow along!
 ```bash
 # 1. Grab defaults
 curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/.env.prod.example -o .env
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/infra/nginx.conf -o nginx.conf
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/infra/docker-compose.prod.mongo.yml -o docker-compose.yml
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/nginx.conf -o nginx.conf
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/docker-compose.prod.mongo.yml -o docker-compose.yml
 
 # 2. Fire it up
 docker compose up -d
@@ -118,8 +118,8 @@ open http://localhost:8383
 ```bash
 # 1. Grab defaults
 curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/.env.prod.example -o .env
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/infra/nginx.conf -o nginx.conf
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/infra/docker-compose.prod.postgres.yml -o docker-compose.yml
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/nginx.conf -o nginx.conf
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/docker-compose.prod.postgres.yml -o docker-compose.yml
 
 # 2. Fire it up
 docker compose up -d
@@ -132,8 +132,8 @@ open http://localhost:8383
 ```bash
 # 1. Grab defaults
 curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/.env.prod.example -o .env
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/infra/nginx.conf -o nginx.conf
-curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/infra/docker-compose.prod.sqlite.yml -o docker-compose.yml
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/nginx.conf -o nginx.conf
+curl -L https://raw.githubusercontent.com/0xfurai/peekaping/main/docker-compose.prod.sqlite.yml -o docker-compose.yml
 
 # 2. Fire it up
 docker compose up -d

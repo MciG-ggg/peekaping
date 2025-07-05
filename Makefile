@@ -14,14 +14,14 @@ WEB_DIR = apps/web
 BINARY_NAME = peekaping-server
 
 # Docker Compose configurations
-COMPOSE_DEV_POSTGRES = infra/docker-compose.dev.postgres.yml
-COMPOSE_DEV_MONGO = infra/docker-compose.dev.mongo.yml
-COMPOSE_DEV_SQLITE = infra/docker-compose.dev.sqlite.yml
-COMPOSE_PROD_POSTGRES = infra/docker-compose.prod.postgres.yml
-COMPOSE_PROD_MONGO = infra/docker-compose.prod.mongo.yml
-COMPOSE_PROD_SQLITE = infra/docker-compose.prod.sqlite.yml
-COMPOSE_POSTGRES = infra/docker-compose.postgres.yml
-COMPOSE_MONGO = infra/docker-compose.mongo.yml
+COMPOSE_DEV_POSTGRES = docker-compose.dev.postgres.yml
+COMPOSE_DEV_MONGO = docker-compose.dev.mongo.yml
+COMPOSE_DEV_SQLITE = docker-compose.dev.sqlite.yml
+COMPOSE_PROD_POSTGRES = docker-compose.prod.postgres.yml
+COMPOSE_PROD_MONGO = docker-compose.prod.mongo.yml
+COMPOSE_PROD_SQLITE = docker-compose.prod.sqlite.yml
+COMPOSE_POSTGRES = docker-compose.postgres.yml
+COMPOSE_MONGO = docker-compose.mongo.yml
 
 # Default configurations
 DEFAULT_DEV_DB = mongo

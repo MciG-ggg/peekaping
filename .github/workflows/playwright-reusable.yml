@@ -39,25 +39,25 @@ jobs:
     - name: Update docker-compose file with container tag
       run: |
         # Create a temporary docker-compose file with the specified container tag
-        cp infra/docker-compose.prod.${{ matrix.database }}.yml infra/docker-compose.test.${{ matrix.database }}.yml
+        cp docker-compose.prod.${{ matrix.database }}.yml docker-compose.test.${{ matrix.database }}.yml
 
         # Replace container tags with the specified version
-        sed -i 's|0xfurai/peekaping-server:latest|0xfurai/peekaping-server:${{ inputs.container-tag }}|g' infra/docker-compose.test.${{ matrix.database }}.yml
-        sed -i 's|0xfurai/peekaping-web:latest|0xfurai/peekaping-web:${{ inputs.container-tag }}|g' infra/docker-compose.test.${{ matrix.database }}.yml
-        sed -i 's|0xfurai/peekaping-migrate:latest|0xfurai/peekaping-migrate:${{ inputs.container-tag }}|g' infra/docker-compose.test.${{ matrix.database }}.yml
+        sed -i 's|0xfurai/peekaping-server:latest|0xfurai/peekaping-server:${{ inputs.container-tag }}|g' docker-compose.test.${{ matrix.database }}.yml
+        sed -i 's|0xfurai/peekaping-web:latest|0xfurai/peekaping-web:${{ inputs.container-tag }}|g' docker-compose.test.${{ matrix.database }}.yml
+        sed -i 's|0xfurai/peekaping-migrate:latest|0xfurai/peekaping-migrate:${{ inputs.container-tag }}|g' docker-compose.test.${{ matrix.database }}.yml
 
         echo "=== Modified docker-compose file ==="
-        cat infra/docker-compose.test.${{ matrix.database }}.yml
+        cat docker-compose.test.${{ matrix.database }}.yml
 
     - name: Start services
-      run: docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml up -d
+      run: docker compose -f docker-compose.test.${{ matrix.database }}.yml up -d
 
     - name: Show container logs
       run: |
         echo "=== Container Status ==="
-        docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml ps
+        docker compose -f docker-compose.test.${{ matrix.database }}.yml ps
         echo "=== Container Logs ==="
-        docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml logs
+        docker compose -f docker-compose.test.${{ matrix.database }}.yml logs
 
     - name: Wait for services to be ready
       run: |
@@ -73,11 +73,11 @@ jobs:
             attempt=$((attempt + 1))
             sleep 5
             echo "=== Container Status ==="
-            docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml ps
+            docker compose -f docker-compose.test.${{ matrix.database }}.yml ps
             echo "=== Server Logs ==="
-            docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml logs server
+            docker compose -f docker-compose.test.${{ matrix.database }}.yml logs server
             echo "=== Gateway Logs ==="
-            docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml logs gateway
+            docker compose -f docker-compose.test.${{ matrix.database }}.yml logs gateway
 
           done
         ' || echo "Health check timed out after 60 seconds"
@@ -89,11 +89,11 @@ jobs:
 
     - name: Stop services
       if: always()
-      run: docker compose -f infra/docker-compose.test.${{ matrix.database }}.yml down
+      run: docker compose -f docker-compose.test.${{ matrix.database }}.yml down
 
     - name: Cleanup temporary docker-compose file
       if: always()
-      run: rm -f infra/docker-compose.test.${{ matrix.database }}.yml
+      run: rm -f docker-compose.test.${{ matrix.database }}.yml
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

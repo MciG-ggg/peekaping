@@ -26,6 +26,10 @@ jobs:
       matrix:
         database: [postgres, mongo, sqlite]
         config: [dev, bundle]
+        exclude:
+          # MongoDB bundle not working - MongoDB not available in Alpine
+          - database: mongo
+            config: bundle
     steps:
     # Prepare environment and dependencies
     - uses: actions/checkout@v4
@@ -50,7 +54,7 @@ jobs:
         DB_PASS=password
 
         # Server Configuration
-        PORT=8034
+        PORT=${{ matrix.config == 'bundle' && '8383' || '8034' }}
         JWT_SECRET=test-secret-key-for-playwright-tests
         ACCESS_TOKEN_EXPIRED_IN=1h
         ACCESS_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
@@ -61,35 +65,36 @@ jobs:
 
     # Build and start services using appropriate docker-compose file
     - name: Start services with docker-compose
-      run: docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml up -d --build
+      run: docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml up -d --build
 
     - name: Show container logs
       run: |
         echo "=== Container Status ==="
-        docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml ps
+        docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml ps
         echo "=== Container Logs ==="
-        docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs
+        docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs
 
     - name: Wait for services to be ready
       run: |
         echo "Waiting for services to be healthy..."
+        HEALTH_URL="http://localhost:${{ matrix.config == 'bundle' && '8383' || '8034' }}/api/v1/health"
         timeout 120 bash -c '
           attempt=1
-          until curl -f http://localhost:8034/api/v1/health; do
+          until curl -f '"$HEALTH_URL"'; do
             echo "Attempt $attempt: Health check failed, retrying in 5 seconds..."
-            response=$(curl -s http://localhost:8034/api/v1/health || echo "connection failed")
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8034/api/v1/health || echo "000")
+            response=$(curl -s '"$HEALTH_URL"' || echo "connection failed")
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" '"$HEALTH_URL"' || echo "000")
             echo "  Status Code: $status_code"
             echo "  Response Body: $response"
             attempt=$((attempt + 1))
             sleep 5
             if [ $attempt -gt 24 ]; then
               echo "=== Container Status ==="
-              docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml ps
+              docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml ps
               echo "=== Server Logs ==="
-              docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs server
+              docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs server
               echo "=== Web Logs ==="
-              docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs web
+              docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs web
             fi
           done
         ' || echo "Health check timed out after 120 seconds"
@@ -101,7 +106,7 @@ jobs:
 
     - name: Stop services
       if: always()
-      run: docker compose -f infra/docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml down
+      run: docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml down
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

@@ -2,31 +2,32 @@ networks:
   appnet:
 
 services:
-  migrate:
-    image: 0xfurai/peekaping-migrate:latest
-    restart: "no"
+  mongodb:
+    image: mongo:7
+    restart: always
+    ports:
+      - "${DB_PORT}:27017"
     env_file:
-      - ../.env
+      - .env
     environment:
-      - DB_TYPE=sqlite
-      - DB_NAME=/app/data/peekaping.db
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
     volumes:
-      - ./.data/sqlite:/app/data
+      - ./.data/mongodb:/data/db
+    networks:
+      - appnet
 
   server:
     image: 0xfurai/peekaping-server:latest
-    restart: unless-stopped
     env_file:
-      - ../.env
-    environment:
-      - DB_TYPE=sqlite
-      - DB_NAME=/app/data/peekaping.db
-      - MODE=prod
-    volumes:
-      - ./.data/sqlite:/app/data
+      - .env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      - mongodb
+    environment:
+      DB_HOST: mongodb
+      DB_PORT: 27017
+      DB_TYPE: mongo
     networks:
       - appnet
 
@@ -34,7 +35,6 @@ services:
     image: 0xfurai/peekaping-web:latest
     depends_on:
       - server
-    restart: unless-stopped
     networks:
       - appnet
 

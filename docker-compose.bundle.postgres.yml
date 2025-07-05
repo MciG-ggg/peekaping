@@ -1,13 +1,13 @@
 services:
   peekaping:
     build:
-      context: ..
-      dockerfile: infra/Dockerfile.bundle.postgres
+      context: .
+      dockerfile: Dockerfile.bundle.postgres
     restart: unless-stopped
     ports:
       - "8383:8383"
     env_file:
-      - ../.env
+      - .env
     environment:
       - DB_TYPE=postgres
       - DB_HOST=localhost

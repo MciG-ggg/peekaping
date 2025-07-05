@@ -1,11 +1,11 @@
 services:
   migrate:
     build:
-      context: ../apps/server
+      context: ./apps/server
       dockerfile: Dockerfile.migrate
     restart: "no"
     env_file:
-      - ../.env
+      - .env
     environment:
       - DB_TYPE=sqlite
       - DB_NAME=/app/data/peekaping.db
@@ -14,13 +14,13 @@ services:
 
   server:
     build:
-      context: ../apps/server
+      context: ./apps/server
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "8034:8034"
     env_file:
-      - ../.env
+      - .env
     environment:
       - DB_TYPE=sqlite
       - DB_NAME=/app/data/peekaping.db
@@ -32,7 +32,7 @@ services:
 
   web:
     build:
-      context: ../apps/web
+      context: ./apps/web
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:

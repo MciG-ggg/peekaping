@@ -8,7 +8,7 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     env_file:
-      - ../.env
+      - .env
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASS:-password}
@@ -24,10 +24,12 @@ services:
       - appnet
 
   migrate:
-    image: 0xfurai/peekaping-migrate:latest
+    build:
+      context: ./apps/server
+      dockerfile: Dockerfile.migrate
     restart: "no"
     env_file:
-      - ../.env
+      - .env
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -39,36 +41,36 @@ services:
       - appnet
 
   server:
-    image: 0xfurai/peekaping-server:latest
+    build:
+      context: ./apps/server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8034:8034"
     env_file:
-      - ../.env
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_TYPE=postgres
     depends_on:
       postgres:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_TYPE: postgres
     networks:
       - appnet
 
   web:
-    image: 0xfurai/peekaping-web:latest
-    depends_on:
-      - server
-    networks:
-      - appnet
-
-  gateway:
-    image: nginx:latest
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
       - "8383:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - server
-      - web
+    environment:
+      - API_URL=http://localhost:8034
     networks:
       - appnet

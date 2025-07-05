@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile to build server, web, and migrations in one container with MongoDB
+# Multi-stage Dockerfile to build server, web, and migrations in one container with SQLite
 
 # Stage 1: Build Go server and migration tool
 FROM golang:1.24.3-alpine AS go-builder
@@ -48,14 +48,14 @@ COPY apps/web/ ./apps/web/
 WORKDIR /app/apps/web
 RUN pnpm run build
 
-# Stage 3: Final runtime image with MongoDB
+# Stage 3: Final runtime image
 FROM caddy:alpine
 
-# Install supervisor, MongoDB, and dependencies
-RUN apk add --no-cache supervisor netcat-openbsd mongodb mongodb-tools
+# Install supervisor to manage multiple processes
+RUN apk add --no-cache supervisor netcat-openbsd
 
 # Create necessary directories
-RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web /data/db
+RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web
 
 # Copy Go server and migration tool from go-builder
 COPY --from=go-builder /app/server/main /app/server/main
@@ -70,13 +70,13 @@ COPY --from=go-builder /app/server/scripts/run-migrations.sh /app/server/run-mig
 COPY --from=web-builder /app/apps/web/dist /app/web
 
 # Copy Caddy configuration
-COPY ./Caddyfile /etc/caddy/Caddyfile
+COPY Caddyfile /etc/caddy/Caddyfile
 
-# Copy supervisor configuration for MongoDB
-COPY supervisord.bundle-mongo.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy supervisor configuration for SQLite
+COPY supervisord.bundle-sqlite.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy startup script
-COPY startup.bundle-mongo.sh /app/startup.sh
+COPY startup.bundle-sqlite.sh /app/startup.sh
 
 # Make scripts executable
 RUN chmod +x /app/server/run-migrations.sh /app/startup.sh /app/server/main /app/server/bun

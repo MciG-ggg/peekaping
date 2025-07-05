@@ -232,7 +232,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./infra/Dockerfile.bundle.${{ matrix.database }}
+          file: ./Dockerfile.bundle.${{ matrix.database }}
           push: true
           platforms: ${{ matrix.platform }}
           provenance: false

@@ -8,7 +8,7 @@ services:
     ports:
       - "${DB_PORT}:27017"
     env_file:
-      - ../.env
+      - .env
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
@@ -20,13 +20,13 @@ services:
 
   server:
     build:
-      context: ../apps/server
+      context: ./apps/server
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "8034:8034"
     env_file:
-      - ../.env
+      - .env
     environment:
       - DB_HOST=mongodb
       - DB_PORT=27017
@@ -38,7 +38,7 @@ services:
 
   web:
     build:
-      context: ../apps/web
+      context: ./apps/web
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
