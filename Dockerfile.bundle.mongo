@@ -49,13 +49,38 @@ WORKDIR /app/apps/web
 RUN pnpm run build
 
 # Stage 3: Final runtime image with MongoDB
-FROM caddy:alpine
+FROM ubuntu:22.04
 
-# Install supervisor, MongoDB, and dependencies
-RUN apk add --no-cache supervisor netcat-openbsd mongodb mongodb-tools
+# Install dependencies including MongoDB
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    lsb-release \
+    supervisor \
+    netcat-openbsd \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Caddy
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg && \
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list && \
+    apt-get update && \
+    apt-get install -y caddy && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install MongoDB
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | apt-key add - && \
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
+    apt-get update && \
+    apt-get install -y mongodb-org && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create necessary directories
 RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web /data/db
+
+# Set proper permissions for MongoDB data directory
+RUN chmod 755 /data/db
 
 # Copy Go server and migration tool from go-builder
 COPY --from=go-builder /app/server/main /app/server/main
@@ -73,10 +98,10 @@ COPY --from=web-builder /app/apps/web/dist /app/web
 COPY Caddyfile /etc/caddy/Caddyfile
 
 # Copy supervisor configuration for MongoDB
-COPY supervisord.bundle-mongo.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.bundle.mongo.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy startup script
-COPY startup.bundle-mongo.sh /app/startup.sh
+COPY startup.bundle.mongo.sh /app/startup.sh
 
 # Make scripts executable
 RUN chmod +x /app/server/run-migrations.sh /app/startup.sh /app/server/main /app/server/bun

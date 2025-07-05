@@ -18,6 +18,34 @@ export DB_NAME=${DB_NAME:-peekaping}
 export DB_USER=${DB_USER:-peekaping}
 export DB_PASS=${DB_PASS:-peekaping}
 
+# Set server configuration environment variables
+export PORT=${PORT:-8034}
+export CLIENT_URL=${CLIENT_URL:-http://localhost:8383}
+export ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY:-your-access-token-secret-key-change-this-in-production}
+export REFRESH_TOKEN_SECRET_KEY=${REFRESH_TOKEN_SECRET_KEY:-your-refresh-token-secret-key-change-this-in-production}
+export ACCESS_TOKEN_EXPIRED_IN=${ACCESS_TOKEN_EXPIRED_IN:-15m}
+export REFRESH_TOKEN_EXPIRED_IN=${REFRESH_TOKEN_EXPIRED_IN:-7d}
+export MODE=${MODE:-prod}
+export TZ=${TZ:-UTC}
+
+# Create .env file for the server
+cat > /app/.env << EOF
+PORT=$PORT
+CLIENT_URL=$CLIENT_URL
+DB_TYPE=$DB_TYPE
+DB_HOST=$DB_HOST
+DB_PORT=$DB_PORT
+DB_NAME=$DB_NAME
+DB_USER=$DB_USER
+DB_PASS=$DB_PASS
+ACCESS_TOKEN_SECRET_KEY=$ACCESS_TOKEN_SECRET_KEY
+REFRESH_TOKEN_SECRET_KEY=$REFRESH_TOKEN_SECRET_KEY
+ACCESS_TOKEN_EXPIRED_IN=$ACCESS_TOKEN_EXPIRED_IN
+REFRESH_TOKEN_EXPIRED_IN=$REFRESH_TOKEN_EXPIRED_IN
+MODE=$MODE
+TZ=$TZ
+EOF
+
 # Create data directory if it doesn't exist
 mkdir -p /data/db
 
@@ -32,21 +60,24 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
     echo "Waiting for MongoDB to be ready..."
     sleep 5
 
-    # Create admin user and database
-    mongo admin --eval "
+    # Create admin user and database using mongosh (MongoDB Shell)
+    mongosh admin --eval "
         db.createUser({
             user: 'admin',
             pwd: '$DB_PASS',
             roles: ['root']
         });
         db.auth('admin', '$DB_PASS');
-        use $DB_NAME;
+    "
+
+    # Create database user using mongosh
+    mongosh "$DB_NAME" --eval "
         db.createUser({
             user: '$DB_USER',
             pwd: '$DB_PASS',
             roles: ['readWrite', 'dbAdmin']
         });
-    "
+    " --authenticationDatabase admin -u admin -p "$DB_PASS"
 
     # Stop MongoDB
     mongod --dbpath /data/db --shutdown
@@ -55,6 +86,10 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
     touch /data/db/.mongodb_initialized
     echo "MongoDB initialization completed!"
 fi
+
+# Give MongoDB a moment to fully start up
+echo "Waiting for MongoDB to be fully ready..."
+sleep 3
 
 # Run database migrations
 echo "Running database migrations..."

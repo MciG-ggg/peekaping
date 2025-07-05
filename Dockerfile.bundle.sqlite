@@ -73,10 +73,10 @@ COPY --from=web-builder /app/apps/web/dist /app/web
 COPY Caddyfile /etc/caddy/Caddyfile
 
 # Copy supervisor configuration for SQLite
-COPY supervisord.bundle-sqlite.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.bundle.sqlite.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy startup script
-COPY startup.bundle-sqlite.sh /app/startup.sh
+COPY startup.bundle.sqlite.sh /app/startup.sh
 
 # Make scripts executable
 RUN chmod +x /app/server/run-migrations.sh /app/startup.sh /app/server/main /app/server/bun

@@ -28,7 +28,6 @@ if [ ! -f /var/lib/postgresql/data/.postgres_initialized ]; then
     # Clear data directory if it exists but is not initialized
     if [ -d /var/lib/postgresql/data ]; then
         rm -rf /var/lib/postgresql/data/*
-        rm -rf /var/lib/postgresql/data/.[^.]*
     fi
 
     # Initialize PostgreSQL cluster
