@@ -63,7 +63,7 @@ services:
 
   web:
     build:
-      context: ./apps/web
+      context: ../apps/web
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
