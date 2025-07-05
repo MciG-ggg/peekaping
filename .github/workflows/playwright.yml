@@ -91,10 +91,8 @@ jobs:
             if [ $attempt -gt 20 ]; then
               echo "=== Container Status ==="
               docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml ps
-              echo "=== Server Logs ==="
-              docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs server
-              echo "=== Web Logs ==="
-              docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs web
+              echo "===  Logs ==="
+              docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml logs
             fi
           done
         ' || echo "Health check timed out after 120 seconds"
