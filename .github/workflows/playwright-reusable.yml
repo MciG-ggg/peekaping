@@ -165,12 +165,27 @@ jobs:
         BUNDLE_TAG="${{ steps.bundle_tag.outputs.tag }}"
         echo "Starting bundle container with tag: ${BUNDLE_TAG}"
 
+        # Common environment variables for all database types
+        COMMON_ENV=(
+          -e DB_TYPE=${{ matrix.database }}
+          -e API_URL=http://localhost:8383
+          -e PORT=8034
+          -e JWT_SECRET=test-secret-key-for-playwright-tests
+          -e ACCESS_TOKEN_EXPIRED_IN=1h
+          -e ACCESS_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
+          -e REFRESH_TOKEN_EXPIRED_IN=60m
+          -e REFRESH_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
+          -e BUNDEBUG=2
+        )
+
         case "${{ matrix.database }}" in
           sqlite)
             docker run -d \
               --name peekaping-bundle-test-${{ matrix.database }} \
               -p 8383:8383 \
               -v $(pwd)/test-data/sqlite/app:/app/data \
+              "${COMMON_ENV[@]}" \
+              -e DB_NAME=/app/data/peekaping.db \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:${BUNDLE_TAG}
             ;;
           mongo)
@@ -178,6 +193,12 @@ jobs:
               --name peekaping-bundle-test-${{ matrix.database }} \
               -p 8383:8383 \
               -v $(pwd)/test-data/mongo/db:/data/db \
+              "${COMMON_ENV[@]}" \
+              -e DB_HOST=localhost \
+              -e DB_PORT=27017 \
+              -e DB_NAME=peekaping \
+              -e DB_USER=root \
+              -e DB_PASS=password \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:${BUNDLE_TAG}
             ;;
           postgres)
@@ -185,6 +206,12 @@ jobs:
               --name peekaping-bundle-test-${{ matrix.database }} \
               -p 8383:8383 \
               -v $(pwd)/test-data/postgres/data:/var/lib/postgresql/data \
+              "${COMMON_ENV[@]}" \
+              -e DB_HOST=localhost \
+              -e DB_PORT=5432 \
+              -e DB_NAME=peekaping \
+              -e DB_USER=peekaping \
+              -e DB_PASS=password \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:${BUNDLE_TAG}
             ;;
         esac
@@ -196,7 +223,11 @@ jobs:
         echo "=== Container Logs ==="
         docker logs peekaping-bundle-test-${{ matrix.database }}
         echo "=== Container Environment ==="
-        docker exec peekaping-bundle-test-${{ matrix.database }} env | grep -E "(DB_|API_|VERSION)" || echo "No relevant env vars found"
+        docker exec peekaping-bundle-test-${{ matrix.database }} env | grep -E "(DB_|API_|JWT_|ACCESS_|REFRESH_|BUNDEBUG)" || echo "No relevant env vars found"
+        echo "=== Container Processes ==="
+        docker exec peekaping-bundle-test-${{ matrix.database }} ps aux || echo "Could not list processes"
+        echo "=== Testing internal connectivity ==="
+        docker exec peekaping-bundle-test-${{ matrix.database }} nc -zv localhost 8034 || echo "Go server not responding on port 8034"
 
     - name: Wait for bundle service to be ready
       run: |
@@ -232,6 +263,12 @@ jobs:
         docker ps --filter "name=peekaping-bundle-test-${{ matrix.database }}"
         echo "=== Final Container Logs ==="
         docker logs peekaping-bundle-test-${{ matrix.database }}
+        echo "=== Final Container Environment ==="
+        docker exec peekaping-bundle-test-${{ matrix.database }} env | grep -E "(DB_|API_|JWT_|ACCESS_|REFRESH_|BUNDEBUG)" || echo "No relevant env vars found"
+        echo "=== Final Container Processes ==="
+        docker exec peekaping-bundle-test-${{ matrix.database }} ps aux || echo "Could not list processes"
+        echo "=== Final internal connectivity test ==="
+        docker exec peekaping-bundle-test-${{ matrix.database }} nc -zv localhost 8034 || echo "Go server not responding on port 8034"
 
     - name: Stop bundle container
       if: always()
