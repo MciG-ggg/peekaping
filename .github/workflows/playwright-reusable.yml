@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         database: [postgres, mongo, sqlite]
     steps:
@@ -106,6 +107,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         database: [sqlite, mongo, postgres]
     steps:
@@ -278,7 +280,7 @@ jobs:
 
     - name: Cleanup test data
       if: always()
-      run: rm -rf ./test-data
+      run: sudo rm -rf ./test-data
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
