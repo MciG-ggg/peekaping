@@ -45,7 +45,7 @@ func ProvideMongoDB(
 	cfg *config.Config,
 	logger *zap.SugaredLogger,
 ) (*mongo.Client, error) {
-	DBUri := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s",
+	DBUri := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authSource=admin",
 		cfg.DBUser,
 		cfg.DBPass,
 		cfg.DBHost,

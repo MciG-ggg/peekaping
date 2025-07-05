@@ -24,7 +24,7 @@ export CLIENT_URL=${CLIENT_URL:-http://localhost:8383}
 export ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY:-your-access-token-secret-key-change-this-in-production}
 export REFRESH_TOKEN_SECRET_KEY=${REFRESH_TOKEN_SECRET_KEY:-your-refresh-token-secret-key-change-this-in-production}
 export ACCESS_TOKEN_EXPIRED_IN=${ACCESS_TOKEN_EXPIRED_IN:-15m}
-export REFRESH_TOKEN_EXPIRED_IN=${REFRESH_TOKEN_EXPIRED_IN:-7d}
+export REFRESH_TOKEN_EXPIRED_IN=${REFRESH_TOKEN_EXPIRED_IN:-168h}
 export MODE=${MODE:-prod}
 export TZ=${TZ:-UTC}
 
@@ -73,12 +73,15 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
         });
     "
 
-    # Create application user in target database using mongosh
-    mongosh "$DB_NAME" --eval "
+    # Create application user in admin database (not target database)
+    mongosh admin --eval "
         db.createUser({
             user: '$DB_USER',
             pwd: '$DB_PASS',
-            roles: ['readWrite', 'dbAdmin']
+            roles: [
+                { role: 'readWrite', db: '$DB_NAME' },
+                { role: 'dbAdmin', db: '$DB_NAME' }
+            ]
         });
     " --authenticationDatabase admin -u admin -p "$DB_PASS"
 
