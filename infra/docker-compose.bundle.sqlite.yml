@@ -2,7 +2,7 @@ services:
   peekaping:
     build:
       context: ..
-      dockerfile: infra/Dockerfile.bundle-sqlite
+      dockerfile: infra/Dockerfile.bundle.sqlite
     restart: unless-stopped
     ports:
       - "8383:8383"

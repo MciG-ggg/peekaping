@@ -2,7 +2,7 @@ services:
   peekaping:
     build:
       context: ..
-      dockerfile: infra/Dockerfile.bundle-postgres
+      dockerfile: infra/Dockerfile.bundle.postgres
     restart: unless-stopped
     ports:
       - "8383:8383"
