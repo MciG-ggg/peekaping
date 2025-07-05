@@ -232,16 +232,16 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./infra/Dockerfile.bundle-${{ matrix.database }}
+          file: ./infra/Dockerfile.bundle.${{ matrix.database }}
           push: true
           platforms: ${{ matrix.platform }}
           provenance: false
           sbom: false
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:${{ github.event.inputs.version }}-${{ matrix.arch }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:latest-${{ matrix.arch }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:${{ github.event.inputs.version }}-${{ matrix.arch }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:latest-${{ matrix.arch }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle.${{ matrix.database }}:${{ github.event.inputs.version }}-${{ matrix.arch }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle.${{ matrix.database }}:latest-${{ matrix.arch }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-bundle.${{ matrix.database }}:${{ github.event.inputs.version }}-${{ matrix.arch }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-bundle.${{ matrix.database }}:latest-${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
