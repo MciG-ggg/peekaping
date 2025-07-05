@@ -70,7 +70,7 @@ COPY --from=go-builder /app/server/scripts/run-migrations.sh /app/server/run-mig
 COPY --from=web-builder /app/apps/web/dist /app/web
 
 # Copy Caddy configuration
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY ./Caddyfile /etc/caddy/Caddyfile
 
 # Copy supervisor configuration for SQLite
 COPY supervisord.bundle-sqlite.conf /etc/supervisor/conf.d/supervisord.conf
