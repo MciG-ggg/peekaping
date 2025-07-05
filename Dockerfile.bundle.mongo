@@ -49,9 +49,9 @@ WORKDIR /app/apps/web
 RUN pnpm run build
 
 # Stage 3: Final runtime image with MongoDB
-FROM ubuntu:22.04
+FROM mongo:7
 
-# Install dependencies including MongoDB
+# Install additional dependencies (MongoDB is already installed in mongo:7 image)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -69,18 +69,8 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --de
     apt-get install -y caddy && \
     rm -rf /var/lib/apt/lists/*
 
-# Install MongoDB
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | apt-key add - && \
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
-    apt-get update && \
-    apt-get install -y mongodb-org && \
-    rm -rf /var/lib/apt/lists/*
-
 # Create necessary directories
-RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web /data/db
-
-# Set proper permissions for MongoDB data directory
-RUN chmod 755 /data/db
+RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web
 
 # Copy Go server and migration tool from go-builder
 COPY --from=go-builder /app/server/main /app/server/main
