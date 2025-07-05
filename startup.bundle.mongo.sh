@@ -49,6 +49,10 @@ EOF
 # Create data directory if it doesn't exist
 mkdir -p /data/db
 
+# Create log directory and fix permissions
+mkdir -p /var/log/supervisor
+chmod 755 /var/log/supervisor
+
 # Initialize MongoDB if needed
 if [ ! -f /data/db/.mongodb_initialized ]; then
     echo "Initializing MongoDB..."

@@ -26,10 +26,6 @@ jobs:
       matrix:
         database: [postgres, mongo, sqlite]
         config: [dev, bundle]
-        exclude:
-          # MongoDB bundle not working - MongoDB not available in Alpine
-          - database: mongo
-            config: bundle
     steps:
     # Prepare environment and dependencies
     - uses: actions/checkout@v4
@@ -66,10 +62,12 @@ jobs:
     # Create and prepare data directories with proper permissions
     - name: Prepare data directories
       run: |
-        mkdir -p .data/postgres .data/logs .data/caddy-data .data/caddy-config
+        mkdir -p .data/postgres .data/mongodb .data/logs .data/caddy-data .data/caddy-config
         sudo chown -R 999:999 .data/postgres .data/logs  # postgres user is typically uid 999
+        sudo chown -R 999:999 .data/mongodb              # mongodb user is typically uid 999
         sudo chmod -R 755 .data/logs
         sudo chmod -R 700 .data/postgres
+        sudo chmod -R 755 .data/mongodb
         ls -la .data/
         echo "Directory permissions set successfully"
 
