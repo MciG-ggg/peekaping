@@ -63,6 +63,16 @@ jobs:
         BUNDEBUG=2
         EOF
 
+    # Create and prepare data directories with proper permissions
+    - name: Prepare data directories
+      run: |
+        mkdir -p .data/postgres .data/logs .data/caddy-data .data/caddy-config
+        sudo chown -R 999:999 .data/postgres .data/logs  # postgres user is typically uid 999
+        sudo chmod -R 755 .data/logs
+        sudo chmod -R 700 .data/postgres
+        ls -la .data/
+        echo "Directory permissions set successfully"
+
     # Build and start services using appropriate docker-compose file
     - name: Start services with docker-compose
       run: docker compose -f docker-compose.${{ matrix.config }}.${{ matrix.database }}.yml up -d --build

@@ -21,6 +21,11 @@ export DB_PASS=${DB_PASS:-peekaping}
 # Create data directory if it doesn't exist
 mkdir -p /var/lib/postgresql/data
 
+# Create log directory and fix permissions
+mkdir -p /var/log/supervisor
+chown -R postgres:postgres /var/log/supervisor
+chmod 755 /var/log/supervisor
+
 # Fix ownership and permissions of PostgreSQL data directory
 chown -R postgres:postgres /var/lib/postgresql/data
 chmod 700 /var/lib/postgresql/data
