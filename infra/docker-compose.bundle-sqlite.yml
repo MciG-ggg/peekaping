@@ -7,7 +7,7 @@ services:
     ports:
       - "8383:8383"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_TYPE=sqlite
       - DB_NAME=/app/data/peekaping.db

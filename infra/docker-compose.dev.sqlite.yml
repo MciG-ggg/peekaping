@@ -1,7 +1,7 @@
 services:
   migrate:
     build:
-      context: ./apps/server
+      context: ../apps/server
       dockerfile: Dockerfile.migrate
     restart: "no"
     env_file:
@@ -14,7 +14,7 @@ services:
 
   server:
     build:
-      context: ./apps/server
+      context: ../apps/server
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:

@@ -7,14 +7,11 @@ services:
     ports:
       - "8383:8383"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_TYPE=mongodb
       - DB_HOST=localhost
       - DB_PORT=27017
-      - DB_NAME=${DB_NAME:-peekaping}
-      - DB_USER=${DB_USER:-peekaping}
-      - DB_PASS=${DB_PASS:-peekaping}
       - API_URL=http://localhost:8383
     volumes:
       # Database data persistence
