@@ -101,3 +101,151 @@ jobs:
         name: playwright-report-${{ matrix.database }}-${{ inputs.container-tag }}
         path: playwright-report/
         retention-days: 30
+
+  playwright-tests-bundle:
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        database: [sqlite, mongo, postgres]
+    steps:
+    # prepare environment and dependencies
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm install -g pnpm && pnpm install
+    - name: Install Playwright Browsers
+      run: pnpm exec playwright install --with-deps
+
+    # prepare data directories
+    - name: Create data directories
+      run: |
+        mkdir -p ./test-data/${{ matrix.database }}
+        case "${{ matrix.database }}" in
+          sqlite)
+            # SQLite data directory
+            mkdir -p ./test-data/sqlite/app
+            ;;
+          mongo)
+            # MongoDB data directory
+            mkdir -p ./test-data/mongo/db
+            ;;
+          postgres)
+            # PostgreSQL data directory
+            mkdir -p ./test-data/postgres/data
+            ;;
+        esac
+
+    - name: Check bundle image availability and determine tag
+      id: bundle_tag
+      run: |
+        # Try to pull the specific tag first
+        BUNDLE_TAG="${{ inputs.container-tag }}"
+        IMAGE_NAME="ghcr.io/0xfurai/peekaping-bundle-${{ matrix.database }}"
+
+        echo "Checking if ${IMAGE_NAME}:${BUNDLE_TAG} exists..."
+
+        if docker manifest inspect "${IMAGE_NAME}:${BUNDLE_TAG}" >/dev/null 2>&1; then
+          echo "✅ Found bundle image with tag: ${BUNDLE_TAG}"
+          echo "tag=${BUNDLE_TAG}" >> $GITHUB_OUTPUT
+        elif docker manifest inspect "${IMAGE_NAME}:latest" >/dev/null 2>&1; then
+          echo "⚠️  Specific tag not found, falling back to latest"
+          echo "tag=latest" >> $GITHUB_OUTPUT
+        else
+          echo "❌ No bundle image found for ${{ matrix.database }}"
+          echo "Available tags:"
+          docker search --limit 5 "0xfurai/peekaping-bundle-${{ matrix.database }}" || echo "No public images found"
+          exit 1
+        fi
+
+    - name: Start bundle container - ${{ matrix.database }}
+      run: |
+        BUNDLE_TAG="${{ steps.bundle_tag.outputs.tag }}"
+        echo "Starting bundle container with tag: ${BUNDLE_TAG}"
+
+        case "${{ matrix.database }}" in
+          sqlite)
+            docker run -d \
+              --name peekaping-bundle-test-${{ matrix.database }} \
+              -p 8384:8383 \
+              -v $(pwd)/test-data/sqlite/app:/app/data \
+              ghcr.io/0xfurai/peekaping-bundle-${{ matrix.database }}:${BUNDLE_TAG}
+            ;;
+          mongo)
+            docker run -d \
+              --name peekaping-bundle-test-${{ matrix.database }} \
+              -p 8384:8383 \
+              -v $(pwd)/test-data/mongo/db:/data/db \
+              ghcr.io/0xfurai/peekaping-bundle-${{ matrix.database }}:${BUNDLE_TAG}
+            ;;
+          postgres)
+            docker run -d \
+              --name peekaping-bundle-test-${{ matrix.database }} \
+              -p 8384:8383 \
+              -v $(pwd)/test-data/postgres/data:/var/lib/postgresql/data \
+              ghcr.io/0xfurai/peekaping-bundle-${{ matrix.database }}:${BUNDLE_TAG}
+            ;;
+        esac
+
+    - name: Show container logs
+      run: |
+        echo "=== Container Status ==="
+        docker ps --filter "name=peekaping-bundle-test-${{ matrix.database }}"
+        echo "=== Container Logs ==="
+        docker logs peekaping-bundle-test-${{ matrix.database }}
+        echo "=== Container Environment ==="
+        docker exec peekaping-bundle-test-${{ matrix.database }} env | grep -E "(DB_|API_|VERSION)" || echo "No relevant env vars found"
+
+    - name: Wait for bundle service to be ready
+      run: |
+        echo "Waiting for bundle service to be healthy..."
+        timeout 120 bash -c '
+          attempt=1
+          until curl -f http://localhost:8384/api/v1/health; do
+            echo "Attempt $attempt: Health check failed, retrying in 5 seconds..."
+            response=$(curl -s http://localhost:8384/api/v1/health || echo "connection failed")
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8384/api/v1/health || echo "000")
+            echo "  Status Code: $status_code"
+            echo "  Response Body: $response"
+            attempt=$((attempt + 1))
+            sleep 5
+            if [ $attempt -gt 12 ]; then
+              echo "=== Container Status ==="
+              docker ps --filter "name=peekaping-bundle-test-${{ matrix.database }}"
+              echo "=== Container Logs ==="
+              docker logs peekaping-bundle-test-${{ matrix.database }}
+            fi
+          done
+        ' || echo "Health check timed out after 120 seconds"
+        echo "Health check succeeded! Waiting additional 5 seconds for stability..."
+        sleep 5
+
+    - name: Run Playwright tests against bundle
+      run: PLAYWRIGHT_BASE_URL=http://localhost:8384 pnpm exec playwright test
+
+    - name: Show final container logs on failure
+      if: failure()
+      run: |
+        echo "=== Final Container Status ==="
+        docker ps --filter "name=peekaping-bundle-test-${{ matrix.database }}"
+        echo "=== Final Container Logs ==="
+        docker logs peekaping-bundle-test-${{ matrix.database }}
+
+    - name: Stop bundle container
+      if: always()
+      run: |
+        docker stop peekaping-bundle-test-${{ matrix.database }} || true
+        docker rm peekaping-bundle-test-${{ matrix.database }} || true
+
+    - name: Cleanup test data
+      if: always()
+      run: rm -rf ./test-data
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report-bundle-${{ matrix.database }}-${{ inputs.container-tag }}
+        path: playwright-report/
+        retention-days: 30
