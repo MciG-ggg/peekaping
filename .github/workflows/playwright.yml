@@ -50,7 +50,7 @@ jobs:
         DB_HOST=localhost
         DB_PORT=${{ matrix.database == 'postgres' && '5432' || matrix.database == 'mongo' && '27017' || '3306' }}
         DB_NAME=${{ matrix.database == 'sqlite' && '/app/data/peekaping.db' || 'peekaping' }}
-        DB_USER=${{ matrix.database == 'postgres' && 'postgres' || matrix.database == 'mongo' && 'root' || 'root' }}
+        DB_USER=${{ matrix.database == 'postgres' && 'peekaping' || matrix.database == 'mongo' && 'root' || 'root' }}
         DB_PASS=password
 
         # Server Configuration
