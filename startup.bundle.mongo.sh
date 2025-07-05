@@ -73,17 +73,14 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
         });
     "
 
-    # Create application user with database access using mongosh
-    mongosh admin --eval "
+    # Create application user in target database using mongosh
+    mongosh "$DB_NAME" --eval "
         db.createUser({
             user: '$DB_USER',
             pwd: '$DB_PASS',
-            roles: [
-                { role: 'readWrite', db: '$DB_NAME' },
-                { role: 'dbAdmin', db: '$DB_NAME' }
-            ]
+            roles: ['readWrite', 'dbAdmin']
         });
-    " -u admin -p "$DB_PASS"
+    " --authenticationDatabase admin -u admin -p "$DB_PASS"
 
     # Stop MongoDB
     mongod --dbpath /data/db --shutdown
