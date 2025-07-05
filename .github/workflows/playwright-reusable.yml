@@ -169,21 +169,21 @@ jobs:
           sqlite)
             docker run -d \
               --name peekaping-bundle-test-${{ matrix.database }} \
-              -p 8384:8383 \
+              -p 8383:8383 \
               -v $(pwd)/test-data/sqlite/app:/app/data \
               ghcr.io/0xfurai/peekaping-bundle.${{ matrix.database }}:${BUNDLE_TAG}
             ;;
           mongo)
             docker run -d \
               --name peekaping-bundle-test-${{ matrix.database }} \
-              -p 8384:8383 \
+              -p 8383:8383 \
               -v $(pwd)/test-data/mongo/db:/data/db \
               ghcr.io/0xfurai/peekaping-bundle.${{ matrix.database }}:${BUNDLE_TAG}
             ;;
           postgres)
             docker run -d \
               --name peekaping-bundle-test-${{ matrix.database }} \
-              -p 8384:8383 \
+              -p 8383:8383 \
               -v $(pwd)/test-data/postgres/data:/var/lib/postgresql/data \
               ghcr.io/0xfurai/peekaping-bundle.${{ matrix.database }}:${BUNDLE_TAG}
             ;;
@@ -203,10 +203,10 @@ jobs:
         echo "Waiting for bundle service to be healthy..."
         timeout 120 bash -c '
           attempt=1
-          until curl -f http://localhost:8384/api/v1/health; do
+          until curl -f http://localhost:8383/api/v1/health; do
             echo "Attempt $attempt: Health check failed, retrying in 5 seconds..."
-            response=$(curl -s http://localhost:8384/api/v1/health || echo "connection failed")
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8384/api/v1/health || echo "000")
+            response=$(curl -s http://localhost:8383/api/v1/health || echo "connection failed")
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8383/api/v1/health || echo "000")
             echo "  Status Code: $status_code"
             echo "  Response Body: $response"
             attempt=$((attempt + 1))
@@ -223,7 +223,7 @@ jobs:
         sleep 5
 
     - name: Run Playwright tests against bundle
-      run: PLAYWRIGHT_BASE_URL=http://localhost:8384 pnpm exec playwright test
+      run: PLAYWRIGHT_BASE_URL=http://localhost:8383 pnpm exec playwright test
 
     - name: Show final container logs on failure
       if: failure()
