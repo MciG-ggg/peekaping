@@ -1,24 +1,20 @@
 services:
   peekaping:
     build:
-      context: .
-      dockerfile: Dockerfile.all-in-one-mongo
+      context: ..
+      dockerfile: infra/Dockerfile.bundle-sqlite
     restart: unless-stopped
     ports:
       - "8383:8383"
     env_file:
       - .env
     environment:
-      - DB_TYPE=mongodb
-      - DB_HOST=localhost
-      - DB_PORT=27017
-      - DB_NAME=${DB_NAME:-peekaping}
-      - DB_USER=${DB_USER:-peekaping}
-      - DB_PASS=${DB_PASS:-peekaping}
+      - DB_TYPE=sqlite
+      - DB_NAME=/app/data/peekaping.db
       - API_URL=http://localhost:8383
     volumes:
       # Database data persistence
-      - ./.data/mongodb:/data/db
+      - ./.data/sqlite:/app/data
       # Application logs persistence
       - ./.data/logs:/var/log/supervisor
       # Caddy data persistence (certificates, etc.)
@@ -26,4 +22,4 @@ services:
       - ./.data/caddy-config:/config/caddy
       # Optional: Custom Caddyfile override
       # - ./custom-Caddyfile:/etc/caddy/Caddyfile:ro
-    container_name: peekaping-all-in-one-mongo
+    container_name: peekaping-bundle-sqlite

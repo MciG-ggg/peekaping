@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Peekaping All-in-One Docker Variants Launcher
-# This script helps you easily start any of the three all-in-one variants
+# Peekaping Bundle Docker Variants Launcher
+# This script helps you easily start any of the three bundle variants
 
 set -e
 
@@ -14,9 +14,9 @@ NC='\033[0m' # No Color
 print_banner() {
     echo -e "${BLUE}"
     echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
-    echo "║                         Peekaping All-in-One Launcher                        ║"
+    echo "║                         Peekaping Bundle Launcher                            ║"
     echo "║                                                                               ║"
-    echo "║  Choose your preferred database backend for the all-in-one deployment        ║"
+    echo "║  Choose your preferred database backend for the bundle deployment            ║"
     echo "╚═══════════════════════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
@@ -51,15 +51,15 @@ run_variant() {
 
     case $variant in
         1)
-            compose_file="docker-compose.all-in-one-sqlite.yml"
+            compose_file="docker-compose.bundle-sqlite.yml"
             variant_name="SQLite"
             ;;
         2)
-            compose_file="docker-compose.all-in-one-mongo.yml"
+            compose_file="docker-compose.bundle-mongo.yml"
             variant_name="MongoDB"
             ;;
         3)
-            compose_file="docker-compose.all-in-one-postgres.yml"
+            compose_file="docker-compose.bundle-postgres.yml"
             variant_name="PostgreSQL"
             ;;
         *)

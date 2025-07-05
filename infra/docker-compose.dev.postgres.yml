@@ -8,7 +8,7 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     env_file:
-      - .env
+      - ../.env
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASS:-password}
@@ -29,7 +29,7 @@ services:
       dockerfile: Dockerfile.migrate
     restart: "no"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -48,7 +48,7 @@ services:
     ports:
       - "8034:8034"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432

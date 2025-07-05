@@ -33,4 +33,4 @@ coverage
 Dockerfile*
 docker-compose*
 *.md
-!README-all-in-one.md
+!README-bundle.md

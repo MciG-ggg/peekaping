@@ -1,20 +1,24 @@
 services:
   peekaping:
     build:
-      context: .
-      dockerfile: Dockerfile.all-in-one
+      context: ..
+      dockerfile: infra/Dockerfile.bundle-postgres
     restart: unless-stopped
     ports:
       - "8383:8383"
     env_file:
       - .env
     environment:
-      - DB_TYPE=sqlite
-      - DB_NAME=/app/data/peekaping.db
+      - DB_TYPE=postgres
+      - DB_HOST=localhost
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-peekaping}
+      - DB_USER=${DB_USER:-peekaping}
+      - DB_PASS=${DB_PASS:-peekaping}
       - API_URL=http://localhost:8383
     volumes:
       # Database data persistence
-      - ./.data/sqlite:/app/data
+      - ./.data/postgres:/var/lib/postgresql/data
       # Application logs persistence
       - ./.data/logs:/var/log/supervisor
       # Caddy data persistence (certificates, etc.)
@@ -22,4 +26,4 @@ services:
       - ./.data/caddy-config:/config/caddy
       # Optional: Custom Caddyfile override
       # - ./custom-Caddyfile:/etc/caddy/Caddyfile:ro
-    container_name: peekaping-all-in-one
+    container_name: peekaping-bundle-postgres

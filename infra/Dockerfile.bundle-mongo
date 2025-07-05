@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile to build server, web, and migrations in one container with PostgreSQL
+# Multi-stage Dockerfile to build server, web, and migrations in one container with MongoDB
 
 # Stage 1: Build Go server and migration tool
 FROM golang:1.24.3-alpine AS go-builder
@@ -48,20 +48,14 @@ COPY apps/web/ ./apps/web/
 WORKDIR /app/apps/web
 RUN pnpm run build
 
-# Stage 3: Final runtime image with PostgreSQL
+# Stage 3: Final runtime image with MongoDB
 FROM caddy:alpine
 
-# Install supervisor, PostgreSQL, and dependencies
-RUN apk add --no-cache supervisor netcat-openbsd postgresql postgresql-contrib su-exec
+# Install supervisor, MongoDB, and dependencies
+RUN apk add --no-cache supervisor netcat-openbsd mongodb mongodb-tools
 
 # Create necessary directories
-RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web /var/lib/postgresql/data
-
-# Create postgres user and group
-RUN addgroup -g 70 -S postgres && adduser -u 70 -S postgres -G postgres
-
-# Initialize PostgreSQL data directory
-RUN chown -R postgres:postgres /var/lib/postgresql/data
+RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web /data/db
 
 # Copy Go server and migration tool from go-builder
 COPY --from=go-builder /app/server/main /app/server/main
@@ -78,11 +72,11 @@ COPY --from=web-builder /app/apps/web/dist /app/web
 # Copy Caddy configuration
 COPY Caddyfile /etc/caddy/Caddyfile
 
-# Copy supervisor configuration for PostgreSQL
-COPY supervisord.all-in-one-postgres.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy supervisor configuration for MongoDB
+COPY supervisord.bundle-mongo.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy startup script for PostgreSQL
-COPY startup.all-in-one-postgres.sh /app/startup.sh
+# Copy startup script
+COPY startup.bundle-mongo.sh /app/startup.sh
 
 # Make scripts executable
 RUN chmod +x /app/server/run-migrations.sh /app/startup.sh /app/server/main /app/server/bun

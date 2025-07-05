@@ -60,14 +60,14 @@ jobs:
 
     # Build and start services using docker-compose.dev
     - name: Start services with docker-compose.dev
-      run: docker compose -f docker-compose.dev.${{ matrix.database }}.yml up -d --build
+      run: docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml up -d --build
 
     - name: Show container logs
       run: |
         echo "=== Container Status ==="
-        docker compose -f docker-compose.dev.${{ matrix.database }}.yml ps
+        docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml ps
         echo "=== Container Logs ==="
-        docker compose -f docker-compose.dev.${{ matrix.database }}.yml logs
+        docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml logs
 
     - name: Wait for services to be ready
       run: |
@@ -84,11 +84,11 @@ jobs:
             sleep 5
             if [ $attempt -gt 24 ]; then
               echo "=== Container Status ==="
-              docker compose -f docker-compose.dev.${{ matrix.database }}.yml ps
+              docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml ps
               echo "=== Server Logs ==="
-              docker compose -f docker-compose.dev.${{ matrix.database }}.yml logs server
+              docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml logs server
               echo "=== Web Logs ==="
-              docker compose -f docker-compose.dev.${{ matrix.database }}.yml logs web
+              docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml logs web
             fi
           done
         ' || echo "Health check timed out after 120 seconds"
@@ -100,7 +100,7 @@ jobs:
 
     - name: Stop services
       if: always()
-      run: docker compose -f docker-compose.dev.${{ matrix.database }}.yml down
+      run: docker compose -f infra/docker-compose.dev.${{ matrix.database }}.yml down
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

@@ -1,8 +1,8 @@
 services:
   peekaping:
     build:
-      context: .
-      dockerfile: Dockerfile.all-in-one
+      context: ..
+      dockerfile: infra/Dockerfile.bundle
     restart: unless-stopped
     ports:
       - "8383:8383"
@@ -14,4 +14,4 @@ services:
       - API_URL=http://localhost:8383
     volumes:
       - ./.data/sqlite:/app/data
-    container_name: peekaping-all-in-one
+    container_name: peekaping-bundle

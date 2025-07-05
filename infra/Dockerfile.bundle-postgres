@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile to build server, web, and migrations in one container with SQLite
+# Multi-stage Dockerfile to build server, web, and migrations in one container with PostgreSQL
 
 # Stage 1: Build Go server and migration tool
 FROM golang:1.24.3-alpine AS go-builder
@@ -48,14 +48,20 @@ COPY apps/web/ ./apps/web/
 WORKDIR /app/apps/web
 RUN pnpm run build
 
-# Stage 3: Final runtime image
+# Stage 3: Final runtime image with PostgreSQL
 FROM caddy:alpine
 
-# Install supervisor to manage multiple processes
-RUN apk add --no-cache supervisor netcat-openbsd
+# Install supervisor, PostgreSQL, and dependencies
+RUN apk add --no-cache supervisor netcat-openbsd postgresql postgresql-contrib su-exec
 
 # Create necessary directories
-RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web
+RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web /var/lib/postgresql/data
+
+# Create postgres user and group
+RUN addgroup -g 70 -S postgres && adduser -u 70 -S postgres -G postgres
+
+# Initialize PostgreSQL data directory
+RUN chown -R postgres:postgres /var/lib/postgresql/data
 
 # Copy Go server and migration tool from go-builder
 COPY --from=go-builder /app/server/main /app/server/main
@@ -72,11 +78,11 @@ COPY --from=web-builder /app/apps/web/dist /app/web
 # Copy Caddy configuration
 COPY Caddyfile /etc/caddy/Caddyfile
 
-# Copy supervisor configuration for SQLite
-COPY supervisord.all-in-one-sqlite.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy supervisor configuration for PostgreSQL
+COPY supervisord.bundle-postgres.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy startup script for SQLite
-COPY startup.all-in-one-sqlite.sh /app/startup.sh
+# Copy startup script
+COPY startup.bundle-postgres.sh /app/startup.sh
 
 # Make scripts executable
 RUN chmod +x /app/server/run-migrations.sh /app/startup.sh /app/server/main /app/server/bun

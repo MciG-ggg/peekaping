@@ -1,11 +1,12 @@
+networks:
+  appnet:
+
 services:
   migrate:
-    build:
-      context: ./apps/server
-      dockerfile: Dockerfile.migrate
+    image: 0xfurai/peekaping-migrate:latest
     restart: "no"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_TYPE=sqlite
       - DB_NAME=/app/data/peekaping.db
@@ -13,32 +14,38 @@ services:
       - ./.data/sqlite:/app/data
 
   server:
-    build:
-      context: ./apps/server
-      dockerfile: Dockerfile
+    image: 0xfurai/peekaping-server:latest
     restart: unless-stopped
-    ports:
-      - "8034:8034"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_TYPE=sqlite
       - DB_NAME=/app/data/peekaping.db
+      - MODE=prod
     volumes:
       - ./.data/sqlite:/app/data
     depends_on:
       migrate:
         condition: service_completed_successfully
+    networks:
+      - appnet
 
   web:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "8383:80"
+    image: 0xfurai/peekaping-web:latest
     depends_on:
       - server
-    environment:
-      - API_URL=http://localhost:8034
+    restart: unless-stopped
+    networks:
+      - appnet
 
+  gateway:
+    image: nginx:latest
+    ports:
+      - "8383:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - server
+      - web
+    networks:
+      - appnet
