@@ -107,34 +107,14 @@ mkdir -p /data/db
 mkdir -p /var/log/supervisor
 chmod 755 /var/log/supervisor
 
-# Security: Function to safely execute MongoDB commands
-safe_mongosh() {
-    local auth_params="$1"
-    local database="$2"
-    local command="$3"
-
-    # Use temp file to avoid command line password exposure
-    local temp_script=$(mktemp)
-    echo "$command" > "$temp_script"
-    chmod 600 "$temp_script"
-
-    if [ -n "$auth_params" ]; then
-        mongosh "$database" $auth_params --file "$temp_script"
-    else
-        mongosh "$database" --file "$temp_script"
-    fi
-
-    rm -f "$temp_script"
-}
-
 # Initialize MongoDB if needed
 if [ ! -f /data/db/.mongodb_initialized ]; then
     echo "Initializing MongoDB..."
 
-    # Security: Start MongoDB with auth enabled but allow localhost exception for initial setup
-    mongod --dbpath /data/db --fork --logpath /var/log/supervisor/mongodb-init.log --auth
+    # Start MongoDB without auth for initial setup
+    mongod --dbpath /data/db --fork --logpath /var/log/supervisor/mongodb-init.log --noauth
 
-    # Wait for MongoDB to be ready with timeout
+    # Wait for MongoDB to be ready
     echo "Waiting for MongoDB to be ready..."
     retry_count=0
     max_retries=30
@@ -153,19 +133,14 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
         exit 1
     fi
 
-    # Security: Create admin user with proper escaping
-    echo "Creating admin user..."
-    safe_mongosh "" "admin" "
+    # Create users in a single operation
+    echo "Creating MongoDB users..."
+    mongosh admin --eval "
         db.createUser({
             user: '$DB_ADMIN_USER',
             pwd: '$DB_ADMIN_PASS',
             roles: ['root']
         });
-    "
-
-    # Security: Create application user with minimal required privileges
-    echo "Creating application user..."
-    safe_mongosh "--authenticationDatabase admin -u '$DB_ADMIN_USER' -p '$DB_ADMIN_PASS'" "admin" "
         db.createUser({
             user: '$DB_USER',
             pwd: '$DB_PASS',
