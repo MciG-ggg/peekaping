@@ -136,8 +136,8 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
 
     # Wait for MongoDB to be ready with timeout
     echo "Waiting for MongoDB to be ready..."
-    local retry_count=0
-    local max_retries=30
+    retry_count=0
+    max_retries=30
 
     while [ $retry_count -lt $max_retries ]; do
         if mongosh admin --eval "db.runCommand('ping')" >/dev/null 2>&1; then
@@ -187,8 +187,8 @@ fi
 
 # Security: Wait for MongoDB to be fully ready with proper health check
 echo "Waiting for MongoDB to be fully ready..."
-local retry_count=0
-local max_retries=30
+retry_count=0
+max_retries=30
 
 while [ $retry_count -lt $max_retries ]; do
     if mongosh "$DB_NAME" --authenticationDatabase admin -u "$DB_USER" -p "$DB_PASS" --eval "db.runCommand('ping')" >/dev/null 2>&1; then
