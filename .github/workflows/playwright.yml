@@ -53,9 +53,9 @@ jobs:
         CLIENT_URL=http://localhost:8383
         PORT=8034
         JWT_SECRET=test-secret-key-for-playwright-tests
-        ACCESS_TOKEN_EXPIRED_IN=1h
+        ACCESS_TOKEN_EXPIRED_IN=15m
         ACCESS_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
-        REFRESH_TOKEN_EXPIRED_IN=60m
+        REFRESH_TOKEN_EXPIRED_IN=1h
         REFRESH_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
         BUNDEBUG=2
         EOF
