@@ -11,8 +11,7 @@ import (
 )
 
 type Config struct {
-	RedisUri  string `env:"REDIS_URL"`
-	Port      string `env:"PORT"`
+	Port      string `env:"PORT" default:"8034"`
 	ClientURL string `env:"CLIENT_URL"`
 
 	DBHost string `env:"DB_HOST"`
@@ -22,9 +21,9 @@ type Config struct {
 	DBPass string `env:"DB_PASS"`
 	DBType string `env:"DB_TYPE"`
 
-	AccessTokenExpiresIn  time.Duration `env:"ACCESS_TOKEN_EXPIRED_IN"`
+	AccessTokenExpiresIn  time.Duration `env:"ACCESS_TOKEN_EXPIRED_IN" default:"15m"`
 	AccessTokenSecretKey  string        `env:"ACCESS_TOKEN_SECRET_KEY"`
-	RefreshTokenExpiresIn time.Duration `env:"REFRESH_TOKEN_EXPIRED_IN"`
+	RefreshTokenExpiresIn time.Duration `env:"REFRESH_TOKEN_EXPIRED_IN" default:"720h"`
 	RefreshTokenSecretKey string        `env:"REFRESH_TOKEN_SECRET_KEY"`
 
 	Mode string `env:"MODE" default:"dev"`

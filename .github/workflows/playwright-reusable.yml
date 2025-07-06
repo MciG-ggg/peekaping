@@ -169,15 +169,8 @@ jobs:
 
         # Common environment variables for all database types
         COMMON_ENV=(
-          -e DB_TYPE=${{ matrix.database }}
-          -e API_URL=http://localhost:8383
-          -e PORT=8034
-          -e JWT_SECRET=test-secret-key-for-playwright-tests
-          -e ACCESS_TOKEN_EXPIRED_IN=1h
           -e ACCESS_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
-          -e REFRESH_TOKEN_EXPIRED_IN=60m
           -e REFRESH_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
-          -e BUNDEBUG=2
         )
 
         case "${{ matrix.database }}" in
@@ -196,10 +189,8 @@ jobs:
               -p 8383:8383 \
               -v $(pwd)/test-data/mongo/db:/data/db \
               "${COMMON_ENV[@]}" \
-              -e DB_HOST=localhost \
-              -e DB_PORT=27017 \
               -e DB_NAME=peekaping \
-              -e DB_USER=root \
+              -e DB_USER=peekaping \
               -e DB_PASS=password \
               ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-bundle-${{ matrix.database }}:${BUNDLE_TAG}
             ;;
@@ -209,8 +200,6 @@ jobs:
               -p 8383:8383 \
               -v $(pwd)/test-data/postgres/data:/var/lib/postgresql/data \
               "${COMMON_ENV[@]}" \
-              -e DB_HOST=localhost \
-              -e DB_PORT=5432 \
               -e DB_NAME=peekaping \
               -e DB_USER=peekaping \
               -e DB_PASS=password \
