@@ -108,6 +108,13 @@ chmod -R 750 /data/db
 # Create log directory and fix permissions
 mkdir -p /var/log/supervisor
 chmod 755 /var/log/supervisor
+chown -R root:mongodb /var/log/supervisor
+chmod 775 /var/log/supervisor
+
+# Create MongoDB log files with proper permissions
+touch /var/log/supervisor/mongodb-init.log /var/log/supervisor/mongodb.log
+chown mongodb:mongodb /var/log/supervisor/mongodb-init.log /var/log/supervisor/mongodb.log
+chmod 664 /var/log/supervisor/mongodb-init.log /var/log/supervisor/mongodb.log
 
 # Ensure MongoDB directories have correct permissions
 mkdir -p /var/lib/mongodb /var/log/mongodb
@@ -121,6 +128,13 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
     # Clean up any existing MongoDB processes
     pkill -f "mongod" || true
     sleep 2
+
+    # Clean up any existing log files to prevent permission conflicts
+    rm -f /var/log/supervisor/mongodb-init.log* 2>/dev/null || true
+    # Recreate the log file with proper permissions
+    touch /var/log/supervisor/mongodb-init.log
+    chown mongodb:mongodb /var/log/supervisor/mongodb-init.log
+    chmod 664 /var/log/supervisor/mongodb-init.log
 
     # Start MongoDB without auth for initial setup (in background, no fork)
     sudo -u mongodb mongod --dbpath /data/db --logpath /var/log/supervisor/mongodb-init.log --noauth --port $DB_PORT --bind_ip_all &
@@ -150,27 +164,60 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
     # Create users in a single operation
     echo "Creating MongoDB users..."
     mongosh --port $DB_PORT admin --eval "
-        db.createUser({
-            user: '$DB_ADMIN_USER',
-            pwd: '$DB_ADMIN_PASS',
-            roles: ['root']
-        });
-        db.createUser({
-            user: '$DB_USER',
-            pwd: '$DB_PASS',
-            roles: [
-                { role: 'readWrite', db: '$DB_NAME' }
-            ]
-        });
+        try {
+            db.createUser({
+                user: '$DB_ADMIN_USER',
+                pwd: '$DB_ADMIN_PASS',
+                roles: ['root']
+            });
+            print('Admin user created successfully');
+        } catch (error) {
+            if (error.code === 51003) {
+                print('Admin user already exists, skipping creation');
+            } else {
+                throw error;
+            }
+        }
+
+        try {
+            db.createUser({
+                user: '$DB_USER',
+                pwd: '$DB_PASS',
+                roles: [
+                    { role: 'readWrite', db: '$DB_NAME' }
+                ]
+            });
+            print('Database user created successfully');
+        } catch (error) {
+            if (error.code === 51003) {
+                print('Database user already exists, skipping creation');
+            } else {
+                throw error;
+            }
+        }
     "
 
     # Stop MongoDB gracefully
     echo "Stopping MongoDB after initialization..."
-    kill $MONGO_PID
+    # Kill the sudo process first
+    kill $MONGO_PID 2>/dev/null || true
+    # Also kill any remaining MongoDB processes
+    pkill -f "mongod.*--noauth" || true
 
     # Wait for MongoDB to stop
     wait $MONGO_PID 2>/dev/null || true
     sleep 3
+
+    # Verify MongoDB is stopped
+    retry_count=0
+    while [ $retry_count -lt 10 ]; do
+        if ! pgrep -f "mongod.*--noauth" >/dev/null 2>&1; then
+            echo "MongoDB initialization process stopped successfully."
+            break
+        fi
+        sleep 1
+        retry_count=$((retry_count + 1))
+    done
 
     # Mark as initialized
     touch /data/db/.mongodb_initialized
