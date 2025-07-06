@@ -118,8 +118,13 @@ chmod 755 /var/lib/mongodb /var/log/mongodb
 if [ ! -f /data/db/.mongodb_initialized ]; then
     echo "Initializing MongoDB..."
 
-    # Start MongoDB without auth for initial setup
-    sudo -u mongodb mongod --dbpath /data/db --fork --logpath /var/log/supervisor/mongodb-init.log --noauth --port $DB_PORT --bind_ip_all
+    # Clean up any existing MongoDB processes
+    pkill -f "mongod" || true
+    sleep 2
+
+    # Start MongoDB without auth for initial setup (in background, no fork)
+    sudo -u mongodb mongod --dbpath /data/db --logpath /var/log/supervisor/mongodb-init.log --noauth --port $DB_PORT --bind_ip_all &
+    MONGO_PID=$!
 
     # Wait for MongoDB to be ready
     echo "Waiting for MongoDB to be ready..."
@@ -137,6 +142,8 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
 
     if [ $retry_count -eq $max_retries ]; then
         echo "ERROR: MongoDB failed to start within timeout"
+        # Clean up background process
+        kill $MONGO_PID 2>/dev/null || true
         exit 1
     fi
 
@@ -159,9 +166,10 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
 
     # Stop MongoDB gracefully
     echo "Stopping MongoDB after initialization..."
-    sudo -u mongodb mongod --dbpath /data/db --shutdown
+    kill $MONGO_PID
 
     # Wait for MongoDB to stop
+    wait $MONGO_PID 2>/dev/null || true
     sleep 3
 
     # Mark as initialized
