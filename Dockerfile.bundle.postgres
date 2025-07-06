@@ -24,8 +24,9 @@ WORKDIR /app/apps/web
 RUN pnpm run build
 
 # Stage 3: Final runtime image with PostgreSQL
-FROM postgres:17
+FROM ubuntu:24.04
 
+# Security: Install packages with minimal privileges and clean up
 RUN apt-get update && apt-get install -y \
     supervisor \
     netcat-openbsd \
@@ -33,6 +34,23 @@ RUN apt-get update && apt-get install -y \
     curl \
     gosu \
     openssl \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    locales \
+    && rm -rf /var/lib/apt/lists/*
+
+# Security: Set up proper locales to avoid encoding issues
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
+
+# Install PostgreSQL 17 from official repository
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && apt-get update \
+    && apt-get install -y postgresql-17 postgresql-client-17 postgresql-contrib-17 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Caddy
@@ -41,6 +59,15 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --de
     && apt-get update \
     && apt-get install -y caddy \
     && rm -rf /var/lib/apt/lists/*
+
+# Security: Set proper permissions for PostgreSQL
+RUN mkdir -p /var/lib/postgresql/data \
+    && chown -R postgres:postgres /var/lib/postgresql \
+    && chmod 700 /var/lib/postgresql/data
+
+# Security: Set PostgreSQL binary paths
+ENV PATH="/usr/lib/postgresql/17/bin:$PATH"
+ENV PGDATA="/var/lib/postgresql/data"
 
 RUN mkdir -p /app/server /app/data /var/log/supervisor /app/web
 COPY --from=go-builder /app/server/main /app/server/main

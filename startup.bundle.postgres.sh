@@ -51,6 +51,7 @@ execute_sql_safely() {
     local temp_file=$(mktemp)
     chmod 600 "$temp_file"
     echo "$sql" > "$temp_file"
+    chown postgres:postgres "$temp_file"
     gosu postgres psql -f "$temp_file" -q
     rm -f "$temp_file"
 }
