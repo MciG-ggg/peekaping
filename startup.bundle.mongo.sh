@@ -100,19 +100,26 @@ EOF
 # Security: Set restrictive permissions on sensitive config file
 chmod 600 /app/.env
 
-# Create data directory if it doesn't exist
+# Create and secure data directory
 mkdir -p /data/db
+chown -R mongodb:mongodb /data/db
+chmod -R 750 /data/db
 
 # Create log directory and fix permissions
 mkdir -p /var/log/supervisor
 chmod 755 /var/log/supervisor
+
+# Ensure MongoDB directories have correct permissions
+mkdir -p /var/lib/mongodb /var/log/mongodb
+chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb
+chmod 755 /var/lib/mongodb /var/log/mongodb
 
 # Initialize MongoDB if needed
 if [ ! -f /data/db/.mongodb_initialized ]; then
     echo "Initializing MongoDB..."
 
     # Start MongoDB without auth for initial setup
-    mongod --dbpath /data/db --fork --logpath /var/log/supervisor/mongodb-init.log --noauth
+    sudo -u mongodb mongod --dbpath /data/db --fork --logpath /var/log/supervisor/mongodb-init.log --noauth --port $DB_PORT --bind_ip_all
 
     # Wait for MongoDB to be ready
     echo "Waiting for MongoDB to be ready..."
@@ -120,7 +127,7 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
     max_retries=30
 
     while [ $retry_count -lt $max_retries ]; do
-        if mongosh admin --eval "db.runCommand('ping')" >/dev/null 2>&1; then
+        if mongosh --port $DB_PORT admin --eval "db.runCommand('ping')" >/dev/null 2>&1; then
             echo "MongoDB is ready!"
             break
         fi
@@ -135,7 +142,7 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
 
     # Create users in a single operation
     echo "Creating MongoDB users..."
-    mongosh admin --eval "
+    mongosh --port $DB_PORT admin --eval "
         db.createUser({
             user: '$DB_ADMIN_USER',
             pwd: '$DB_ADMIN_PASS',
@@ -152,21 +159,29 @@ if [ ! -f /data/db/.mongodb_initialized ]; then
 
     # Stop MongoDB gracefully
     echo "Stopping MongoDB after initialization..."
-    mongod --dbpath /data/db --shutdown
+    sudo -u mongodb mongod --dbpath /data/db --shutdown
+
+    # Wait for MongoDB to stop
+    sleep 3
 
     # Mark as initialized
     touch /data/db/.mongodb_initialized
     chmod 600 /data/db/.mongodb_initialized
+    chown mongodb:mongodb /data/db/.mongodb_initialized
     echo "MongoDB initialization completed!"
 fi
 
-# Security: Wait for MongoDB to be fully ready with proper health check
+# Start supervisor first to manage MongoDB
+echo "Starting supervisor to manage MongoDB..."
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &
+
+# Wait for MongoDB to be fully ready with authentication
 echo "Waiting for MongoDB to be fully ready..."
 retry_count=0
 max_retries=30
 
 while [ $retry_count -lt $max_retries ]; do
-    if mongosh "$DB_NAME" --authenticationDatabase admin -u "$DB_USER" -p "$DB_PASS" --eval "db.runCommand('ping')" >/dev/null 2>&1; then
+    if mongosh --port $DB_PORT "$DB_NAME" --authenticationDatabase admin -u "$DB_USER" -p "$DB_PASS" --eval "db.runCommand('ping')" >/dev/null 2>&1; then
         echo "MongoDB is ready and accessible!"
         break
     fi
@@ -195,6 +210,6 @@ unset DB_ADMIN_PASS
 unset ACCESS_TOKEN_SECRET_KEY
 unset REFRESH_TOKEN_SECRET_KEY
 
-# Start supervisor to manage MongoDB, server, and Caddy
-echo "Starting supervisor to manage MongoDB, server, and Caddy..."
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Wait for supervisor to continue managing all services
+echo "All services are now running under supervisor management..."
+wait

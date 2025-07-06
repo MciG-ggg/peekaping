@@ -52,7 +52,7 @@ execute_sql_safely() {
     chmod 600 "$temp_file"
     echo "$sql" > "$temp_file"
     chown postgres:postgres "$temp_file"
-    gosu postgres psql -f "$temp_file" -q
+    gosu postgres psql -p "$DB_PORT" -f "$temp_file" -q
     rm -f "$temp_file"
 }
 
@@ -133,14 +133,14 @@ if [ ! -f /var/lib/postgresql/data/.postgres_initialized ]; then
     # Initialize PostgreSQL cluster
     gosu postgres initdb -D /var/lib/postgresql/data
 
-    # Start PostgreSQL temporarily
-    gosu postgres pg_ctl -D /var/lib/postgresql/data -l /var/log/supervisor/postgres-init.log start
+    # Start PostgreSQL temporarily with configurable port
+    gosu postgres pg_ctl -D /var/lib/postgresql/data -o "-p $DB_PORT" -l /var/log/supervisor/postgres-init.log start
 
     # Wait for PostgreSQL to be ready with timeout
     echo "Waiting for PostgreSQL to be ready..."
     timeout=30
     while [ $timeout -gt 0 ]; do
-        if gosu postgres pg_isready -q; then
+        if gosu postgres pg_isready -p "$DB_PORT" -q; then
             break
         fi
         sleep 1
@@ -183,13 +183,13 @@ fi
 
 # Start PostgreSQL for migrations
 echo "Starting PostgreSQL for migrations..."
-gosu postgres pg_ctl -D /var/lib/postgresql/data -l /var/log/supervisor/postgres-migration.log start
+gosu postgres pg_ctl -D /var/lib/postgresql/data -o "-p $DB_PORT" -l /var/log/supervisor/postgres-migration.log start
 
 # Wait for PostgreSQL to be ready with timeout
 echo "Waiting for PostgreSQL to be ready for migrations..."
 timeout=30
 while [ $timeout -gt 0 ]; do
-    if gosu postgres pg_isready -q; then
+    if gosu postgres pg_isready -p "$DB_PORT" -q; then
         break
     fi
     sleep 1
