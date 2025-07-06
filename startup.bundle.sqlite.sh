@@ -2,11 +2,10 @@
 set -e
 
 # Create env.js file for the web app
-API_URL=${API_URL:-}
 cat >/app/web/env.js <<EOF
 /* generated each container start */
 window.__CONFIG__ = {
-  API_URL: "$API_URL"
+  API_URL: ""
 };
 EOF
 
