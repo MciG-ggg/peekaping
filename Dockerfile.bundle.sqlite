@@ -39,7 +39,7 @@ COPY patches/ ./patches/
 COPY apps/web/package.json ./apps/web/package.json
 
 # Install dependencies using workspace (filter for web app only)
-RUN npm install -g pnpm && pnpm install --filter=web-client
+RUN npm install -g pnpm && pnpm install --filter=web
 
 # Copy web app source code
 COPY apps/web/ ./apps/web/
