@@ -215,11 +215,9 @@ fi
 echo "Stopping PostgreSQL after migrations..."
 gosu postgres pg_ctl -D /var/lib/postgresql/data stop
 
-# Security: Clear sensitive variables from memory
-unset DB_PASS
-unset ACCESS_TOKEN_SECRET_KEY
-unset REFRESH_TOKEN_SECRET_KEY
-
 # Start supervisor to manage PostgreSQL, server, and Caddy
 echo "Starting supervisor to manage PostgreSQL, server, and Caddy..."
+
+# Note: Environment variables are passed to supervisor processes via the environment= directive
+# in the supervisor configuration, so they remain available to the server even if cleared here
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
