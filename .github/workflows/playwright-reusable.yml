@@ -51,7 +51,19 @@ jobs:
         cat docker-compose.test.${{ matrix.database }}.yml
 
     - name: Start services
-      run: docker compose -f docker-compose.test.${{ matrix.database }}.yml up -d
+      run: |
+        if ! docker compose -f docker-compose.test.${{ matrix.database }}.yml up -d; then
+          echo "=== Service startup failed! Showing container logs ==="
+          docker compose -f docker-compose.test.${{ matrix.database }}.yml ps
+          echo "=== Container Logs ==="
+          docker compose -f docker-compose.test.${{ matrix.database }}.yml logs
+          echo "=== Individual Service Logs ==="
+          docker compose -f docker-compose.test.${{ matrix.database }}.yml logs migrate || echo "No migrate service logs"
+          docker compose -f docker-compose.test.${{ matrix.database }}.yml logs server || echo "No server service logs"
+          docker compose -f docker-compose.test.${{ matrix.database }}.yml logs web || echo "No web service logs"
+          docker compose -f docker-compose.test.${{ matrix.database }}.yml logs gateway || echo "No gateway service logs"
+          exit 1
+        fi
 
     - name: Show container logs
       run: |
@@ -171,6 +183,7 @@ jobs:
         COMMON_ENV=(
           -e ACCESS_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
           -e REFRESH_TOKEN_SECRET_KEY=test-secret-key-for-playwright-tests
+          -e CLIENT_URL=http://localhost:8383
         )
 
         case "${{ matrix.database }}" in
