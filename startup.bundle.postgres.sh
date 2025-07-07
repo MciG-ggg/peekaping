@@ -25,13 +25,13 @@ validate_env_vars() {
     fi
 
     # Validate secret key strength
-    if [ ${#ACCESS_TOKEN_SECRET_KEY} -lt 32 ]; then
-        echo "ERROR: ACCESS_TOKEN_SECRET_KEY must be at least 32 characters long"
+    if [ ${#ACCESS_TOKEN_SECRET_KEY} -lt 16 ]; then
+        echo "ERROR: ACCESS_TOKEN_SECRET_KEY must be at least 16 characters long"
         errors=1
     fi
 
-    if [ ${#REFRESH_TOKEN_SECRET_KEY} -lt 32 ]; then
-        echo "ERROR: REFRESH_TOKEN_SECRET_KEY must be at least 32 characters long"
+    if [ ${#REFRESH_TOKEN_SECRET_KEY} -lt 16 ]; then
+        echo "ERROR: REFRESH_TOKEN_SECRET_KEY must be at least 16 characters long"
         errors=1
     fi
 
