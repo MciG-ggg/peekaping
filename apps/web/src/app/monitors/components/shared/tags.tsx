@@ -11,7 +11,16 @@ import { useQuery } from "@tanstack/react-query";
 import { getTagsOptions } from "@/api/@tanstack/react-query.gen";
 import { type TagModel } from "@/api";
 import { useState } from "react";
-import { MultiSelect } from "@/components/multi-select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X } from "lucide-react";
+import { getContrastingTextColor } from "@/lib/utils";
 
 export const tagsDefaultValues = {
   tag_ids: [] as string[],
@@ -23,7 +32,7 @@ export const tagsSchema = z.object({
 
 const Tags = () => {
   const form = useFormContext();
-  const [search, setSearch] = useState("");
+  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
 
   // Load available tags
   const { data: tagsData } = useQuery({
@@ -37,17 +46,23 @@ const Tags = () => {
   const availableTags = (tagsData?.data || []) as TagModel[];
   const selectedTagIds = form.watch("tag_ids") || [];
 
-  // Transform TagModel data to MultiSelect options format
-  const tagOptions = availableTags.map((tag) => ({
-    label: tag.name || "",
-    value: tag.id || "",
-    // Note: MultiSelect doesn't support custom colors in the same way,
-    // but we could add an icon or handle styling differently if needed
-  }));
-
-  const handleValueChange = (newValues: string[]) => {
-    form.setValue("tag_ids", newValues);
+  const handleTagToggle = (tagId: string) => {
+    const currentTags = (form.getValues("tag_ids") || []) as string[];
+    const newTags = currentTags.includes(tagId)
+      ? currentTags.filter((id: string) => id !== tagId)
+      : [...currentTags, tagId];
+    form.setValue("tag_ids", newTags);
   };
+
+  const handleTagRemove = (tagId: string) => {
+    const currentTags = (form.getValues("tag_ids") || []) as string[];
+    const newTags = currentTags.filter((id: string) => id !== tagId);
+    form.setValue("tag_ids", newTags);
+  };
+
+  const selectedTags = availableTags.filter((tag) =>
+    selectedTagIds.includes(tag.id!)
+  );
 
   return (
     <FormField
@@ -57,16 +72,73 @@ const Tags = () => {
         <FormItem>
           <FormLabel>Tags</FormLabel>
           <FormControl>
-            <MultiSelect
-              options={tagOptions}
-              value={selectedTagIds}
-              onValueChange={handleValueChange}
-              search={search}
-              onSearchChange={setSearch}
-              placeholder="Select tags..."
-              maxCount={3}
-              className="w-full"
-            />
+            <div className="space-y-3">
+              {/* Selected Tags Display */}
+              {selectedTags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedTags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                      style={{
+                        backgroundColor: tag.color,
+                        color: getContrastingTextColor(tag.color!),
+                      }}
+                    >
+                      {tag.name}
+                      <div
+                        role="button"
+                        onClick={() => handleTagRemove(tag.id!)}
+                      >
+                        <X className="h-3 w-3 cursor-pointer" />
+                      </div>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Tag Selector */}
+              <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="px-3 font-normal w-full">
+                    <span className="text-muted-foreground">Select tags</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <div className="max-h-60 overflow-y-auto">
+                    <div className="">
+                      {availableTags.map((tag) => (
+                        <div
+                          key={tag.id}
+                          className="flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+                          onClick={() => handleTagToggle(tag.id!)}
+                        >
+                          <Checkbox
+                            checked={selectedTagIds.includes(tag.id!)}
+                          />
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                            style={{
+                              backgroundColor: tag.color,
+                              color: getContrastingTextColor(tag.color!),
+                            }}
+                          >
+                            {tag.name}
+                          </Badge>
+                        </div>
+                      ))}
+                      {availableTags.length === 0 && (
+                        <div className="text-center text-muted-foreground text-sm py-4">
+                          No tags available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>
