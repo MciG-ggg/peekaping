@@ -39,6 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getContrastingTextColor } from "@/lib/utils";
 
 const MonitorsPage = () => {
   const navigate = useNavigate();
@@ -94,7 +95,8 @@ const MonitorsPage = () => {
               : statusFilter === "maintenance"
               ? 3
               : undefined,
-          tag_ids: selectedTagIds.length > 0 ? selectedTagIds.join(",") : undefined,
+          tag_ids:
+            selectedTagIds.length > 0 ? selectedTagIds.join(",") : undefined,
         },
       }),
       getNextPageParam: (lastPage, pages) => {
@@ -180,6 +182,7 @@ const MonitorsPage = () => {
   };
 
   const handleTagRemove = (tagId: string) => {
+    console.log("handle tag remove", tagId);
     setSelectedTagIds((prev) => prev.filter((id) => id !== tagId));
   };
 
@@ -191,9 +194,11 @@ const MonitorsPage = () => {
     selectedTagIds.includes(tag.id!)
   );
 
+  const debouncedLoader = useDebounce(isLoading, 300);
+
   return (
     <Layout
-      pageName={t('monitors.title')}
+      pageName={t("monitors.title")}
       onCreate={() => {
         navigate("/monitors/new");
       }}
@@ -201,7 +206,7 @@ const MonitorsPage = () => {
       <div>
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="active-filter">{t('common.active')}</Label>
+            <Label htmlFor="active-filter">{t("common.active")}</Label>
             <Select
               value={activeFilter}
               onValueChange={(v) =>
@@ -212,15 +217,15 @@ const MonitorsPage = () => {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('common.all')}</SelectItem>
-                <SelectItem value="active">{t('common.active')}</SelectItem>
-                <SelectItem value="inactive">{t('common.inactive')}</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="active">{t("common.active")}</SelectItem>
+                <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="status-filter">
-              {t('monitors.filters.monitor_status')}
+              {t("monitors.filters.monitor_status")}
             </Label>
             <Select
               value={statusFilter}
@@ -232,10 +237,12 @@ const MonitorsPage = () => {
                 <SelectValue placeholder="Monitor Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('common.all')}</SelectItem>
-                <SelectItem value="up">{t('common.up')}</SelectItem>
-                <SelectItem value="down">{t('common.down')}</SelectItem>
-                <SelectItem value="maintenance">{t('common.maintenance')}</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
+                <SelectItem value="up">{t("common.up")}</SelectItem>
+                <SelectItem value="down">{t("common.down")}</SelectItem>
+                <SelectItem value="maintenance">
+                  {t("common.maintenance")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -243,65 +250,13 @@ const MonitorsPage = () => {
             <Label htmlFor="tag-filter">Tags</Label>
             <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-[200px] justify-start text-left font-normal"
-                >
-                  {selectedTags.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {selectedTags.slice(0, 2).map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="text-xs"
-                          style={{ backgroundColor: tag.color, color: 'white' }}
-                        >
-                          {tag.name}
-                        </Badge>
-                      ))}
-                      {selectedTags.length > 2 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{selectedTags.length - 2} more
-                        </Badge>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">Select tags...</span>
-                  )}
+                <Button variant="outline" className="px-3 font-normal">
+                  <span className="text-muted-foreground">Select tags</span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-0">
-                <div className="p-3 border-b">
-                  <h4 className="font-medium text-sm mb-2">Filter by Tags</h4>
-                  {selectedTags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {selectedTags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="text-xs flex items-center gap-1"
-                          style={{ backgroundColor: tag.color, color: 'white' }}
-                        >
-                          {tag.name}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => handleTagRemove(tag.id!)}
-                          />
-                        </Badge>
-                      ))}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearAllTags}
-                        className="h-6 text-xs"
-                      >
-                        Clear all
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                <div className="h-60 overflow-y-auto">
-                  <div className="p-2">
+              <PopoverContent className="w-auto p-0" align="end">
+                <div className="max-h-60 overflow-y-auto">
+                  <div className="">
                     {availableTags.map((tag) => (
                       <div
                         key={tag.id}
@@ -315,15 +270,13 @@ const MonitorsPage = () => {
                         <Badge
                           variant="secondary"
                           className="text-xs"
-                          style={{ backgroundColor: tag.color, color: 'white' }}
+                          style={{
+                            backgroundColor: tag.color,
+                            color: getContrastingTextColor(tag.color!),
+                          }}
                         >
                           {tag.name}
                         </Badge>
-                        {tag.description && (
-                          <span className="text-xs text-muted-foreground">
-                            {tag.description}
-                          </span>
-                        )}
                       </div>
                     ))}
                     {availableTags.length === 0 && (
@@ -337,10 +290,10 @@ const MonitorsPage = () => {
             </Popover>
           </div>
           <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <Label htmlFor="search-maintenances">{t('common.search')}</Label>
+            <Label htmlFor="search-maintenances">{t("common.search")}</Label>
             <Input
               id="search-maintenances"
-              placeholder={t('monitors.filters.search_placeholder')}
+              placeholder={t("monitors.filters.search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full sm:w-[400px]"
@@ -359,20 +312,22 @@ const MonitorsPage = () => {
                 key={tag.id}
                 variant="secondary"
                 className="flex items-center gap-1"
-                style={{ backgroundColor: tag.color, color: 'white' }}
+                style={{
+                  backgroundColor: tag.color,
+                  color: getContrastingTextColor(tag.color!),
+                }}
               >
                 {tag.name}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => handleTagRemove(tag.id!)}
-                />
+                <div role="button" onClick={() => handleTagRemove(tag.id!)}>
+                  <X className="h-3 w-3 cursor-pointer" />
+                </div>
               </Badge>
             ))}
             <Button
               variant="ghost"
               size="sm"
               onClick={clearAllTags}
-              className="h-6 text-xs"
+              className="h-6 text-xs cursor-pointer"
             >
               Clear all
             </Button>
@@ -380,7 +335,7 @@ const MonitorsPage = () => {
         )}
 
         {/* Monitors list */}
-        {monitors.length === 0 && isLoading && (
+        {monitors.length === 0 && debouncedLoader && (
           <div className="flex flex-col space-y-2 mb-2">
             {Array.from({ length: 7 }, (_, id) => (
               <Skeleton className="h-[68px] w-full rounded-xl" key={id} />

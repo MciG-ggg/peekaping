@@ -94,3 +94,19 @@ export const invalidateByPartialQueryKey = (queryClient: QueryClient, part: Reco
     },
   });
 };
+
+export function getContrastingTextColor(hex: string) {
+  // Remove the hash if present
+  hex = hex.replace('#', '');
+
+  // Parse r, g, b values
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+
+  // Calculate brightness (YIQ formula)
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+  // Return black or white depending on brightness
+  return yiq >= 128 ? 'oklch(0.205 0 0)' : 'oklch(0.985 0 0)';
+}
