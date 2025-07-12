@@ -21,10 +21,16 @@ export const useSearchParams = () => {
     [searchParams, setSearchParams]
   );
 
+  const clearAllParams = useCallback(() => {
+    setSearchParams({}, { replace: true });
+  }, [setSearchParams]);
+
   return {
     searchParams,
     updateSearchParams,
     getParam: (key: string) => searchParams.get(key),
     getAllParams: () => Object.fromEntries(searchParams.entries()),
+    clearAllParams,
+    hasParams: () => searchParams.toString().length > 0,
   };
 };

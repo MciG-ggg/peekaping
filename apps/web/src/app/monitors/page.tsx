@@ -47,7 +47,8 @@ const MonitorsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useLocalizedTranslation();
-  const { getParam, updateSearchParams } = useSearchParams();
+  const { getParam, updateSearchParams, clearAllParams, hasParams } =
+    useSearchParams();
 
   // Initialize state from URL parameters
   const [search, setSearch] = useState(getParam("search") || "");
@@ -59,10 +60,7 @@ const MonitorsPage = () => {
 
   const [statusFilter, setStatusFilter] = useState<
     "all" | "up" | "down" | "maintenance"
-  >(
-    (getParam("status") as "all" | "up" | "down" | "maintenance") ||
-      "all"
-  );
+  >((getParam("status") as "all" | "up" | "down" | "maintenance") || "all");
 
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     getParam("tags")?.split(",").filter(Boolean) || []
@@ -72,7 +70,7 @@ const MonitorsPage = () => {
 
   // Update URL when search changes
   useEffect(() => {
-      updateSearchParams({ search: debouncedSearch });
+    updateSearchParams({ search: debouncedSearch });
   }, [debouncedSearch, updateSearchParams]);
 
   // Update URL when active filter changes
@@ -220,6 +218,14 @@ const MonitorsPage = () => {
     setSelectedTagIds([]);
   };
 
+  const clearAllFilters = () => {
+    setSearch("");
+    setActiveFilter("all");
+    setStatusFilter("all");
+    setSelectedTagIds([]);
+    clearAllParams();
+  };
+
   const selectedTags = availableTags.filter((tag) =>
     selectedTagIds.includes(tag.id!)
   );
@@ -235,100 +241,116 @@ const MonitorsPage = () => {
       }}
     >
       <div>
-        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="active-filter">{t("common.active")}</Label>
-            <Select
-              value={activeFilter}
-              onValueChange={(v) =>
-                setActiveFilter(v as "all" | "active" | "inactive")
-              }
-            >
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("common.all")}</SelectItem>
-                <SelectItem value="active">{t("common.active")}</SelectItem>
-                <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="status-filter">
-              {t("monitors.filters.monitor_status")}
-            </Label>
-            <Select
-              value={statusFilter}
-              onValueChange={(v) =>
-                setStatusFilter(v as "all" | "up" | "down" | "maintenance")
-              }
-            >
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <SelectValue placeholder="Monitor Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("common.all")}</SelectItem>
-                <SelectItem value="up">{t("common.up")}</SelectItem>
-                <SelectItem value="down">{t("common.down")}</SelectItem>
-                <SelectItem value="maintenance">
-                  {t("common.maintenance")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="tag-filter">Tags</Label>
-            <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="px-3 font-normal">
-                  <span className="text-muted-foreground">Select tags</span>
+        <div className="mb-4 space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4 items-end">
+            {hasParams() && (
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="w-fit h-[36px]"
+                >
+                  Clear all filters
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <div className="max-h-60 overflow-y-auto">
-                  <div className="">
-                    {availableTags.map((tag) => (
-                      <div
-                        key={tag.id}
-                        className="flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
-                        onClick={() => handleTagToggle(tag.id!)}
-                      >
-                        <Checkbox
-                          checked={selectedTagIds.includes(tag.id!)}
-                          onChange={() => handleTagToggle(tag.id!)}
-                        />
-                        <Badge
-                          variant="secondary"
-                          className="text-xs"
-                          style={{
-                            backgroundColor: tag.color,
-                            color: getContrastingTextColor(tag.color!),
-                          }}
+              </div>
+            )}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="active-filter">{t("common.active")}</Label>
+              <Select
+                value={activeFilter}
+                onValueChange={(v) =>
+                  setActiveFilter(v as "all" | "active" | "inactive")
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
+                  <SelectItem value="active">{t("common.active")}</SelectItem>
+                  <SelectItem value="inactive">
+                    {t("common.inactive")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="status-filter">
+                {t("monitors.filters.monitor_status")}
+              </Label>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) =>
+                  setStatusFilter(v as "all" | "up" | "down" | "maintenance")
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[160px]">
+                  <SelectValue placeholder="Monitor Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.all")}</SelectItem>
+                  <SelectItem value="up">{t("common.up")}</SelectItem>
+                  <SelectItem value="down">{t("common.down")}</SelectItem>
+                  <SelectItem value="maintenance">
+                    {t("common.maintenance")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="tag-filter">Tags</Label>
+              <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="px-3 font-normal">
+                    <span className="text-muted-foreground">Select tags</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <div className="max-h-60 overflow-y-auto">
+                    <div className="">
+                      {availableTags.map((tag) => (
+                        <div
+                          key={tag.id}
+                          className="flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+                          onClick={() => handleTagToggle(tag.id!)}
                         >
-                          {tag.name}
-                        </Badge>
-                      </div>
-                    ))}
-                    {availableTags.length === 0 && (
-                      <div className="text-center text-muted-foreground text-sm py-4">
-                        No tags available
-                      </div>
-                    )}
+                          <Checkbox
+                            checked={selectedTagIds.includes(tag.id!)}
+                            onChange={() => handleTagToggle(tag.id!)}
+                          />
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                            style={{
+                              backgroundColor: tag.color,
+                              color: getContrastingTextColor(tag.color!),
+                            }}
+                          >
+                            {tag.name}
+                          </Badge>
+                        </div>
+                      ))}
+                      {availableTags.length === 0 && (
+                        <div className="text-center text-muted-foreground text-sm py-4">
+                          No tags available
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <Label htmlFor="search-maintenances">{t("common.search")}</Label>
-            <Input
-              id="search-maintenances"
-              placeholder={t("monitors.filters.search_placeholder")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-[400px]"
-            />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <Label htmlFor="search-maintenances">{t("common.search")}</Label>
+              <Input
+                id="search-maintenances"
+                placeholder={t("monitors.filters.search_placeholder")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-[400px]"
+              />
+            </div>
           </div>
         </div>
 

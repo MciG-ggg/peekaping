@@ -12,10 +12,12 @@ import StatusPageCard from "./components/status-page-card";
 import { Label } from "@/components/ui/label";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import EmptyList from "@/components/empty-list";
+import { Button } from "@/components/ui/button";
 
 const StatusPagesPage = () => {
   const navigate = useNavigate();
-  const { getParam, updateSearchParams } = useSearchParams();
+  const { getParam, updateSearchParams, clearAllParams, hasParams } =
+    useSearchParams();
 
   // Initialize search from URL params
   const [search, setSearch] = useState(getParam("q") || "");
@@ -25,6 +27,11 @@ const StatusPagesPage = () => {
   useEffect(() => {
     updateSearchParams({ q: debouncedSearch });
   }, [debouncedSearch, updateSearchParams]);
+
+  const clearAllFilters = () => {
+    setSearch("");
+    clearAllParams();
+  };
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -67,16 +74,30 @@ const StatusPagesPage = () => {
       }}
     >
       <div>
-        <div className="mb-4 flex justify-center sm:justify-end gap-4">
-          <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <Label htmlFor="search-status-pages">Search</Label>
-            <Input
-              id="search-status-pages"
-              placeholder="Search status pages by title..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-[400px]"
-            />
+        <div className="mb-4 space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4 items-end">
+            {hasParams() && (
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="w-fit h-[36px]"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <Label htmlFor="search-status-pages">Search</Label>
+              <Input
+                id="search-status-pages"
+                placeholder="Search status pages by title..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-[400px]"
+              />
+            </div>
           </div>
         </div>
 

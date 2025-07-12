@@ -37,7 +37,8 @@ const TagsPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useLocalizedTranslation();
-  const { getParam, updateSearchParams } = useSearchParams();
+  const { getParam, updateSearchParams, clearAllParams, hasParams } =
+    useSearchParams();
 
   // Initialize search from URL params
   const [search, setSearch] = useState(getParam("q") || "");
@@ -47,6 +48,11 @@ const TagsPage = () => {
   useEffect(() => {
     updateSearchParams({ q: debouncedSearch });
   }, [debouncedSearch, updateSearchParams]);
+
+  const clearAllFilters = () => {
+    setSearch("");
+    clearAllParams();
+  };
 
   // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -117,16 +123,30 @@ const TagsPage = () => {
       onCreate={handleCreate}
     >
       <div>
-        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4">
-          <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <Label htmlFor="search-tags">{t('common.search')}</Label>
-            <Input
-              id="search-tags"
-              placeholder="Search tags..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-[400px]"
-            />
+        <div className="mb-4 space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4 items-end">
+            {hasParams() && (
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="w-fit h-[36px]"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <Label htmlFor="search-tags">{t('common.search')}</Label>
+              <Input
+                id="search-tags"
+                placeholder="Search tags..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-[400px]"
+              />
+            </div>
           </div>
         </div>
 
