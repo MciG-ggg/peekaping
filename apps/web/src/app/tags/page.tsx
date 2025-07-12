@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { commonMutationErrorHandler } from "@/lib/utils";
+import { commonMutationErrorHandler, getContrastingTextColor } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
 const TagsPage = () => {
@@ -151,7 +151,7 @@ const TagsPage = () => {
                   <div className="flex items-center gap-4 flex-1">
                     <Badge
                       className="px-3 py-1 text-white flex-shrink-0"
-                      style={{ backgroundColor: tag.color }}
+                      style={{ backgroundColor: tag.color, color: getContrastingTextColor(tag.color!) }}
                     >
                       {tag.name}
                     </Badge>

@@ -5,7 +5,7 @@ import {
   getTagsOptions,
 } from "@/api/@tanstack/react-query.gen";
 import Layout from "@/layout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   type HeartbeatModel,
   type MonitorModel,
@@ -45,22 +45,68 @@ const MonitorsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useLocalizedTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Add state for search query
-  const [search, setSearch] = useState("");
+  // Initialize state from URL parameters
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const debouncedSearch = useDebounce(search, 400);
 
-  // Add state for active filter
   const [activeFilter, setActiveFilter] = useState<
     "all" | "active" | "inactive"
-  >("all");
+  >((searchParams.get("active") as "all" | "active" | "inactive") || "all");
+
   const [statusFilter, setStatusFilter] = useState<
     "all" | "up" | "down" | "maintenance"
-  >("all");
+  >(
+    (searchParams.get("status") as "all" | "up" | "down" | "maintenance") ||
+      "all"
+  );
 
-  // Add state for tag filtering
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
+    searchParams.get("tags")?.split(",").filter(Boolean) || []
+  );
+
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
+
+  // Update URL when filters change
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const newSearchParams = new URLSearchParams(searchParams);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === "" || value === "all") {
+          newSearchParams.delete(key);
+        } else {
+          newSearchParams.set(key, value);
+        }
+      });
+
+      setSearchParams(newSearchParams, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  // Update URL when search changes
+  useEffect(() => {
+      updateSearchParams({ search: debouncedSearch });
+  }, [debouncedSearch, updateSearchParams]);
+
+  // Update URL when active filter changes
+  useEffect(() => {
+    updateSearchParams({ active: activeFilter });
+  }, [activeFilter, updateSearchParams]);
+
+  // Update URL when status filter changes
+  useEffect(() => {
+    updateSearchParams({ status: statusFilter });
+  }, [statusFilter, updateSearchParams]);
+
+  // Update URL when tag selection changes
+  useEffect(() => {
+    updateSearchParams({
+      tags: selectedTagIds.length > 0 ? selectedTagIds.join(",") : null,
+    });
+  }, [selectedTagIds, updateSearchParams]);
 
   // Load tags for filtering
   const { data: tagsData } = useQuery({
