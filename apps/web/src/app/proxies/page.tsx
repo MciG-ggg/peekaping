@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import type { ProxyModel } from "@/api/types.gen";
 import {
   getProxiesInfiniteOptions,
@@ -11,7 +11,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
@@ -31,20 +31,49 @@ import { commonMutationErrorHandler } from "@/lib/utils";
 import ProxyCard from "./components/proxy-card";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import EmptyList from "@/components/empty-list";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const ProxiesPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize search state from URL parameter
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const debouncedSearch = useDebounce(search, 400);
+
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [proxyToDelete, setProxyToDelete] = useState<ProxyModel | null>(null);
+
+  // Update URL when search changes
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const newSearchParams = new URLSearchParams(searchParams);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === "") {
+          newSearchParams.delete(key);
+        } else {
+          newSearchParams.set(key, value);
+        }
+      });
+
+      setSearchParams(newSearchParams, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  // Update URL when search changes
+  useEffect(() => {
+    updateSearchParams({ search: debouncedSearch });
+  }, [debouncedSearch, updateSearchParams]);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       ...getProxiesInfiniteOptions({
         query: {
           limit: 20,
-          q: search || undefined,
+          q: debouncedSearch || undefined,
         },
       }),
       getNextPageParam: (lastPage, pages) => {
