@@ -853,6 +853,12 @@ const docTemplate = `{
                         "description": "Status",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of tag IDs to filter by",
+                        "name": "tag_ids",
+                        "in": "query"
                     }
                 ],
                 "responses": {

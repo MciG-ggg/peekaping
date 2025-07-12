@@ -94,6 +94,7 @@ const MonitorsPage = () => {
               : statusFilter === "maintenance"
               ? 3
               : undefined,
+          tag_ids: selectedTagIds.length > 0 ? selectedTagIds.join(",") : undefined,
         },
       }),
       getNextPageParam: (lastPage, pages) => {
@@ -108,16 +109,8 @@ const MonitorsPage = () => {
   const allMonitors = (data?.pages.flatMap((page) => page.data || []) ||
     []) as MonitorModel[];
 
-  // Client-side filtering for tags since API doesn't support it yet
-  const monitors = allMonitors.filter(() => {
-    if (selectedTagIds.length === 0) return true;
-
-    // For client-side filtering, we need to check if monitor has any of the selected tags
-    // Since we don't have tag_ids in MonitorModel, we'll need to fetch monitor details
-    // For now, we'll just return all monitors and implement proper filtering later
-    // when the API supports tag filtering or when we have tag_ids in the monitor response
-    return true;
-  });
+  // No more client-side filtering needed since API now supports tag filtering
+  const monitors = allMonitors;
 
   const { socket, status: socketStatus } = useWebSocket();
   const subscribedRef = useRef(false);

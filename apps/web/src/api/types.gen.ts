@@ -1208,6 +1208,10 @@ export type GetMonitorsData = {
      * Status
      */
     status?: number;
+    /**
+     * Comma-separated list of tag IDs to filter by
+     */
+    tag_ids?: string;
   };
   url: "/monitors";
 };

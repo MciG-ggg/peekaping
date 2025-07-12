@@ -46,6 +46,7 @@ func NewMonitorController(
 // @Param     limit query    int     false  "Items per page" default(10)
 // @Param     active query   bool    false  "Active status"
 // @Param     status query   int     false  "Status"
+// @Param     tag_ids query  string  false  "Comma-separated list of tag IDs to filter by"
 // @Success		200	{object}	utils.ApiResponse[[]Model]
 // @Failure		400	{object}	utils.APIError[any]
 // @Failure		404	{object}	utils.APIError[any]
@@ -81,7 +82,25 @@ func (ic *MonitorController) FindAll(ctx *gin.Context) {
 		statusPtr = &statusVal
 	}
 
-	response, err := ic.monitorService.FindAll(ctx, page, limit, q, active, statusPtr)
+	// Parse tag_ids parameter
+	var tagIds []string
+	if tagIdsStr := ctx.Query("tag_ids"); tagIdsStr != "" {
+		tagIds = strings.Split(tagIdsStr, ",")
+		// Trim whitespace from each tag ID
+		for i, tagId := range tagIds {
+			tagIds[i] = strings.TrimSpace(tagId)
+		}
+		// Remove empty strings
+		var validTagIds []string
+		for _, tagId := range tagIds {
+			if tagId != "" {
+				validTagIds = append(validTagIds, tagId)
+			}
+		}
+		tagIds = validTagIds
+	}
+
+	response, err := ic.monitorService.FindAll(ctx, page, limit, q, active, statusPtr, tagIds)
 	if err != nil {
 		ic.logger.Errorw("Failed to fetch monitors", "error", err)
 		ctx.JSON(http.StatusInternalServerError, utils.NewFailResponse("Internal server error"))

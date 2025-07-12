@@ -1748,6 +1748,10 @@ paths:
         in: query
         name: status
         type: integer
+      - description: Comma-separated list of tag IDs to filter by
+        in: query
+        name: tag_ids
+        type: string
       produces:
       - application/json
       responses:
