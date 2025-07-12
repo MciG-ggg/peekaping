@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +30,7 @@ import type { MaintenanceModel } from "@/api/types.gen";
 import Layout from "@/layout";
 import { Label } from "@/components/ui/label";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { commonMutationErrorHandler } from "@/lib/utils";
@@ -38,12 +39,20 @@ import EmptyList from "@/components/empty-list";
 export default function MaintenancePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
+  const { getParam, updateSearchParams } = useSearchParams();
+
+  // Initialize search from URL params
+  const [search, setSearch] = useState(getParam("q") || "");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<"pause" | "resume" | null>(null);
   const [pendingMaintenanceId, setPendingMaintenanceId] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
+
+  // Update URL when debounced search changes
+  useEffect(() => {
+    updateSearchParams({ q: debouncedSearch });
+  }, [debouncedSearch, updateSearchParams]);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({

@@ -3,8 +3,9 @@ import { getStatusPagesInfiniteOptions } from "@/api/@tanstack/react-query.gen";
 import Layout from "@/layout";
 import { useNavigate } from "react-router-dom";
 import type { StatusPageModel } from "@/api";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatusPageCard from "./components/status-page-card";
@@ -14,10 +15,16 @@ import EmptyList from "@/components/empty-list";
 
 const StatusPagesPage = () => {
   const navigate = useNavigate();
+  const { getParam, updateSearchParams } = useSearchParams();
 
-  // Add state for search query
-  const [search, setSearch] = useState("");
+  // Initialize search from URL params
+  const [search, setSearch] = useState(getParam("q") || "");
   const debouncedSearch = useDebounce(search, 400);
+
+  // Update URL when debounced search changes
+  useEffect(() => {
+    updateSearchParams({ q: debouncedSearch });
+  }, [debouncedSearch, updateSearchParams]);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({

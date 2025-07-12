@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import type { NotificationChannelModel } from "@/api";
 import {
   getNotificationChannelsInfiniteOptions,
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import NotificationChannelCard from "./components/notification-channel-card";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { commonMutationErrorHandler } from "@/lib/utils";
@@ -37,8 +38,16 @@ import EmptyList from "@/components/empty-list";
 const NotifiersPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
+  const { getParam, updateSearchParams } = useSearchParams();
+
+  // Initialize search from URL params
+  const [search, setSearch] = useState(getParam("q") || "");
   const debouncedSearch = useDebounce(search, 400);
+
+  // Update URL when debounced search changes
+  useEffect(() => {
+    updateSearchParams({ q: debouncedSearch });
+  }, [debouncedSearch, updateSearchParams]);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [notifierToDelete, setNotifierToDelete] =
     useState<NotificationChannelModel | null>(null);

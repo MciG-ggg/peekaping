@@ -5,8 +5,9 @@ import {
 } from "@/api/@tanstack/react-query.gen";
 import Layout from "@/layout";
 import { type TagModel } from "@/api";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,10 +37,16 @@ const TagsPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useLocalizedTranslation();
+  const { getParam, updateSearchParams } = useSearchParams();
 
-  // Add state for search query
-  const [search, setSearch] = useState("");
+  // Initialize search from URL params
+  const [search, setSearch] = useState(getParam("q") || "");
   const debouncedSearch = useDebounce(search, 400);
+
+  // Update URL when debounced search changes
+  useEffect(() => {
+    updateSearchParams({ q: debouncedSearch });
+  }, [debouncedSearch, updateSearchParams]);
 
   // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

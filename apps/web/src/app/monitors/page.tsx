@@ -5,7 +5,7 @@ import {
   getTagsOptions,
 } from "@/api/@tanstack/react-query.gen";
 import Layout from "@/layout";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   type HeartbeatModel,
   type MonitorModel,
@@ -15,6 +15,7 @@ import {
 import { useWebSocket, WebSocketStatus } from "@/context/websocket-context";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,51 +41,34 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getContrastingTextColor } from "@/lib/utils";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 
 const MonitorsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useLocalizedTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { getParam, updateSearchParams } = useSearchParams();
 
   // Initialize state from URL parameters
-  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [search, setSearch] = useState(getParam("search") || "");
   const debouncedSearch = useDebounce(search, 400);
 
   const [activeFilter, setActiveFilter] = useState<
     "all" | "active" | "inactive"
-  >((searchParams.get("active") as "all" | "active" | "inactive") || "all");
+  >((getParam("active") as "all" | "active" | "inactive") || "all");
 
   const [statusFilter, setStatusFilter] = useState<
     "all" | "up" | "down" | "maintenance"
   >(
-    (searchParams.get("status") as "all" | "up" | "down" | "maintenance") ||
+    (getParam("status") as "all" | "up" | "down" | "maintenance") ||
       "all"
   );
 
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
-    searchParams.get("tags")?.split(",").filter(Boolean) || []
+    getParam("tags")?.split(",").filter(Boolean) || []
   );
 
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
-
-  // Update URL when filters change
-  const updateSearchParams = useCallback(
-    (updates: Record<string, string | null>) => {
-      const newSearchParams = new URLSearchParams(searchParams);
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === null || value === "" || value === "all") {
-          newSearchParams.delete(key);
-        } else {
-          newSearchParams.set(key, value);
-        }
-      });
-
-      setSearchParams(newSearchParams, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
 
   // Update URL when search changes
   useEffect(() => {
@@ -240,7 +224,8 @@ const MonitorsPage = () => {
     selectedTagIds.includes(tag.id!)
   );
 
-  const debouncedLoader = useDebounce(isLoading, 300);
+  const delayedLoader = useDelayedLoading(isLoading, 300);
+  const delayedLoaderNextPage = useDelayedLoading(isFetchingNextPage, 300);
 
   return (
     <Layout
@@ -381,7 +366,7 @@ const MonitorsPage = () => {
         )}
 
         {/* Monitors list */}
-        {monitors.length === 0 && debouncedLoader && (
+        {monitors.length === 0 && delayedLoader && (
           <div className="flex flex-col space-y-2 mb-2">
             {Array.from({ length: 7 }, (_, id) => (
               <Skeleton className="h-[68px] w-full rounded-xl" key={id} />
@@ -406,7 +391,7 @@ const MonitorsPage = () => {
 
         {/* Sentinel for infinite scroll */}
         <div ref={sentinelRef} style={{ height: 1 }} />
-        {isFetchingNextPage && (
+        {delayedLoaderNextPage && (
           <div className="flex flex-col space-y-2 mb-2">
             {Array.from({ length: 3 }, (_, i) => (
               <Skeleton key={i} className="h-[68px] w-full rounded-xl" />
