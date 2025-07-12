@@ -11,7 +11,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
@@ -37,32 +38,14 @@ import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 const ProxiesPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { getParam, updateSearchParams } = useSearchParams();
 
   // Initialize search state from URL parameter
-  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [search, setSearch] = useState(getParam("search") || "");
   const debouncedSearch = useDebounce(search, 400);
 
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [proxyToDelete, setProxyToDelete] = useState<ProxyModel | null>(null);
-
-  // Update URL when search changes
-  const updateSearchParams = useCallback(
-    (updates: Record<string, string | null>) => {
-      const newSearchParams = new URLSearchParams(searchParams);
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === null || value === "") {
-          newSearchParams.delete(key);
-        } else {
-          newSearchParams.set(key, value);
-        }
-      });
-
-      setSearchParams(newSearchParams, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
 
   // Update URL when search changes
   useEffect(() => {
