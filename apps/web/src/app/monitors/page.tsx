@@ -242,7 +242,7 @@ const MonitorsPage = () => {
     >
       <div>
         <div className="mb-4 space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4 items-end">
+          <div className="flex flex-col gap-4 md:flex-row sm:justify-end sm:gap-4 items-end">
             {hasParams() && (
               <div className="flex justify-start">
                 <Button
@@ -287,7 +287,7 @@ const MonitorsPage = () => {
                   setStatusFilter(v as "all" | "up" | "down" | "maintenance")
                 }
               >
-                <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectTrigger className="w-full md:w-[160px]">
                   <SelectValue placeholder="Monitor Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -352,7 +352,7 @@ const MonitorsPage = () => {
                 placeholder={t("monitors.filters.search_placeholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full sm:w-[400px]"
+                className="w-full lg:w-[400px]"
               />
             </div>
           </div>
