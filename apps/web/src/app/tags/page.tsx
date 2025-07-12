@@ -30,7 +30,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { commonMutationErrorHandler, getContrastingTextColor } from "@/lib/utils";
+import {
+  commonMutationErrorHandler,
+  getContrastingTextColor,
+} from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
 const TagsPage = () => {
@@ -118,10 +121,7 @@ const TagsPage = () => {
   };
 
   return (
-    <Layout
-      pageName="Tags"
-      onCreate={handleCreate}
-    >
+    <Layout pageName="Tags" onCreate={handleCreate}>
       <div>
         <div className="mb-4 space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-4 items-end">
@@ -138,7 +138,7 @@ const TagsPage = () => {
               </div>
             )}
             <div className="flex flex-col gap-1 w-full sm:w-auto">
-              <Label htmlFor="search-tags">{t('common.search')}</Label>
+              <Label htmlFor="search-tags">{t("common.search")}</Label>
               <Input
                 id="search-tags"
                 placeholder="Search tags..."
@@ -172,26 +172,32 @@ const TagsPage = () => {
         {/* Tags grid */}
         <div className="space-y-4">
           {tags.map((tag) => (
-            <Card key={tag.id} className="hover:shadow-md transition-shadow py-2">
+            <Card
+              key={tag.id}
+              className="hover:shadow-md transition-shadow py-2"
+            >
               <CardContent className="px-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
                     <Badge
                       className="px-3 py-1 text-white flex-shrink-0"
-                      style={{ backgroundColor: tag.color, color: getContrastingTextColor(tag.color!) }}
+                      style={{
+                        backgroundColor: tag.color,
+                        color: getContrastingTextColor(tag.color!),
+                      }}
                     >
                       {tag.name}
                     </Badge>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0  hidden sm:block">
                       {tag.description && (
                         <p className="text-sm text-muted-foreground truncate">
                           {tag.description}
                         </p>
                       )}
                     </div>
-                      <div className="text-xs text-muted-foreground mt-1 mr-4">
-                        Created: {new Date(tag.created_at!).toLocaleDateString()}
-                      </div>
+                    <div className="text-xs text-muted-foreground mt-1 mr-4 hidden sm:block">
+                      Created: {new Date(tag.created_at!).toLocaleDateString()}
+                    </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
                     <Button
@@ -233,14 +239,16 @@ const TagsPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the tag
-                "{selectedTag?.name}" and remove it from all monitors.
+                This action cannot be undone. This will permanently delete the
+                tag "{selectedTag?.name}" and remove it from all monitors.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => deleteMutation.mutate({ path: { id: selectedTag?.id || "" } })}
+                onClick={() =>
+                  deleteMutation.mutate({ path: { id: selectedTag?.id || "" } })
+                }
                 className="bg-red-500 hover:bg-red-600"
                 disabled={deleteMutation.isPending}
               >

@@ -255,7 +255,8 @@ const MonitorsPage = () => {
                 </Button>
               </div>
             )}
-            <div className="flex flex-col gap-1">
+
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
               <Label htmlFor="active-filter">{t("common.active")}</Label>
               <Select
                 value={activeFilter}
@@ -275,7 +276,8 @@ const MonitorsPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1">
+
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
               <Label htmlFor="status-filter">
                 {t("monitors.filters.monitor_status")}
               </Label>
@@ -298,7 +300,8 @@ const MonitorsPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1">
+
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
               <Label htmlFor="tag-filter">Tags</Label>
               <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -341,6 +344,7 @@ const MonitorsPage = () => {
                 </PopoverContent>
               </Popover>
             </div>
+
             <div className="flex flex-col gap-1 w-full sm:w-auto">
               <Label htmlFor="search-maintenances">{t("common.search")}</Label>
               <Input
