@@ -7,6 +7,7 @@ import (
 	"peekaping/src/modules/healthcheck/executor"
 	"peekaping/src/modules/heartbeat"
 	"peekaping/src/modules/monitor_notification"
+	"peekaping/src/modules/monitor_tag"
 	"peekaping/src/modules/shared"
 	"peekaping/src/modules/stats"
 	"time"
@@ -52,6 +53,7 @@ type MonitorServiceImpl struct {
 	heartbeatService           heartbeat.Service
 	eventBus                   *events.EventBus
 	monitorNotificationService monitor_notification.Service
+	monitorTagService          monitor_tag.Service
 	executorRegistry           *executor.ExecutorRegistry
 	statPointsService          stats.Service
 	logger                     *zap.SugaredLogger
@@ -62,6 +64,7 @@ func NewMonitorService(
 	heartbeatService heartbeat.Service,
 	eventBus *events.EventBus,
 	monitorNotificationService monitor_notification.Service,
+	monitorTagService monitor_tag.Service,
 	executorRegistry *executor.ExecutorRegistry,
 	statPointsService stats.Service,
 	logger *zap.SugaredLogger,
@@ -71,6 +74,7 @@ func NewMonitorService(
 		heartbeatService,
 		eventBus,
 		monitorNotificationService,
+		monitorTagService,
 		executorRegistry,
 		statPointsService,
 		logger.Named("[monitor-service]"),
@@ -203,6 +207,8 @@ func (mr *MonitorServiceImpl) Delete(ctx context.Context, id string) error {
 
 	// Cascade delete monitor_notification relations
 	_ = mr.monitorNotificationService.DeleteByMonitorID(ctx, id)
+	// Cascade delete monitor_tag relations
+	_ = mr.monitorTagService.DeleteByMonitorID(ctx, id)
 	_ = mr.heartbeatService.DeleteByMonitorID(ctx, id)
 	_ = mr.statPointsService.DeleteByMonitorID(ctx, id)
 

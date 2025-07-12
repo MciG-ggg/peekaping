@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"peekaping/src/modules/monitor_notification"
+	"peekaping/src/modules/monitor_tag"
 	"peekaping/src/utils"
 	"strings"
 	"time"
@@ -16,12 +17,14 @@ type MonitorController struct {
 	monitorService             Service
 	logger                     *zap.SugaredLogger
 	monitorNotificationService monitor_notification.Service
+	monitorTagService          monitor_tag.Service
 }
 
 func NewMonitorController(
 	monitorService Service,
 	logger *zap.SugaredLogger,
 	monitorNotificationService monitor_notification.Service,
+	monitorTagService monitor_tag.Service,
 ) *MonitorController {
 	utils.Validate.RegisterStructValidation(CreateUpdateDtoStructLevelValidation, CreateUpdateDto{})
 
@@ -29,6 +32,7 @@ func NewMonitorController(
 		monitorService,
 		logger,
 		monitorNotificationService,
+		monitorTagService,
 	}
 }
 
@@ -135,6 +139,18 @@ func (ic *MonitorController) Create(ctx *gin.Context) {
 		}
 	}
 
+	// Handle multiple tag IDs
+	if len(monitor.TagIds) > 0 {
+		for _, tagId := range monitor.TagIds {
+			_, err = ic.monitorTagService.Create(ctx, createdMonitor.ID, tagId)
+			if err != nil {
+				ic.logger.Errorw("Failed to create monitor-tag record", "error", err)
+				ctx.JSON(http.StatusInternalServerError, utils.NewFailResponse("Internal server error"))
+				return
+			}
+		}
+	}
+
 	ctx.JSON(http.StatusCreated, utils.NewSuccessResponse("Monitor created successfully", createdMonitor))
 }
 
@@ -175,7 +191,19 @@ func (ic *MonitorController) FindByID(ctx *gin.Context) {
 		notificationIds = append(notificationIds, rel.NotificationID)
 	}
 
-	// Compose response with notification_ids
+	// Fetch tag_ids
+	tagRels, err := ic.monitorTagService.FindByMonitorID(ctx, id)
+	if err != nil {
+		ic.logger.Errorw("Failed to fetch monitor-tag relations", "error", err)
+		ctx.JSON(http.StatusInternalServerError, utils.NewFailResponse("Internal server error"))
+		return
+	}
+	tagIds := make([]string, 0, len(tagRels))
+	for _, rel := range tagRels {
+		tagIds = append(tagIds, rel.TagID)
+	}
+
+	// Compose response with notification_ids and tag_ids
 	response := MonitorResponseDto{
 		ID:              monitor.ID,
 		Name:            monitor.Name,
@@ -190,6 +218,7 @@ func (ic *MonitorController) FindByID(ctx *gin.Context) {
 		CreatedAt:       monitor.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:       monitor.UpdatedAt.Format(time.RFC3339),
 		NotificationIds: notificationIds,
+		TagIds:          tagIds,
 		ProxyId:         monitor.ProxyId,
 		Config:          monitor.Config,
 	}
@@ -224,11 +253,6 @@ func (ic *MonitorController) UpdateFull(ctx *gin.Context) {
 		return
 	}
 
-	// if float64(monitor.Timeout)*0.8 >= float64(monitor.Interval) {
-	// 	ctx.JSON(http.StatusBadRequest, utils.NewFailResponse("Timeout cannot be greater than 80% of interval"))
-	// 	return
-	// }
-
 	// Validate monitor type and config
 	if err := ic.monitorService.ValidateMonitorConfig(monitor.Type, monitor.Config); err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.NewFailResponse(fmt.Sprintf("Invalid monitor configuration: %v", err)))
@@ -260,6 +284,24 @@ func (ic *MonitorController) UpdateFull(ctx *gin.Context) {
 		}
 	}
 
+	// Delete all existing tag relations and create new ones
+	err = ic.monitorTagService.DeleteByMonitorID(ctx, id)
+	if err != nil {
+		ic.logger.Errorw("Failed to delete existing monitor-tag relations", "error", err)
+		ctx.JSON(http.StatusInternalServerError, utils.NewFailResponse("Internal server error"))
+		return
+	}
+
+	// Create new tag relations
+	for _, tagId := range monitor.TagIds {
+		_, err = ic.monitorTagService.Create(ctx, id, tagId)
+		if err != nil {
+			ic.logger.Errorw("Failed to create monitor-tag record", "error", err)
+			ctx.JSON(http.StatusInternalServerError, utils.NewFailResponse("Internal server error"))
+			return
+		}
+	}
+
 	ctx.JSON(http.StatusOK, utils.NewSuccessResponse("Monitor updated successfully", updatedMonitor))
 }
 
@@ -283,11 +325,6 @@ func (ic *MonitorController) UpdatePartial(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, utils.NewFailResponse(err.Error()))
 		return
 	}
-
-	// if monitor.Timeout != nil && float64(*monitor.Timeout)*0.8 >= float64(*monitor.Interval) {
-	// 	ctx.JSON(http.StatusBadRequest, utils.NewFailResponse("Timeout cannot be greater than 80% of interval"))
-	// 	return
-	// }
 
 	// Validate monitor type and config if they are being updated
 	if monitor.Type != nil && monitor.Config != nil {
@@ -338,6 +375,45 @@ func (ic *MonitorController) UpdatePartial(ctx *gin.Context) {
 			if _, found := existingMap[nid]; !found {
 				if _, err := ic.monitorNotificationService.Create(ctx, id, nid); err != nil {
 					ic.logger.Warnw("Failed to create monitor-notification relation", "error", err)
+				}
+			}
+		}
+	}
+
+	// Handle tag IDs if they are being updated
+	if len(monitor.TagIds) > 0 {
+		// Replace all monitor-tag relations in an optimized way
+		existing, err := ic.monitorTagService.FindByMonitorID(ctx, id)
+		if err != nil {
+			ic.logger.Errorw("Failed to fetch monitor-tag relations", "error", err)
+			ctx.JSON(http.StatusInternalServerError, utils.NewFailResponse("Internal server error"))
+			return
+		}
+
+		// Build sets for comparison
+		existingMap := make(map[string]string) // tagID -> relationID
+		for _, rel := range existing {
+			existingMap[rel.TagID] = rel.ID
+		}
+		newSet := make(map[string]struct{})
+		for _, tid := range monitor.TagIds {
+			newSet[tid] = struct{}{}
+		}
+
+		// Delete relations not in the new list
+		for tagID, relID := range existingMap {
+			if _, found := newSet[tagID]; !found {
+				if err := ic.monitorTagService.Delete(ctx, relID); err != nil {
+					ic.logger.Warnw("Failed to delete monitor-tag relation", "error", err)
+				}
+			}
+		}
+
+		// Add new relations not already present
+		for _, tid := range monitor.TagIds {
+			if _, found := existingMap[tid]; !found {
+				if _, err := ic.monitorTagService.Create(ctx, id, tid); err != nil {
+					ic.logger.Warnw("Failed to create monitor-tag relation", "error", err)
 				}
 			}
 		}
