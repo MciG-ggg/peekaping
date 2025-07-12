@@ -32,6 +32,7 @@ import ProxyCard from "./components/proxy-card";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import EmptyList from "@/components/empty-list";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
 
 const ProxiesPage = () => {
   const navigate = useNavigate();
@@ -84,6 +85,8 @@ const ProxiesPage = () => {
       initialPageParam: 0,
       enabled: true,
     });
+
+  const shouldShowSkeleton = useDelayedLoading(isLoading, 200);
 
   const deleteMutation = useMutation({
     ...deleteProxiesByIdMutation(),
@@ -147,7 +150,7 @@ const ProxiesPage = () => {
           </div>
         </div>
 
-        {proxies.length === 0 && isLoading && (
+        {proxies.length === 0 && shouldShowSkeleton && (
           <div className="flex flex-col space-y-2 mb-2">
             {Array.from({ length: 7 }, (_, id) => (
               <Skeleton className="h-[68px] w-full rounded-xl" key={id} />
