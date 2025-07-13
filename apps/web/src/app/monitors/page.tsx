@@ -210,7 +210,6 @@ const MonitorsPage = () => {
   };
 
   const handleTagRemove = (tagId: string) => {
-    console.log("handle tag remove", tagId);
     setSelectedTagIds((prev) => prev.filter((id) => id !== tagId));
   };
 
