@@ -130,7 +130,7 @@ const Tags = () => {
                         </div>
                       ))}
                       {availableTags.length === 0 && (
-                        <div className="text-center text-muted-foreground text-sm py-4">
+                        <div className="text-center text-muted-foreground text-sm p-4">
                           No tags available
                         </div>
                       )}

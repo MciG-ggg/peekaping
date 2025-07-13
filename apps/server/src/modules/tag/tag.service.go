@@ -3,6 +3,7 @@ package tag
 import (
 	"context"
 	"errors"
+	"peekaping/src/modules/monitor_tag"
 
 	"go.uber.org/zap"
 )
@@ -18,16 +19,19 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	repository Repository
-	logger     *zap.SugaredLogger
+	repository        Repository
+	monitorTagService monitor_tag.Service
+	logger            *zap.SugaredLogger
 }
 
 func NewService(
 	repository Repository,
+	monitorTagService monitor_tag.Service,
 	logger *zap.SugaredLogger,
 ) Service {
 	return &ServiceImpl{
 		repository,
+		monitorTagService,
 		logger.Named("[tag-service]"),
 	}
 }
@@ -126,5 +130,11 @@ func (s *ServiceImpl) UpdatePartial(ctx context.Context, id string, entity *Part
 }
 
 func (s *ServiceImpl) Delete(ctx context.Context, id string) error {
+	// Delete monitor_tag relations first
+	err := s.monitorTagService.DeleteByTagID(ctx, id)
+	if err != nil {
+		s.logger.Warnw("Failed to delete monitor-tag relations", "tagID", id, "error", err)
+	}
+
 	return s.repository.Delete(ctx, id)
 }

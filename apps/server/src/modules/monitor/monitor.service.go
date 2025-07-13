@@ -205,9 +205,7 @@ func (mr *MonitorServiceImpl) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	// Cascade delete monitor_notification relations
 	_ = mr.monitorNotificationService.DeleteByMonitorID(ctx, id)
-	// Cascade delete monitor_tag relations
 	_ = mr.monitorTagService.DeleteByMonitorID(ctx, id)
 	_ = mr.heartbeatService.DeleteByMonitorID(ctx, id)
 	_ = mr.statPointsService.DeleteByMonitorID(ctx, id)

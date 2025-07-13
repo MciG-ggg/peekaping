@@ -33,6 +33,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   commonMutationErrorHandler,
   getContrastingTextColor,
+  invalidateByPartialQueryKey,
 } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
@@ -88,7 +89,7 @@ const TagsPage = () => {
       toast.success("Tag deleted successfully");
       setDeleteDialogOpen(false);
       setSelectedTag(null);
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      invalidateByPartialQueryKey(queryClient, { _id: "getTags" });
     },
     onError: commonMutationErrorHandler("Failed to delete tag"),
   });
