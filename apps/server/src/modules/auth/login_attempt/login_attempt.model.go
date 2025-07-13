@@ -1,4 +1,4 @@
-package auth
+package login_attempt
 
 import (
 	"time"

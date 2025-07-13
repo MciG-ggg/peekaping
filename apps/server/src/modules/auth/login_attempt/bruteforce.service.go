@@ -1,4 +1,4 @@
-package auth
+package login_attempt
 
 import (
 	"context"
@@ -15,6 +15,7 @@ type BruteforceService interface {
 	GetBruteforceStatus(ctx context.Context, email, ipAddress string) (*BruteforceStatus, error)
 	IsBlocked(ctx context.Context, email, ipAddress string) (bool, error)
 	CleanupOldAttempts(ctx context.Context) error
+	ResetFailedAttempts(ctx context.Context, email, ipAddress string) error
 }
 
 type BruteforceServiceImpl struct {
@@ -52,6 +53,7 @@ func (s *BruteforceServiceImpl) CheckAndRecordAttempt(ctx context.Context, email
 
 	// If the attempt was successful, return success status
 	if success {
+		s.logger.Infow("Successful login recorded", "email", email, "ip", ipAddress)
 		return &BruteforceStatus{
 			IsBlocked:                false,
 			RemainingAttempts:        s.config.BruteforceMaxAttempts,
@@ -62,7 +64,8 @@ func (s *BruteforceServiceImpl) CheckAndRecordAttempt(ctx context.Context, email
 		}, nil
 	}
 
-	// Check current bruteforce status
+	// For failed attempts, log and return current status
+	s.logger.Warnw("Failed login attempt recorded", "email", email, "ip", ipAddress)
 	return s.GetBruteforceStatus(ctx, email, ipAddress)
 }
 
@@ -158,7 +161,7 @@ func (s *BruteforceServiceImpl) GetBruteforceStatus(ctx context.Context, email, 
 		consecutiveFailures = consecutiveIPCount
 	}
 
-	return &BruteforceStatus{
+	status := &BruteforceStatus{
 		IsBlocked:                isBlocked,
 		RemainingAttempts:        remainingAttempts,
 		BlockedUntil:             blockedUntil,
@@ -167,7 +170,20 @@ func (s *BruteforceServiceImpl) GetBruteforceStatus(ctx context.Context, email, 
 		ConsecutiveFailures:      consecutiveFailures,
 		RequiresProgressiveDelay: requiresProgressiveDelay,
 		DelaySeconds:             delaySeconds,
-	}, nil
+	}
+
+	s.logger.Debugw("Bruteforce status calculated", 
+		"email", email, 
+		"ip", ipAddress,
+		"blocked", isBlocked,
+		"email_failures", emailFailureCount,
+		"ip_failures", ipFailureCount,
+		"consecutive_failures", consecutiveFailures,
+		"remaining_attempts", remainingAttempts,
+		"blocked_until", blockedUntil,
+	)
+
+	return status, nil
 }
 
 func (s *BruteforceServiceImpl) IsBlocked(ctx context.Context, email, ipAddress string) (bool, error) {
@@ -180,12 +196,22 @@ func (s *BruteforceServiceImpl) IsBlocked(ctx context.Context, email, ipAddress 
 	if status.IsBlocked {
 		// Check if the block has expired
 		if time.Now().After(status.BlockedUntil) {
+			s.logger.Infow("Block expired", "email", email, "ip", ipAddress, "blocked_until", status.BlockedUntil)
 			return false, nil
 		}
+		s.logger.Infow("Account/IP is blocked", "email", email, "ip", ipAddress, "blocked_until", status.BlockedUntil)
 		return true, nil
 	}
 
 	return false, nil
+}
+
+func (s *BruteforceServiceImpl) ResetFailedAttempts(ctx context.Context, email, ipAddress string) error {
+	s.logger.Infow("Resetting failed attempts after successful login", "email", email, "ip", ipAddress)
+	// Note: We don't actually delete the records, as successful login attempts
+	// are recorded and will naturally reset the consecutive failure count
+	// This method is here for potential future use or explicit reset scenarios
+	return nil
 }
 
 func (s *BruteforceServiceImpl) CleanupOldAttempts(ctx context.Context) error {

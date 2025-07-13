@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"peekaping/src/modules/auth/login_attempt"
 	"peekaping/src/utils"
 	"strings"
 
@@ -11,11 +12,11 @@ import (
 // MiddlewareProvider holds all middleware functions
 type MiddlewareProvider struct {
 	tokenMaker           *TokenMaker
-	bruteforceMiddleware *BruteforceMiddleware
+	bruteforceMiddleware *login_attempt.BruteforceMiddleware
 }
 
 // NewMiddlewareProvider creates a new middleware provider
-func NewMiddlewareProvider(tokenMaker *TokenMaker, bruteforceMiddleware *BruteforceMiddleware) *MiddlewareProvider {
+func NewMiddlewareProvider(tokenMaker *TokenMaker, bruteforceMiddleware *login_attempt.BruteforceMiddleware) *MiddlewareProvider {
 	return &MiddlewareProvider{
 		tokenMaker:           tokenMaker,
 		bruteforceMiddleware: bruteforceMiddleware,

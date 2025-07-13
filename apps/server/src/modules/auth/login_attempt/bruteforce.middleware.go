@@ -1,8 +1,9 @@
-package auth
+package login_attempt
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"peekaping/src/utils"
@@ -12,6 +13,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
+
+// LoginDto defines the login request structure to avoid circular imports
+type LoginDto struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+	Token    string `json:"token"`
+}
 
 type BruteforceMiddleware struct {
 	bruteforceService BruteforceService
@@ -41,7 +49,8 @@ func (m *BruteforceMiddleware) BruteforceProtection() gin.HandlerFunc {
 		body, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			m.logger.Errorw("Failed to read request body", "error", err)
-			c.Next()
+			c.JSON(http.StatusBadRequest, utils.NewFailResponse("Invalid request body"))
+			c.Abort()
 			return
 		}
 
@@ -51,6 +60,15 @@ func (m *BruteforceMiddleware) BruteforceProtection() gin.HandlerFunc {
 		// Parse the login DTO to get the email
 		var loginDto LoginDto
 		if err := json.Unmarshal(body, &loginDto); err != nil {
+			m.logger.Debugw("Failed to parse login request body", "error", err)
+			// Let the controller handle the validation error
+			c.Next()
+			return
+		}
+
+		// Validate that email is provided
+		if loginDto.Email == "" {
+			m.logger.Debugw("Empty email in login request")
 			// Let the controller handle the validation error
 			c.Next()
 			return
@@ -62,6 +80,8 @@ func (m *BruteforceMiddleware) BruteforceProtection() gin.HandlerFunc {
 		// Get client IP and user agent
 		clientIP := m.getClientIP(c)
 		userAgent := c.GetHeader("User-Agent")
+
+		m.logger.Debugw("Processing login attempt", "email", loginDto.Email, "ip", clientIP, "user_agent", userAgent)
 
 		// Check if the IP or email is currently blocked
 		isBlocked, err := m.bruteforceService.IsBlocked(c.Request.Context(), loginDto.Email, clientIP)
@@ -91,7 +111,14 @@ func (m *BruteforceMiddleware) BruteforceProtection() gin.HandlerFunc {
 		// Apply progressive delay if required
 		if status.RequiresProgressiveDelay && status.DelaySeconds > 0 {
 			m.logger.Infow("Applying progressive delay", "email", loginDto.Email, "ip", clientIP, "delay_seconds", status.DelaySeconds)
-			time.Sleep(time.Duration(status.DelaySeconds) * time.Second)
+			
+			// Apply delay with a maximum cap for safety
+			delayDuration := time.Duration(status.DelaySeconds) * time.Second
+			if delayDuration > 5*time.Minute {
+				delayDuration = 5 * time.Minute
+			}
+			
+			time.Sleep(delayDuration)
 		}
 
 		// Continue with the request
@@ -107,7 +134,10 @@ func (m *BruteforceMiddleware) getClientIP(c *gin.Context) string {
 		// X-Forwarded-For can contain multiple IPs, take the first one
 		parts := strings.Split(xForwardedFor, ",")
 		if len(parts) > 0 {
-			return strings.TrimSpace(parts[0])
+			ip := strings.TrimSpace(parts[0])
+			if ip != "" {
+				return ip
+			}
 		}
 	}
 
@@ -123,19 +153,27 @@ func (m *BruteforceMiddleware) getClientIP(c *gin.Context) string {
 		return cfConnectingIP
 	}
 
-	// Fall back to RemoteAddr
+	// Fall back to ClientIP() which handles RemoteAddr and other headers
 	ip := c.ClientIP()
 	if ip != "" {
 		return ip
 	}
 
+	// Last resort - use RemoteAddr directly
 	return c.Request.RemoteAddr
 }
 
 // RecordLoginAttempt records a login attempt result
 func (m *BruteforceMiddleware) RecordLoginAttempt(c *gin.Context, email string, success bool) {
+	if email == "" {
+		m.logger.Warnw("Attempted to record login attempt with empty email")
+		return
+	}
+
 	clientIP := m.getClientIP(c)
 	userAgent := c.GetHeader("User-Agent")
+
+	m.logger.Debugw("Recording login attempt", "email", email, "ip", clientIP, "success", success)
 
 	_, err := m.bruteforceService.CheckAndRecordAttempt(c.Request.Context(), email, clientIP, userAgent, success)
 	if err != nil {
@@ -145,6 +183,10 @@ func (m *BruteforceMiddleware) RecordLoginAttempt(c *gin.Context, email string, 
 
 // GetBruteforceStatus returns the current bruteforce status for debugging/monitoring
 func (m *BruteforceMiddleware) GetBruteforceStatus(c *gin.Context, email string) (*BruteforceStatus, error) {
+	if email == "" {
+		return nil, errors.New("email is required")
+	}
+
 	clientIP := m.getClientIP(c)
 	return m.bruteforceService.GetBruteforceStatus(c.Request.Context(), email, clientIP)
 }

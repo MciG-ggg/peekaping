@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
+	"peekaping/src/modules/auth/login_attempt"
 )
 
 type Controller struct {
@@ -109,7 +110,13 @@ func (c *Controller) Login(ctx *gin.Context) {
 
 	// Check if the DTO was already bound by the middleware
 	if cachedDto, exists := ctx.Get("login_dto"); exists {
-		dto = cachedDto.(LoginDto)
+		middlewareDto := cachedDto.(login_attempt.LoginDto)
+		// Convert from middleware DTO to auth DTO
+		dto = LoginDto{
+			Email:    middlewareDto.Email,
+			Password: middlewareDto.Password,
+			Token:    middlewareDto.Token,
+		}
 	} else {
 		if err := ctx.ShouldBindJSON(&dto); err != nil {
 			ctx.JSON(http.StatusBadRequest, utils.NewFailResponse(err.Error()))
