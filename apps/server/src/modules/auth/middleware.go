@@ -10,13 +10,15 @@ import (
 
 // MiddlewareProvider holds all middleware functions
 type MiddlewareProvider struct {
-	tokenMaker *TokenMaker
+	tokenMaker           *TokenMaker
+	bruteforceMiddleware *BruteforceMiddleware
 }
 
 // NewMiddlewareProvider creates a new middleware provider
-func NewMiddlewareProvider(tokenMaker *TokenMaker) *MiddlewareProvider {
+func NewMiddlewareProvider(tokenMaker *TokenMaker, bruteforceMiddleware *BruteforceMiddleware) *MiddlewareProvider {
 	return &MiddlewareProvider{
-		tokenMaker: tokenMaker,
+		tokenMaker:           tokenMaker,
+		bruteforceMiddleware: bruteforceMiddleware,
 	}
 }
 
@@ -68,4 +70,14 @@ func (p *MiddlewareProvider) Auth() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// BruteforceProtection returns the bruteforce protection middleware
+func (p *MiddlewareProvider) BruteforceProtection() gin.HandlerFunc {
+	return p.bruteforceMiddleware.BruteforceProtection()
+}
+
+// RecordLoginAttempt records a login attempt result
+func (p *MiddlewareProvider) RecordLoginAttempt(c *gin.Context, email string, success bool) {
+	p.bruteforceMiddleware.RecordLoginAttempt(c, email, success)
 }

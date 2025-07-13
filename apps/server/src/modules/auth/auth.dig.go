@@ -9,10 +9,13 @@ import (
 
 func RegisterDependencies(container *dig.Container, cfg *config.Config) {
 	utils.RegisterRepositoryByDBType(container, cfg, NewSQLRepository, NewMongoRepository)
+	utils.RegisterRepositoryByDBType(container, cfg, NewLoginAttemptSQLRepository, NewLoginAttemptMongoRepository)
 
 	container.Provide(NewRoute)
 	container.Provide(NewTokenMaker)
 	container.Provide(NewService)
 	container.Provide(NewController)
+	container.Provide(NewBruteforceService)
+	container.Provide(NewBruteforceMiddleware)
 	container.Provide(NewMiddlewareProvider)
 }
