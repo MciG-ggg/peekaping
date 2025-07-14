@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import Advanced from "./advanced";
 import Authentication from "./authentication";
 import HttpOptions from "./options";
+import ResponseValidation from "./response-validation";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import Notifications from "../shared/notifications";
@@ -137,6 +138,14 @@ const Http = () => {
         ignore_tls_errors: parsedConfig.ignore_tls_errors || false,
         httpOptions,
         authentication,
+        
+        // Response validation fields
+        response_validation: parsedConfig.response_validation || "none",
+        keyword: parsedConfig.keyword || "",
+        invert_keyword: parsedConfig.invert_keyword || false,
+        json_query: parsedConfig.json_query || "",
+        json_query_condition: parsedConfig.json_query_condition || "===",
+        json_query_expected_value: parsedConfig.json_query_expected_value || "",
       });
     }
   }, [form, monitor, mode]);
@@ -168,6 +177,12 @@ const Http = () => {
                 </FormItem>
               )}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="space-y-4">
+            <ResponseValidation />
           </CardContent>
         </Card>
 

@@ -9,6 +9,30 @@ import { proxiesDefaultValues, proxiesSchema } from "../shared/proxies";
 import { tagsDefaultValues, tagsSchema } from "../shared/tags";
 import type { MonitorMonitorResponseDto, MonitorCreateUpdateDto } from "@/api";
 
+// Response validation schema
+export const responseValidationSchema = z.discriminatedUnion("response_validation", [
+  z.object({
+    response_validation: z.literal("none"),
+  }),
+  z.object({
+    response_validation: z.literal("keyword"),
+    keyword: z.string().min(1, "Keyword is required"),
+    invert_keyword: z.boolean().optional(),
+  }),
+  z.object({
+    response_validation: z.literal("json_query"),
+    json_query: z.string().min(1, "JSON query expression is required"),
+    json_query_condition: z.enum(["===", "!=", ">", "<", ">=", "<="]).optional(),
+    json_query_expected_value: z.string().optional(),
+  }),
+]);
+
+export type ResponseValidationForm = z.infer<typeof responseValidationSchema>;
+
+export const responseValidationDefaultValues: ResponseValidationForm = {
+  response_validation: "none",
+};
+
 export const httpSchema = z
   .object({
     type: z.literal("http"),
@@ -29,7 +53,8 @@ export const httpSchema = z
     z.object({
       authentication: authenticationSchema,
     })
-  );
+  )
+  .merge(responseValidationSchema);
 
 export type HttpForm = z.infer<typeof httpSchema>;
 
@@ -46,6 +71,7 @@ export const httpDefaultValues: HttpForm = {
 
   httpOptions: httpOptionsDefaultValues,
   authentication: authenticationDefaultValues,
+  ...responseValidationDefaultValues,
 };
 
 export const deserialize = (data: MonitorMonitorResponseDto): HttpForm => {
@@ -126,6 +152,18 @@ export const deserialize = (data: MonitorMonitorResponseDto): HttpForm => {
       body: config.body || "",
     },
     authentication,
+    
+    // Response validation fields
+    response_validation: (config.response_validation || "none") as "none" | "keyword" | "json_query",
+    ...(config.response_validation === "keyword" && {
+      keyword: config.keyword || "",
+      invert_keyword: config.invert_keyword || false,
+    }),
+    ...(config.response_validation === "json_query" && {
+      json_query: config.json_query || "",
+      json_query_condition: config.json_query_condition || "===",
+      json_query_expected_value: config.json_query_expected_value || "",
+    }),
   };
 };
 
@@ -163,6 +201,18 @@ export const serialize = (formData: HttpForm): MonitorCreateUpdateDto => {
       tlsCert: formData.authentication.tlsCert,
       tlsKey: formData.authentication.tlsKey,
       tlsCa: formData.authentication.tlsCa,
+    }),
+    
+    // Response validation fields
+    response_validation: formData.response_validation,
+    ...(formData.response_validation === "keyword" && {
+      keyword: formData.keyword,
+      invert_keyword: formData.invert_keyword,
+    }),
+    ...(formData.response_validation === "json_query" && {
+      json_query: formData.json_query,
+      json_query_condition: formData.json_query_condition,
+      json_query_expected_value: formData.json_query_expected_value,
     }),
   };
 
@@ -211,4 +261,12 @@ export interface HttpExecutorConfig {
   tlsCert?: string;
   tlsKey?: string;
   tlsCa?: string;
+
+  // Response validation fields
+  response_validation?: "none" | "keyword" | "json_query";
+  keyword?: string;
+  invert_keyword?: boolean;
+  json_query?: string;
+  json_query_condition?: "===" | "!=" | ">" | "<" | ">=" | "<=";
+  json_query_expected_value?: string;
 }

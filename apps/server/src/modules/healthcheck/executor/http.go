@@ -14,6 +14,7 @@ import (
 	"peekaping/src/modules/shared"
 	"peekaping/src/utils"
 	"peekaping/src/version"
+	"strconv"
 	"strings"
 	"time"
 
@@ -135,6 +136,14 @@ type HTTPConfig struct {
 	TlsCert           string `json:"tlsCert,omitempty"`
 	TlsKey            string `json:"tlsKey,omitempty"`
 	TlsCa             string `json:"tlsCa,omitempty"`
+
+	// Response validation fields
+	ResponseValidation string `json:"response_validation" validate:"omitempty,oneof=none keyword json_query"`
+	Keyword           string `json:"keyword,omitempty"`
+	InvertKeyword     bool   `json:"invert_keyword,omitempty"`
+	JsonQuery         string `json:"json_query,omitempty"`
+	JsonQueryCondition string `json:"json_query_condition" validate:"omitempty,oneof=== != > < >= <="`
+	JsonQueryExpectedValue string `json:"json_query_expected_value,omitempty"`
 }
 
 type HTTPExecutor struct {
@@ -425,10 +434,251 @@ func (h *HTTPExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Prox
 		}
 	}
 
+	// Read response body for content validation
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		h.logger.Warnf("Failed to read response body: %v", err)
+		responseBody = []byte{}
+	}
+
+	// Validate response content based on configured validation mode
+	if cfg.ResponseValidation != "" && cfg.ResponseValidation != "none" {
+		validationResult := h.validateResponseContent(cfg, responseBody)
+		if validationResult.Status == shared.MonitorStatusDown {
+			return &Result{
+				Status:    shared.MonitorStatusDown,
+				Message:   validationResult.Message,
+				StartTime: startTime,
+				EndTime:   endTime,
+			}
+		}
+	}
+
 	return &Result{
 		Status:    shared.MonitorStatusUp,
 		Message:   fmt.Sprintf("%d - %s", resp.StatusCode, resp.Status),
 		StartTime: startTime,
 		EndTime:   endTime,
+	}
+}
+
+func (h *HTTPExecutor) validateResponseContent(cfg *HTTPConfig, responseBody []byte) *Result {
+	responseText := string(responseBody)
+	
+	switch cfg.ResponseValidation {
+	case "keyword":
+		return h.validateKeyword(cfg, responseText)
+	case "json_query":
+		return h.validateJsonQuery(cfg, responseBody)
+	default:
+		return &Result{Status: shared.MonitorStatusUp, Message: "No validation configured"}
+	}
+}
+
+func (h *HTTPExecutor) validateKeyword(cfg *HTTPConfig, responseText string) *Result {
+	if cfg.Keyword == "" {
+		return &Result{Status: shared.MonitorStatusUp, Message: "No keyword specified"}
+	}
+
+	containsKeyword := strings.Contains(responseText, cfg.Keyword)
+	
+	if cfg.InvertKeyword {
+		// Invert keyword: should NOT contain the keyword
+		if containsKeyword {
+			return &Result{
+				Status:  shared.MonitorStatusDown,
+				Message: fmt.Sprintf("Keyword '%s' found in response (inverted check)", cfg.Keyword),
+			}
+		}
+		return &Result{
+			Status:  shared.MonitorStatusUp,
+			Message: fmt.Sprintf("Keyword '%s' not found in response (inverted check)", cfg.Keyword),
+		}
+	} else {
+		// Normal keyword: should contain the keyword
+		if !containsKeyword {
+			return &Result{
+				Status:  shared.MonitorStatusDown,
+				Message: fmt.Sprintf("Keyword '%s' not found in response", cfg.Keyword),
+			}
+		}
+		return &Result{
+			Status:  shared.MonitorStatusUp,
+			Message: fmt.Sprintf("Keyword '%s' found in response", cfg.Keyword),
+		}
+	}
+}
+
+func (h *HTTPExecutor) validateJsonQuery(cfg *HTTPConfig, responseBody []byte) *Result {
+	if cfg.JsonQuery == "" {
+		return &Result{Status: shared.MonitorStatusUp, Message: "No JSON query specified"}
+	}
+
+	// Handle raw response query
+	if cfg.JsonQuery == "$" {
+		responseStr := string(responseBody)
+		if cfg.JsonQueryCondition == "" || cfg.JsonQueryExpectedValue == "" {
+			return &Result{
+				Status:  shared.MonitorStatusUp,
+				Message: fmt.Sprintf("Raw response: %s", responseStr),
+			}
+		}
+		return h.compareJsonQueryResult(responseStr, cfg.JsonQueryCondition, cfg.JsonQueryExpectedValue)
+	}
+
+	// Parse JSON response
+	var jsonData interface{}
+	if err := json.Unmarshal(responseBody, &jsonData); err != nil {
+		return &Result{
+			Status:  shared.MonitorStatusDown,
+			Message: fmt.Sprintf("Invalid JSON response: %v", err),
+		}
+	}
+
+	// Simple JSON path implementation (only supports basic key access)
+	result, err := h.extractJsonValue(jsonData, cfg.JsonQuery)
+	if err != nil {
+		return &Result{
+			Status:  shared.MonitorStatusDown,
+			Message: fmt.Sprintf("JSON query failed: %v", err),
+		}
+	}
+
+	// If no condition is specified, just check if the result exists
+	if cfg.JsonQueryCondition == "" || cfg.JsonQueryExpectedValue == "" {
+		if result == nil {
+			return &Result{
+				Status:  shared.MonitorStatusDown,
+				Message: "JSON query returned null/undefined",
+			}
+		}
+		return &Result{
+			Status:  shared.MonitorStatusUp,
+			Message: fmt.Sprintf("JSON query returned: %v", result),
+		}
+	}
+
+	// Compare result with expected value
+	return h.compareJsonQueryResult(result, cfg.JsonQueryCondition, cfg.JsonQueryExpectedValue)
+}
+
+func (h *HTTPExecutor) compareJsonQueryResult(result interface{}, condition, expectedValue string) *Result {
+	// Convert result to string for comparison
+	resultStr := fmt.Sprintf("%v", result)
+	
+	switch condition {
+	case "===":
+		if resultStr == expectedValue {
+			return &Result{Status: shared.MonitorStatusUp, Message: fmt.Sprintf("JSONata result '%s' equals expected value '%s'", resultStr, expectedValue)}
+		}
+		return &Result{Status: shared.MonitorStatusDown, Message: fmt.Sprintf("JSONata result '%s' does not equal expected value '%s'", resultStr, expectedValue)}
+	
+	case "!=":
+		if resultStr != expectedValue {
+			return &Result{Status: shared.MonitorStatusUp, Message: fmt.Sprintf("JSONata result '%s' does not equal expected value '%s'", resultStr, expectedValue)}
+		}
+		return &Result{Status: shared.MonitorStatusDown, Message: fmt.Sprintf("JSONata result '%s' equals expected value '%s' (should not)", resultStr, expectedValue)}
+	
+	case ">", "<", ">=", "<=":
+		// Try to convert to numbers for numeric comparison
+		resultNum, err1 := strconv.ParseFloat(resultStr, 64)
+		expectedNum, err2 := strconv.ParseFloat(expectedValue, 64)
+		
+		if err1 != nil || err2 != nil {
+			return &Result{Status: shared.MonitorStatusDown, Message: fmt.Sprintf("Cannot compare non-numeric values: result='%s', expected='%s'", resultStr, expectedValue)}
+		}
+		
+		var comparison bool
+		switch condition {
+		case ">":
+			comparison = resultNum > expectedNum
+		case "<":
+			comparison = resultNum < expectedNum
+		case ">=":
+			comparison = resultNum >= expectedNum
+		case "<=":
+			comparison = resultNum <= expectedNum
+		}
+		
+		if comparison {
+			return &Result{Status: shared.MonitorStatusUp, Message: fmt.Sprintf("JSONata result %s %s %s", resultStr, condition, expectedValue)}
+		}
+		return &Result{Status: shared.MonitorStatusDown, Message: fmt.Sprintf("JSONata result %s is not %s %s", resultStr, condition, expectedValue)}
+	
+	default:
+		return &Result{Status: shared.MonitorStatusDown, Message: fmt.Sprintf("Unknown condition: %s", condition)}
+	}
+}
+
+// extractJsonValue extracts a value from JSON data using a simple path
+// Supports basic dot notation like "user.name" or "data.items[0].id"
+func (h *HTTPExecutor) extractJsonValue(data interface{}, path string) (interface{}, error) {
+	if path == "" {
+		return data, nil
+	}
+
+	// Split path by dots
+	keys := strings.Split(path, ".")
+	current := data
+
+	for _, key := range keys {
+		// Handle array indexing like "items[0]"
+		if strings.Contains(key, "[") && strings.Contains(key, "]") {
+			// Extract key and index
+			parts := strings.Split(key, "[")
+			if len(parts) != 2 {
+				return nil, fmt.Errorf("invalid array syntax: %s", key)
+			}
+			arrayKey := parts[0]
+			indexStr := strings.TrimSuffix(parts[1], "]")
+			
+			// Get the array
+			current = h.getObjectValue(current, arrayKey)
+			if current == nil {
+				return nil, fmt.Errorf("key not found: %s", arrayKey)
+			}
+			
+			// Convert to slice
+			slice, ok := current.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("not an array: %s", arrayKey)
+			}
+			
+			// Parse index
+			index, err := strconv.Atoi(indexStr)
+			if err != nil {
+				return nil, fmt.Errorf("invalid array index: %s", indexStr)
+			}
+			
+			if index < 0 || index >= len(slice) {
+				return nil, fmt.Errorf("array index out of bounds: %d", index)
+			}
+			
+			current = slice[index]
+		} else {
+			// Regular key access
+			current = h.getObjectValue(current, key)
+			if current == nil {
+				return nil, fmt.Errorf("key not found: %s", key)
+			}
+		}
+	}
+
+	return current, nil
+}
+
+// getObjectValue gets a value from an object by key
+func (h *HTTPExecutor) getObjectValue(data interface{}, key string) interface{} {
+	if data == nil {
+		return nil
+	}
+
+	switch v := data.(type) {
+	case map[string]interface{}:
+		return v[key]
+	case map[interface{}]interface{}:
+		return v[key]
+	default:
+		return nil
 	}
 }
