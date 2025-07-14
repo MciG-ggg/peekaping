@@ -181,6 +181,14 @@ func (s *HealthCheckSupervisor) postProcessHeartbeat(result *executor.Result, m 
 		return
 	}
 
+	// Check certificate expiry notifications if monitor is up and has TLS info
+	if result.Status == shared.MonitorStatusUp && result.TLSInfo != nil {
+		err := s.certificateExpiryService.CheckCertExpiryNotifications(ctx, result, m)
+		if err != nil {
+			s.logger.Errorf("Failed to check certificate expiry notifications for monitor %s: %v", m.ID, err)
+		}
+	}
+
 	if shouldNotify {
 		s.eventBus.Publish(events.Event{
 			Type:    events.MonitorStatusChanged,

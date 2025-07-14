@@ -120,6 +120,7 @@ type HTTPConfig struct {
 	AcceptedStatusCodes []string `json:"accepted_statuscodes" validate:"required,dive,oneof=2XX 3XX 4XX 5XX"`
 	MaxRedirects        int      `json:"max_redirects" validate:"omitempty,min=0"`
 	IgnoreTlsErrors     bool     `json:"ignore_tls_errors"`
+	ExpiryNotification  bool     `json:"expiry_notification"`
 
 	// Authentication fields
 	AuthMethod        string `json:"authMethod" validate:"required,oneof=none basic oauth2-cc ntlm mtls"`
@@ -425,10 +426,33 @@ func (h *HTTPExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Prox
 		}
 	}
 
+	// Extract TLS certificate information if enabled and available
+	var tlsInfo *TLSInfo
+	if cfg.ExpiryNotification && resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {
+		// Extract certificate information from the first certificate (server cert)
+		serverCert := resp.TLS.PeerCertificates[0]
+		certInfo := ExtractCertificateInfo(serverCert)
+		
+		// Build certificate chain information
+		if len(resp.TLS.PeerCertificates) > 1 {
+			current := certInfo
+			for i := 1; i < len(resp.TLS.PeerCertificates); i++ {
+				issuerInfo := ExtractCertificateInfo(resp.TLS.PeerCertificates[i])
+				current.IssuerCertificate = issuerInfo
+				current = issuerInfo
+			}
+		}
+		
+		tlsInfo = &TLSInfo{
+			CertInfo: certInfo,
+		}
+	}
+
 	return &Result{
 		Status:    shared.MonitorStatusUp,
 		Message:   fmt.Sprintf("%d - %s", resp.StatusCode, resp.Status),
 		StartTime: startTime,
 		EndTime:   endTime,
+		TLSInfo:   tlsInfo,
 	}
 }

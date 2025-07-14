@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"peekaping/src/modules/certificate_expiry"
 	"peekaping/src/modules/events"
 	"peekaping/src/modules/healthcheck/executor"
 	"peekaping/src/modules/heartbeat"
@@ -18,16 +19,17 @@ import (
 )
 
 type HealthCheckSupervisor struct {
-	mu               sync.RWMutex
-	active           map[string]*task
-	monitorSvc       monitor.Service
-	maintenanceSvc   maintenance.Service
-	execRegistry     *executor.ExecutorRegistry
-	heartbeatService heartbeat.Service
-	eventBus         *events.EventBus
-	logger           *zap.SugaredLogger
-	proxyService     proxy.Service
-	maxJitterSeconds int64 // configurable jitter for testing
+	mu                    sync.RWMutex
+	active                map[string]*task
+	monitorSvc            monitor.Service
+	maintenanceSvc        maintenance.Service
+	execRegistry          *executor.ExecutorRegistry
+	heartbeatService      heartbeat.Service
+	certificateExpiryService certificate_expiry.Service
+	eventBus              *events.EventBus
+	logger                *zap.SugaredLogger
+	proxyService          proxy.Service
+	maxJitterSeconds      int64 // configurable jitter for testing
 }
 
 type task struct {
@@ -40,21 +42,23 @@ func NewHealthCheck(
 	monitorService monitor.Service,
 	maintenanceService maintenance.Service,
 	heartbeatService heartbeat.Service,
+	certificateExpiryService certificate_expiry.Service,
 	eventBus *events.EventBus,
 	execRegistry *executor.ExecutorRegistry,
 	logger *zap.SugaredLogger,
 	proxyService proxy.Service,
 ) *HealthCheckSupervisor {
 	return &HealthCheckSupervisor{
-		active:           make(map[string]*task),
-		monitorSvc:       monitorService,
-		maintenanceSvc:   maintenanceService,
-		execRegistry:     execRegistry,
-		heartbeatService: heartbeatService,
-		eventBus:         eventBus,
-		logger:           logger.With("service", "[healthcheck]"),
-		proxyService:     proxyService,
-		maxJitterSeconds: 20, // default production jitter
+		active:                make(map[string]*task),
+		monitorSvc:            monitorService,
+		maintenanceSvc:        maintenanceService,
+		execRegistry:          execRegistry,
+		heartbeatService:      heartbeatService,
+		certificateExpiryService: certificateExpiryService,
+		eventBus:              eventBus,
+		logger:                logger.With("service", "[healthcheck]"),
+		proxyService:          proxyService,
+		maxJitterSeconds:      20, // default production jitter
 	}
 }
 
@@ -63,6 +67,7 @@ func NewHealthCheckWithJitter(
 	monitorService monitor.Service,
 	maintenanceService maintenance.Service,
 	heartbeatService heartbeat.Service,
+	certificateExpiryService certificate_expiry.Service,
 	eventBus *events.EventBus,
 	execRegistry *executor.ExecutorRegistry,
 	logger *zap.SugaredLogger,
@@ -70,15 +75,16 @@ func NewHealthCheckWithJitter(
 	maxJitterSeconds int64,
 ) *HealthCheckSupervisor {
 	return &HealthCheckSupervisor{
-		active:           make(map[string]*task),
-		monitorSvc:       monitorService,
-		maintenanceSvc:   maintenanceService,
-		execRegistry:     execRegistry,
-		heartbeatService: heartbeatService,
-		eventBus:         eventBus,
-		logger:           logger.With("service", "[healthcheck]"),
-		proxyService:     proxyService,
-		maxJitterSeconds: maxJitterSeconds,
+		active:                make(map[string]*task),
+		monitorSvc:            monitorService,
+		maintenanceSvc:        maintenanceService,
+		execRegistry:          execRegistry,
+		heartbeatService:      heartbeatService,
+		certificateExpiryService: certificateExpiryService,
+		eventBus:              eventBus,
+		logger:                logger.With("service", "[healthcheck]"),
+		proxyService:          proxyService,
+		maxJitterSeconds:      maxJitterSeconds,
 	}
 }
 

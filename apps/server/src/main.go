@@ -8,6 +8,7 @@ import (
 	"peekaping/docs"
 	"peekaping/src/config"
 	"peekaping/src/modules/auth"
+	"peekaping/src/modules/certificate_expiry"
 	"peekaping/src/modules/cleanup"
 	"peekaping/src/modules/events"
 	"peekaping/src/modules/healthcheck"
@@ -19,6 +20,7 @@ import (
 	"peekaping/src/modules/monitor_status_page"
 	"peekaping/src/modules/monitor_tag"
 	"peekaping/src/modules/notification_channel"
+	"peekaping/src/modules/notification_sent_history"
 	"peekaping/src/modules/proxy"
 	"peekaping/src/modules/setting"
 	"peekaping/src/modules/stats"
@@ -77,12 +79,14 @@ func main() {
 	events.RegisterDependencies(container)
 	heartbeat.RegisterDependencies(container, &cfg)
 	monitor.RegisterDependencies(container, &cfg)
-	healthcheck.RegisterDependencies(container)
 	auth.RegisterDependencies(container, &cfg)
 	notification_channel.RegisterDependencies(container, &cfg)
 	monitor_notification.RegisterDependencies(container, &cfg)
-	proxy.RegisterDependencies(container, &cfg)
+	notification_sent_history.RegisterDependencies(container, &cfg)
 	setting.RegisterDependencies(container, &cfg)
+	certificate_expiry.RegisterDependencies(container)
+	healthcheck.RegisterDependencies(container)
+	proxy.RegisterDependencies(container, &cfg)
 	stats.RegisterDependencies(container, &cfg)
 	monitor_maintenance.RegisterDependencies(container, &cfg)
 	maintenance.RegisterDependencies(container, &cfg)

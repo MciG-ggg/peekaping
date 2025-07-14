@@ -25,6 +25,7 @@ export const advancedSchema = z.object({
   accepted_statuscodes: z.array(z.string()),
   max_redirects: z.coerce.number().min(0).max(30),
   ignore_tls_errors: z.boolean(),
+  expiry_notification: z.boolean(),
 });
 
 export type AdvancedForm = z.infer<typeof advancedSchema>;
@@ -33,6 +34,7 @@ export const advancedDefaultValues: AdvancedForm = {
   accepted_statuscodes: ["2XX"],
   max_redirects: 10,
   ignore_tls_errors: false,
+  expiry_notification: false,
 }
 
 const Advanced = () => {
@@ -96,6 +98,30 @@ const Advanced = () => {
               </FormLabel>
               <FormDescription>
                 Skip TLS certificate validation. Use with caution - this makes connections less secure.
+              </FormDescription>
+            </div>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="expiry_notification"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+            <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                disabled={form.watch("ignore_tls_errors")}
+              />
+            </FormControl>
+            <div className="space-y-1 leading-none">
+              <FormLabel>
+                Certificate Expiry Notification
+              </FormLabel>
+              <FormDescription>
+                Get notified when SSL/TLS certificates are about to expire. Notifications are sent at 7, 14, and 21 days before expiry.
               </FormDescription>
             </div>
           </FormItem>

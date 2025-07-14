@@ -135,6 +135,7 @@ const Http = () => {
         accepted_statuscodes: parsedConfig.accepted_statuscodes,
         max_redirects: parsedConfig.max_redirects,
         ignore_tls_errors: parsedConfig.ignore_tls_errors || false,
+        expiry_notification: parsedConfig.expiry_notification || false,
         httpOptions,
         authentication,
       });

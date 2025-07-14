@@ -114,12 +114,13 @@ export const deserialize = (data: MonitorMonitorResponseDto): HttpForm => {
     resend_interval: data.resend_interval || 10,
     notification_ids: data.notification_ids || [],
     tag_ids: data.tag_ids || [],
-    proxy_id: data.proxy_id || "",
-    url: config.url || "https://example.com",
-    accepted_statuscodes: config.accepted_statuscodes || ["2XX"],
-    max_redirects: config.max_redirects || 10,
-    ignore_tls_errors: config.ignore_tls_errors || false,
-    httpOptions: {
+            proxy_id: data.proxy_id || "",
+        url: config.url || "https://example.com",
+        accepted_statuscodes: config.accepted_statuscodes || ["2XX"],
+        max_redirects: config.max_redirects || 10,
+        ignore_tls_errors: config.ignore_tls_errors || false,
+        expiry_notification: config.expiry_notification || false,
+        httpOptions: {
       method: config.method || "GET",
       encoding: config.encoding || "json",
       headers: config.headers || '{ "Content-Type": "application/json" }',
@@ -139,6 +140,7 @@ export const serialize = (formData: HttpForm): MonitorCreateUpdateDto => {
     accepted_statuscodes: formData.accepted_statuscodes as Array<"2XX" | "3XX" | "4XX" | "5XX">,
     max_redirects: formData.max_redirects,
     ignore_tls_errors: formData.ignore_tls_errors,
+    expiry_notification: formData.expiry_notification,
     authMethod: formData.authentication.authMethod,
 
     // Include authentication fields based on method
@@ -195,6 +197,7 @@ export interface HttpExecutorConfig {
 
   max_redirects?: number; // optional, must be >= 0 if present
   ignore_tls_errors: boolean; // defaults to false
+  expiry_notification: boolean; // defaults to false
 
   // Authentication fields
   authMethod: "none" | "basic" | "oauth2-cc" | "ntlm" | "mtls"; // required
