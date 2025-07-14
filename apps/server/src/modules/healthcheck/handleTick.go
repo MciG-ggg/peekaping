@@ -173,8 +173,6 @@ func (s *HealthCheckSupervisor) postProcessHeartbeat(result *executor.Result, m 
 		s.logger.Debugf("%s maintenance response %d ms | interval %d seconds | type %s", m.Name, ping, m.Interval, m.Type)
 	}
 
-	// TODO: calculate uptime
-
 	dbHb, err := s.heartbeatService.Create(ctx, hb)
 	if err != nil {
 		s.logger.Errorf("Failed to create heartbeat", err.Error())

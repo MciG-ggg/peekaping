@@ -7,7 +7,7 @@ import (
 	"peekaping/src/modules/monitor"
 	"peekaping/src/modules/notification_channel"
 	"peekaping/src/modules/notification_sent_history"
-	"peekaping/src/modules/setting"
+	settingModule "peekaping/src/modules/setting"
 	"strconv"
 	"strings"
 
@@ -19,23 +19,23 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	settingService               setting.Service
-	notificationService          notification_channel.Service
+	settingService                 settingModule.Service
+	notificationService            notification_channel.Service
 	notificationSentHistoryService notification_sent_history.Service
-	logger                       *zap.SugaredLogger
+	logger                         *zap.SugaredLogger
 }
 
 func NewService(
-	settingService setting.Service,
+	settingService settingModule.Service,
 	notificationService notification_channel.Service,
 	notificationSentHistoryService notification_sent_history.Service,
 	logger *zap.SugaredLogger,
 ) Service {
 	return &ServiceImpl{
-		settingService:               settingService,
-		notificationService:          notificationService,
+		settingService:                 settingService,
+		notificationService:            notificationService,
 		notificationSentHistoryService: notificationSentHistoryService,
-		logger:                       logger.Named("[certificate-expiry-service]"),
+		logger:                         logger.Named("[certificate-expiry-service]"),
 	}
 }
 
@@ -61,7 +61,7 @@ func (s *ServiceImpl) CheckCertExpiryNotifications(ctx context.Context, result *
 		// Skip root certificates (you may want to maintain a list of known root CAs)
 		subjectCN := certInfo.Subject
 		if s.isRootCertificate(certInfo) {
-			s.logger.Debugf("Known root cert: %s certificate \"%s\" (%d days valid), skipping", 
+			s.logger.Debugf("Known root cert: %s certificate \"%s\" (%d days valid), skipping",
 				certInfo.CertType, subjectCN, certInfo.DaysRemaining)
 			break
 		}
@@ -99,7 +99,7 @@ func (s *ServiceImpl) getNotificationDays(ctx context.Context) ([]int, error) {
 	if setting == nil {
 		defaultDays := []int{7, 14, 21}
 		// Create the setting with default values
-		_, err = s.settingService.SetByKey(ctx, "TLS_EXPIRY_NOTIFY_DAYS", &setting.CreateUpdateDto{
+		_, err = s.settingService.SetByKey(ctx, "TLS_EXPIRY_NOTIFY_DAYS", &settingModule.CreateUpdateDto{
 			Value: "7,14,21",
 			Type:  "string",
 		})
