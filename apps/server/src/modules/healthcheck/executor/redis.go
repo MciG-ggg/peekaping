@@ -147,25 +147,9 @@ func isValidHostname(hostname string) bool {
 
 // isValidIPv6 checks if a string is a valid IPv6 address
 func isValidIPv6(ip string) bool {
-	// Basic IPv6 validation - check for colons and valid hex characters
-	parts := strings.Split(ip, ":")
-	if len(parts) < 2 || len(parts) > 8 {
-		return false
-	}
-
-	for _, part := range parts {
-		if len(part) > 4 {
-			return false
-		}
-		for _, char := range part {
-			if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f') ||
-				(char >= 'A' && char <= 'F')) {
-				return false
-			}
-		}
-	}
-
-	return true
+	// Use Go's standard library to parse and validate IPv6 addresses
+	parsedIP := net.ParseIP(ip)
+	return parsedIP != nil && parsedIP.To4() == nil
 }
 
 // validatePort validates the Redis port
