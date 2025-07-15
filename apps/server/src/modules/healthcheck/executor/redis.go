@@ -3,6 +3,7 @@ package executor
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net"
 	"net/url"
@@ -19,6 +20,9 @@ import (
 type RedisConfig struct {
 	DatabaseConnectionString string `json:"databaseConnectionString" validate:"required" example:"redis://user:password@host:port"`
 	IgnoreTls                bool   `json:"ignoreTls" example:"false"`
+	CaCert                   string `json:"caCert,omitempty" example:"-----BEGIN CERTIFICATE-----\n..."`
+	ClientCert               string `json:"clientCert,omitempty" example:"-----BEGIN CERTIFICATE-----\n..."`
+	ClientKey                string `json:"clientKey,omitempty" example:"-----BEGIN PRIVATE KEY-----\n..."`
 }
 
 type RedisExecutor struct {
@@ -258,6 +262,88 @@ func (r *RedisExecutor) validateAuthFormat(connectionString string) error {
 	return nil
 }
 
+// loadCACertPool loads CA certificate from PEM string
+func loadCACertPool(caCertPEM string) (*x509.CertPool, error) {
+	if caCertPEM == "" {
+		return nil, nil
+	}
+
+	caCertPool := x509.NewCertPool()
+	if !caCertPool.AppendCertsFromPEM([]byte(caCertPEM)) {
+		return nil, fmt.Errorf("failed to parse CA certificate")
+	}
+	return caCertPool, nil
+}
+
+// loadClientCertificate loads client certificate and key from PEM strings
+func loadClientCertificate(clientCertPEM, clientKeyPEM string) (*tls.Certificate, error) {
+	if clientCertPEM == "" && clientKeyPEM == "" {
+		return nil, nil
+	}
+
+	if clientCertPEM == "" || clientKeyPEM == "" {
+		return nil, fmt.Errorf("both client certificate and key must be provided")
+	}
+
+	cert, err := tls.X509KeyPair([]byte(clientCertPEM), []byte(clientKeyPEM))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load client certificate: %w", err)
+	}
+	return &cert, nil
+}
+
+// configureTLS configures TLS settings for Redis connection
+func (r *RedisExecutor) configureTLS(cfg *RedisConfig, opts *redis.Options) error {
+	parsedURL, err := url.Parse(cfg.DatabaseConnectionString)
+	if err != nil {
+		return fmt.Errorf("failed to parse connection string: %w", err)
+	}
+
+	// Only configure TLS for rediss:// scheme
+	if parsedURL.Scheme != "rediss" {
+		return nil
+	}
+
+	tlsConfig := &tls.Config{}
+
+	if cfg.IgnoreTls {
+		// Skip certificate verification
+		tlsConfig.InsecureSkipVerify = true
+		r.logger.Infof("TLS certificate verification disabled (IgnoreTls=true)")
+	} else {
+		tlsConfig.InsecureSkipVerify = false
+		// Load CA certificate if provided
+		if cfg.CaCert != "" {
+			caCertPool, err := loadCACertPool(cfg.CaCert)
+			if err != nil {
+				return fmt.Errorf("failed to load CA certificate: %w", err)
+			}
+			tlsConfig.RootCAs = caCertPool
+			r.logger.Infof("CA certificate loaded for TLS verification")
+		}
+
+		// Load client certificate if provided
+		if cfg.ClientCert != "" || cfg.ClientKey != "" {
+			clientCert, err := loadClientCertificate(cfg.ClientCert, cfg.ClientKey)
+			if err != nil {
+				return fmt.Errorf("failed to load client certificate: %w", err)
+			}
+			if clientCert != nil {
+				tlsConfig.Certificates = []tls.Certificate{*clientCert}
+				r.logger.Infof("Client certificate loaded for mutual TLS")
+			}
+		}
+
+		// If no CA cert provided and not ignoring TLS, skip verification for self-signed certs
+		if cfg.CaCert == "" {
+			r.logger.Warnf("No CA certificate provided for TLS connection, skipping certificate verification")
+		}
+	}
+
+	opts.TLSConfig = tlsConfig
+	return nil
+}
+
 func NewRedisExecutor(logger *zap.SugaredLogger) *RedisExecutor {
 	return &RedisExecutor{
 		logger: logger,
@@ -284,6 +370,11 @@ func (r *RedisExecutor) Validate(configJSON string) error {
 	// Validate connection string format and components
 	if err := r.validateRedisConnectionString(redisConfig.DatabaseConnectionString); err != nil {
 		return fmt.Errorf("connection string validation failed: %w", err)
+	}
+
+	// Validate TLS settings
+	if err := r.configureTLS(redisConfig, &redis.Options{}); err != nil {
+		return fmt.Errorf("TLS configuration validation failed: %w", err)
 	}
 
 	return nil
@@ -314,23 +405,9 @@ func (r *RedisExecutor) Execute(ctx context.Context, m *Monitor, proxyModel *Pro
 	}
 
 	// Configure TLS settings
-	if !cfg.IgnoreTls {
-		// Parse URL to check if it's using TLS
-		parsedURL, err := url.Parse(cfg.DatabaseConnectionString)
-		if err == nil && parsedURL.Scheme == "rediss" {
-			if opts.TLSConfig == nil {
-				opts.TLSConfig = &tls.Config{}
-			}
-			// For self-signed certificates, we need to skip verification
-			// or provide the CA certificate. For testing purposes, we'll skip verification.
-			opts.TLSConfig.InsecureSkipVerify = true
-		}
-	} else {
-		// If ignoreTls is true, skip TLS verification
-		if opts.TLSConfig == nil {
-			opts.TLSConfig = &tls.Config{}
-		}
-		opts.TLSConfig.InsecureSkipVerify = true
+	if err := r.configureTLS(cfg, opts); err != nil {
+		r.logger.Infof("Redis TLS configuration failed: %s, %s", m.Name, err.Error())
+		return DownResult(fmt.Errorf("TLS configuration failed: %w", err), startTime, time.Now().UTC())
 	}
 
 	// Set connection timeouts

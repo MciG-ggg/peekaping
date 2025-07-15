@@ -6,6 +6,7 @@ import (
 	"peekaping/src/modules/shared"
 	"testing"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -533,5 +534,148 @@ func TestRedisExecutor_Execute_Simple_Success(t *testing.T) {
 	} else {
 		// If it's down, it should be due to connection issues, not validation issues
 		assert.Contains(t, result.Message, "Redis")
+	}
+}
+
+func TestRedisExecutor_Validate_WithCertificates(t *testing.T) {
+	logger := zap.NewNop().Sugar()
+	executor := NewRedisExecutor(logger)
+
+	tests := []struct {
+		name      string
+		config    string
+		wantError bool
+	}{
+		{
+			name: "valid config with empty certificates",
+			config: `{
+				"databaseConnectionString": "rediss://localhost:6379",
+				"ignoreTls": false,
+				"caCert": "",
+				"clientCert": "",
+				"clientKey": ""
+			}`,
+			wantError: false,
+		},
+		{
+			name: "invalid config - client cert without key",
+			config: `{
+				"databaseConnectionString": "rediss://localhost:6379",
+				"ignoreTls": false,
+				"clientCert": "-----BEGIN CERTIFICATE-----\nMIIBkTCB+wIJAKZJ..."
+			}`,
+			wantError: true,
+		},
+		{
+			name: "invalid config - client key without cert",
+			config: `{
+				"databaseConnectionString": "rediss://localhost:6379",
+				"ignoreTls": false,
+				"clientKey": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkq..."
+			}`,
+			wantError: true,
+		},
+		{
+			name: "invalid CA certificate format",
+			config: `{
+				"databaseConnectionString": "rediss://localhost:6379",
+				"ignoreTls": false,
+				"caCert": "invalid certificate"
+			}`,
+			wantError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := executor.Validate(tt.config)
+			if tt.wantError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestRedisExecutor_configureTLS(t *testing.T) {
+	logger := zap.NewNop().Sugar()
+	executor := NewRedisExecutor(logger)
+
+	// Valid test certificate (self-signed for testing)
+	validCert := `-----BEGIN CERTIFICATE-----
+MIIBhTCCAS4CCQDsvbqzXHBqbjANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJV
+UzAeFw0yNDEyMDAwMDAwMDBaFw0yNTEyMDAwMDAwMDBaMA0xCzAJBgNVBAYTAlVT
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7
+-----END CERTIFICATE-----`
+
+	tests := []struct {
+		name      string
+		config    *RedisConfig
+		wantError bool
+	}{
+		{
+			name: "no TLS config for redis://",
+			config: &RedisConfig{
+				DatabaseConnectionString: "redis://localhost:6379",
+				IgnoreTls:                false,
+			},
+			wantError: false,
+		},
+		{
+			name: "ignore TLS for rediss://",
+			config: &RedisConfig{
+				DatabaseConnectionString: "rediss://localhost:6379",
+				IgnoreTls:                true,
+			},
+			wantError: false,
+		},
+		{
+			name: "no certificates provided for rediss://",
+			config: &RedisConfig{
+				DatabaseConnectionString: "rediss://localhost:6379",
+				IgnoreTls:                false,
+			},
+			wantError: false, // Should work but skip verification
+		},
+		{
+			name: "invalid CA cert",
+			config: &RedisConfig{
+				DatabaseConnectionString: "rediss://localhost:6379",
+				IgnoreTls:                false,
+				CaCert:                   "invalid certificate",
+			},
+			wantError: true,
+		},
+		{
+			name: "client cert without key",
+			config: &RedisConfig{
+				DatabaseConnectionString: "rediss://localhost:6379",
+				IgnoreTls:                false,
+				ClientCert:               validCert,
+			},
+			wantError: true,
+		},
+		{
+			name: "client key without cert",
+			config: &RedisConfig{
+				DatabaseConnectionString: "rediss://localhost:6379",
+				IgnoreTls:                false,
+				ClientKey:                "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkq...",
+			},
+			wantError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := &redis.Options{}
+			err := executor.configureTLS(tt.config, opts)
+			if tt.wantError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
 	}
 }

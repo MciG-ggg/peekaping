@@ -3,6 +3,7 @@ import { TypographyH4 } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import Intervals, {
   intervalsDefaultValues,
   intervalsSchema,
@@ -34,6 +35,9 @@ import { useEffect } from "react";
 interface RedisConfig {
   databaseConnectionString: string;
   ignoreTls: boolean;
+  caCert?: string;
+  clientCert?: string;
+  clientKey?: string;
 }
 
 // Redis connection string validation regex
@@ -90,6 +94,9 @@ export const redisSchema = z
         }
       ),
     ignoreTls: z.boolean(),
+    caCert: z.string().optional(),
+    clientCert: z.string().optional(),
+    clientKey: z.string().optional(),
   })
   .merge(generalSchema)
   .merge(intervalsSchema)
@@ -102,6 +109,9 @@ export const redisDefaultValues: RedisForm = {
   type: "redis",
   databaseConnectionString: "redis://user:password@host:port",
   ignoreTls: false,
+  caCert: "",
+  clientCert: "",
+  clientKey: "",
   ...generalDefaultValues,
   ...intervalsDefaultValues,
   ...notificationsDefaultValues,
@@ -112,6 +122,9 @@ export const serialize = (formData: RedisForm): MonitorCreateUpdateDto => {
   const config: RedisConfig = {
     databaseConnectionString: formData.databaseConnectionString,
     ignoreTls: formData.ignoreTls,
+    ...(formData.caCert && { caCert: formData.caCert }),
+    ...(formData.clientCert && { clientCert: formData.clientCert }),
+    ...(formData.clientKey && { clientKey: formData.clientKey }),
   };
 
   return {
@@ -144,6 +157,9 @@ export const deserialize = (data: MonitorMonitorResponseDto): RedisForm => {
     databaseConnectionString:
       config.databaseConnectionString ?? "redis://user:password@host:port",
     ignoreTls: config.ignoreTls ?? false,
+    caCert: config.caCert ?? "",
+    clientCert: config.clientCert ?? "",
+    clientKey: config.clientKey ?? "",
   };
 };
 
@@ -245,6 +261,76 @@ const RedisForm = () => {
                 </FormItem>
               )}
             />
+
+            {form.watch("databaseConnectionString")?.startsWith("rediss://") && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="caCert"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CA Certificate (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"
+                          className="font-mono text-sm"
+                          rows={6}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Root CA certificate in PEM format. Required for proper TLS verification with self-signed certificates.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientCert"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Client Certificate (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"
+                          className="font-mono text-sm"
+                          rows={6}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Client certificate in PEM format. Required for mutual TLS authentication.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Client Private Key (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
+                          className="font-mono text-sm"
+                          rows={6}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Client private key in PEM format. Must be provided together with client certificate.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           </CardContent>
         </Card>
 
