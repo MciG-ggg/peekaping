@@ -30,7 +30,8 @@ type RedisExecutor struct {
 }
 
 // Redis connection string validation regex (same as client-side)
-var redisConnectionStringRegex = regexp.MustCompile(`^(rediss?://)([^@]*@)?([^:]+)(:\d{1,5})?(/[0-9]*)?$`)
+// Updated to support IPv6 addresses in brackets [::1] or without brackets ::1
+var redisConnectionStringRegex = regexp.MustCompile(`^(rediss?://)([^@]*@)?(\[[^\]]+\]|[^:/]+)(:\d{1,5})?(/[0-9]*)?$`)
 
 // validateRedisConnectionString performs comprehensive validation of Redis connection strings
 func (r *RedisExecutor) validateRedisConnectionString(connectionString string) error {

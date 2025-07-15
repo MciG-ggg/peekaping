@@ -41,8 +41,9 @@ interface RedisConfig {
 }
 
 // Redis connection string validation regex
+// Updated to support IPv6 addresses in brackets [::1] or without brackets ::1
 const redisConnectionStringRegex =
-  /^(rediss?:\/\/)([^:]*:?[^@]*@)?([^:]+)(:\d{1,5})?(\/[0-9]*)?$/;
+  /^(rediss?:\/\/)([^@]*@)?(\[[^\]]+\]|[^:/]+)(:\d{1,5})?(\/[0-9]*)?$/;
 
 export const redisSchema = z
   .object({

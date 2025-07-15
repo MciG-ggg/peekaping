@@ -281,6 +281,12 @@ func TestRedisExecutor_validateRedisConnectionString(t *testing.T) {
 		{input: "redis://localhost:6379/0", wantError: false},
 		{input: "redis://user:password@localhost:6379/1", wantError: false},
 		{input: "rediss://user:password@localhost:6379/0", wantError: false},
+		{input: "redis://[::1]:6379", wantError: false},
+		{input: "redis://[::1]", wantError: false},
+		{input: "redis://[2001:db8::1]:6379", wantError: false},
+		{input: "redis://user:password@[::1]:6379", wantError: false},
+		{input: "redis://user:password@[::1]:6379/0", wantError: false},
+		{input: "rediss://[::1]:6379", wantError: false},
 
 		// Invalid cases
 		{input: "", wantError: true},
@@ -322,6 +328,9 @@ func TestRedisExecutor_validateHostname(t *testing.T) {
 		{input: "redis-1.example.com", wantError: false},
 		{input: "192.168.1.1", wantError: false},
 		{input: "::1", wantError: false},
+		{input: "[::1]", wantError: false},
+		{input: "[2001:db8::1]", wantError: false},
+		{input: "[2001:db8:0:0:0:0:0:1]", wantError: false},
 
 		// Invalid cases
 		{input: "", wantError: true},
