@@ -334,7 +334,6 @@ func (r *RedisExecutor) configureTLS(cfg *RedisConfig, opts *redis.Options) erro
 			}
 		}
 
-		// If no CA cert provided and not ignoring TLS, skip verification for self-signed certs
 		if cfg.CaCert == "" {
 			r.logger.Warnf("No CA certificate provided for TLS connection, skipping certificate verification")
 		}
