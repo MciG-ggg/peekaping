@@ -1,5 +1,4 @@
 import { lazy } from "react";
-import { z } from "zod";
 
 const importIntegration = (name: string) =>
   lazy(() => import(`./${name}-form`));
